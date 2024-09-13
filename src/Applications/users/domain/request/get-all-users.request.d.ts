@@ -1,5 +1,4 @@
 export interface GetAllUsersRequest {
-  params: object;
-  query: object;
-  body: object;
+	params: object;
+	query: object;
 }

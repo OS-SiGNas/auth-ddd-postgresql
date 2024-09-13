@@ -1,14 +1,12 @@
 import type { JwtPayload } from "jsonwebtoken";
-import type { Role } from "../../Applications/users/domain/entities/roles.entity.ts";
+import type { RoleName } from "../../Applications/users/domain/role-name.enum.js";
 
 interface ITokenPayload extends JwtPayload {
-  readonly userUuid: string;
-  readonly roles: Role[];
+	readonly userUuid: string;
+	readonly roles: RoleName[];
 }
 
 export interface ISession {
-  readonly accessToken: string;
-  readonly refreshToken: string;
-  readonly accessTokenExpiresIn: number;
-  readonly refreshTokenExpiresIn: number;
+	readonly accessToken: string;
+	readonly refreshToken: string;
 }

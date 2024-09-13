@@ -8,11 +8,11 @@ import type { GetOneUserRequest } from "./request/get-one-user.request";
 import type { UpdateUserRequest } from "./request/update-user.request";
 
 export interface IUsersRequestDTO {
-  readonly getUser: Parser<GetOneUserRequest>;
-  readonly getAllUsers: Parser<GetAllUsersRequest>;
-  readonly createUser: Parser<CreateUserRequest>;
-  readonly updateUser: Parser<UpdateUserRequest>;
-  readonly addUserRoles: Parser<AddUserRolesRequest>;
-  readonly createRole: Parser<CreateUserRoleRequest>;
-  readonly deleteUser: Parser<DeleteUserRequest>;
+	readonly getUser: Parser<GetOneUserRequest>;
+	readonly getAllUsers: Parser<GetAllUsersRequest>;
+	readonly createUser: Parser<CreateUserRequest>;
+	readonly updateUser: Parser<UpdateUserRequest>;
+	readonly addUserRoles: Parser<AddUserRolesRequest>;
+	readonly createRole: Parser<CreateUserRoleRequest>;
+	readonly deleteUser: Parser<DeleteUserRequest>;
 }

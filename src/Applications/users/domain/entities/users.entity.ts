@@ -5,28 +5,28 @@ import type { IUser } from "../IUser";
 
 @Entity()
 export class User extends BaseEntity implements IUser {
-  @PrimaryGeneratedColumn("increment")
-  id: number;
+	@PrimaryGeneratedColumn("increment")
+	id: number;
 
-  @Column({ default: crypto.randomUUID() })
-  uuid: string;
+	@Column({ default: crypto.randomUUID() })
+	uuid: string;
 
-  @Column({ unique: true, nullable: false })
-  email: string;
+	@Column({ unique: true, nullable: false })
+	email: string;
 
-  @Column({ nullable: false })
-  password: string;
+	@Column({ nullable: false })
+	password: string;
 
-  @Column({ nullable: false })
-  name: string;
+	@Column({ nullable: false })
+	name: string;
 
-  @ManyToMany(() => Role, (role) => role.users)
-  @JoinTable()
-  roles: Role[];
+	@ManyToMany(() => Role, (role) => role.users)
+	@JoinTable()
+	roles: Role[];
 
-  @Column({ name: "created_at", default: new Date() })
-  createdAt: Date;
+	@Column({ name: "created_at", default: new Date() })
+	createdAt: Date;
 
-  @Column({ name: "is_active", default: false })
-  isActive: boolean;
+	@Column({ name: "is_active", default: false })
+	isActive: boolean;
 }

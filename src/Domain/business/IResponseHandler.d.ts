@@ -4,13 +4,13 @@ import type { ErrorType } from "../core/IErrorHandler";
 import type { IResponse, Pagination } from "./IResponse";
 
 export interface IResponseHandler {
-  businessResponse: ResponseBusiness;
+	http: HttpResponse;
 }
 
-export type ResponseBusiness = <R>(args: Args<R>) => IResponse<R>;
+export type HttpResponse = <R>(args: Args<R>) => IResponse<R>;
 interface Args<R> {
-  code?: HttpStatus;
-  pagination?: Pagination;
-  error?: ErrorType | ZodError;
-  data?: R;
+	code?: HttpStatus;
+	pagination?: Pagination;
+	error?: ErrorType | ZodError;
+	data?: R;
 }

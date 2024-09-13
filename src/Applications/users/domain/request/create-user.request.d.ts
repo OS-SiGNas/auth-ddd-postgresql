@@ -1,7 +1,12 @@
-import { IUser } from "../IUser";
+import { RoleName } from "../role-name.enum";
 
 export interface CreateUserRequest {
-  query: object;
-  params: object;
-  body: Pick<IUser, "email" | "name" | "password" /* | "roles" */>;
+	query: object;
+	params: object;
+	body: {
+		email: string;
+		name: string;
+		password: string;
+		roles: RoleName[];
+	};
 }

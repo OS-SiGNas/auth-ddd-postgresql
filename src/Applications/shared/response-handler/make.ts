@@ -1,3 +1,3 @@
-import ResponseHandler from "./_response.handler.js";
+import { _ResponseHandler } from "./_response.handler.js";
 
-export const responseHandler = ResponseHandler.getInstance();
+export const responseHandler = _ResponseHandler.getInstance();

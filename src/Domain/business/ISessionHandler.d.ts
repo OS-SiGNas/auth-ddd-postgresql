@@ -1,10 +1,13 @@
-import type { Role } from "../../Applications/users/domain/entities/roles.entity.js";
+import type { RoleName } from "../../Applications/users/domain/role-name.enum.js";
 import type { ISession, ITokenPayload } from "./ISession";
 
 interface ISessionHandler {
-  readonly validateSession: (role: Role, bearerToken?: string) => Promise<ITokenPayload>;
-  readonly validateApiKey: (apiKey: string) => boolean;
-  /**
-   * @param payload Business Token Payload  */
-  readonly generateSession: (tokenPayload: ITokenPayload) => Promise<ISession>;
+	/**
+	 * @param payload Business Token Payload  */
+	readonly generateSession: (tokenPayload: ITokenPayload) => Promise<ISession>;
+	readonly validateSession: (role: RoleName, bearerToken?: string) => Promise<ITokenPayload>;
+
+	readonly generateAccessToken: (payload: ITokenPayload) => Promise<string>;
+	readonly validateRefreshToken: (refreshToken: string) => Promise<ITokenPayload>;
+	readonly validateApiKey: (apiKey: string) => boolean;
 }

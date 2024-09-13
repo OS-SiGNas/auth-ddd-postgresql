@@ -1,4 +1,4 @@
 import { _ErrorHandler } from "./_error.handler.js";
-import { logger } from "../logger-handler/make.js";
+import { Logger } from "../logger-handler/logger.js";
 
-export const errorHandler = _ErrorHandler.getInstance({ logger });
+export const errorHandler = _ErrorHandler.getInstance({ logger: new Logger("ErrorHandler") });

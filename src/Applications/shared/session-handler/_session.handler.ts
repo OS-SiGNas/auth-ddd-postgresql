@@ -1,4 +1,3 @@
-import type { Role } from "../../users/domain/entities/roles.entity.js";
 import type { ISession, ITokenPayload } from "../../../Domain/business/ISession";
 import type { ISessionHandler } from "../../../Domain/business/ISessionHandler";
 import type { ITokenHandler } from "../../../Domain/business/ITokenHandler";
@@ -6,67 +5,74 @@ import type { IErrorHandler } from "../../../Domain/core/IErrorHandler";
 
 // Errors
 import { BadRequestException400, ForbiddenException403 } from "../../../Domain/core/errors.factory.js";
+import { RoleName } from "../../users/domain/role-name.enum.js";
 
 interface Dependences {
-  tokenHandler: ITokenHandler;
-  errorHandler: IErrorHandler;
+	accessTokenHandler: ITokenHandler<ITokenPayload>;
+	refreshTokenHandler: ITokenHandler<ITokenPayload>;
+	errorHandler: IErrorHandler;
 }
 
-export default class _SessionHandler implements ISessionHandler {
-  static #instance?: _SessionHandler;
-  static readonly getInstance = (d: Readonly<Dependences>): _SessionHandler => (this.#instance ??= new _SessionHandler(d));
+export class _SessionHandler implements ISessionHandler {
+	static #instance?: _SessionHandler;
+	static readonly getInstance = (d: Readonly<Dependences>): _SessionHandler => (this.#instance ??= new _SessionHandler(d));
+	// Errors
+	readonly #malformedError = new BadRequestException400("Malformed authorization headers");
+	readonly #forbiddenResourceError = new ForbiddenException403("Forbidden resource");
+	readonly #invalidSessionError = new BadRequestException400("Invalid Session");
+	readonly #sessionExpiredError = new ForbiddenException403("Session Expired");
 
-  // Errors
-  readonly #forbiddenResourceError = new ForbiddenException403("Forbidden resource");
-  readonly #malformedError = new BadRequestException400("Malformed authorization headers");
-  readonly #invalidSessionError = new BadRequestException400("Invalid Session");
-  readonly #sessionExpiredError = new ForbiddenException403("Session Expired");
+	readonly #accessTokenHandler: ITokenHandler<ITokenPayload>;
+	readonly #refreshTokenHandler: ITokenHandler<ITokenPayload>;
+	readonly #errorHandler: IErrorHandler;
+	private constructor(d: Readonly<Dependences>) {
+		this.#accessTokenHandler = d.accessTokenHandler;
+		this.#refreshTokenHandler = d.refreshTokenHandler;
+		this.#errorHandler = d.errorHandler;
+	}
 
-  readonly #tokenHandler: ITokenHandler;
-  readonly #errorHandler: IErrorHandler;
-  private constructor(d: Readonly<Dependences>) {
-    this.#tokenHandler = d.tokenHandler;
-    this.#errorHandler = d.errorHandler;
-  }
+	public readonly validateRefreshToken = async (refreshToken: string): Promise<ITokenPayload> =>
+		await this.#refreshTokenHandler.verifyJWT(refreshToken);
 
-  public readonly validateSession = async (role: Role, bearerToken?: string): Promise<ITokenPayload> => {
-    try {
-      if (bearerToken === undefined) throw this.#malformedError;
-      const token = this.#getTokenFromAuthorizationBearer(bearerToken);
-      const payload = await this.#tokenHandler.verifyJWT<ITokenPayload>(token);
-      if (!payload.roles.includes(role)) throw this.#forbiddenResourceError;
-      return payload;
-    } catch (error) {
-      void this.#errorHandler.catch(this.constructor.name, error);
-      if (error instanceof Error) {
-        if (error.name === "JsonWebTokenError") throw this.#invalidSessionError;
-        if (error.name === "TokenExpiredError") throw this.#sessionExpiredError;
-      }
-      throw error;
-    }
-  };
+	public readonly generateAccessToken = async (payload: ITokenPayload): Promise<string> =>
+		await this.#accessTokenHandler.generateJWT(payload);
 
-  // TODO: Implementar toda la lógica para generar el refresh token
-  public readonly generateSession = async (payload: ITokenPayload): Promise<ISession> => {
-    const { generateJWT } = this.#tokenHandler;
-    const [accessToken, refreshToken] = await Promise.all([generateJWT(payload), generateJWT(payload)]);
-    return Promise.resolve({
-      accessToken,
-      refreshToken,
-      accessTokenExpiresIn: 3600,
-      refreshTokenExpiresIn: 6000,
-    });
-  };
+	public readonly generateSession = async (payload: ITokenPayload): Promise<ISession> => {
+		const [accessToken, refreshToken] = await Promise.all([
+			this.#accessTokenHandler.generateJWT(payload),
+			this.#refreshTokenHandler.generateJWT(payload),
+		]);
 
-  readonly #getTokenFromAuthorizationBearer = (authorization: string): string => {
-    if (!authorization.includes("Bearer ")) throw this.#malformedError;
-    const token = authorization.split(" ").pop();
-    if (token === undefined) throw this.#malformedError;
-    return token;
-  };
+		return { accessToken, refreshToken };
+	};
 
-  public readonly validateApiKey = (apiKey: string): boolean => {
-    if (apiKey !== "") return false;
-    else return true;
-  };
+	public readonly validateSession = async (role: RoleName, Authorization?: string): Promise<ITokenPayload> => {
+		try {
+			if (Authorization === undefined) throw this.#malformedError;
+			const token = this.#getTokenFromAuthorizationBearer(Authorization);
+			const payload = await this.#accessTokenHandler.verifyJWT(token);
+			if (!payload.roles.includes(role)) throw this.#forbiddenResourceError;
+			return payload;
+		} catch (error) {
+			void this.#errorHandler.catch(this.constructor.name, error);
+			if (error instanceof Error) {
+				if (error.name === "TokenExpiredError") throw this.#sessionExpiredError;
+				if (error.name === "JsonWebTokenError") throw this.#invalidSessionError;
+				if (error.name === "invalid signature") throw this.#invalidSessionError;
+			}
+			throw error;
+		}
+	};
+
+	readonly #getTokenFromAuthorizationBearer = (authorization: string): string => {
+		if (!authorization.includes("Bearer ")) throw this.#malformedError;
+		const token = authorization.split(" ").pop();
+		if (token === undefined) throw this.#malformedError;
+		return token;
+	};
+
+	public readonly validateApiKey = (apiKey: string): boolean => {
+		if (apiKey !== "") return false;
+		else return true;
+	};
 }

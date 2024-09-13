@@ -1,24 +1,28 @@
 import jwt from "jsonwebtoken";
 
-import _TokenHandler from "./_token.handler.js";
-import _SessionHandler from "./_session.handler.js";
-
+import { ITokenPayload } from "../../../Domain/business/ISession.js";
 import { secrets } from "../../../Domain/System.js";
-
+import { TokenHandler } from "../token.handler.js";
+import { Logger } from "../logger-handler/logger.js";
+import { _SessionHandler } from "./_session.handler.js";
 import { errorHandler } from "../error-handler/make.js";
-import { logger } from "../logger-handler/make.js";
-import { ITokenHandler } from "../../../Domain/business/ITokenHandler.js";
-import { ISessionHandler } from "../../../Domain/business/ISessionHandler.js";
 
-export const tokenHandler: ITokenHandler = _TokenHandler.getInstance({
-  jwtExpiredTime: secrets.JWT_EXPIRED_TIME,
-  jwtSecretKey: secrets.JWT_SECRET_KEY,
-  sign: jwt.sign,
-  verify: jwt.verify,
-  logger,
-});
+const { sign, verify } = jwt;
 
-export const sessionHandler: ISessionHandler = _SessionHandler.getInstance({
-  errorHandler,
-  tokenHandler,
+export const sessionHandler = _SessionHandler.getInstance({
+	errorHandler,
+	accessTokenHandler: new TokenHandler<ITokenPayload>({
+		jwtSecretKey: secrets.JWT_ACCESS_SECRET_KEY,
+		jwtExpiredTime: secrets.JWT_ACCESS_EXPIRED_TIME,
+		sign,
+		verify,
+		logger: new Logger("AccessTokenHandler"),
+	}),
+	refreshTokenHandler: new TokenHandler<ITokenPayload>({
+		jwtSecretKey: secrets.JWT_REFRESH_SECRET_KEY,
+		jwtExpiredTime: secrets.JWT_REFRESH_EXPIRED_TIME,
+		sign,
+		verify,
+		logger: new Logger("RefreshTokenHandler"),
+	}),
 });

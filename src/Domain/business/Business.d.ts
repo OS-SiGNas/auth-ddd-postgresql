@@ -1,12 +1,12 @@
-import { Request } from "express";
+import type { Request } from "express";
 import type { IResponseHandler } from "./IResponseHandler";
 import type { Core } from "../core/Core";
 import type { IResponse } from "./IResponse";
 import type { ISessionHandler } from "./ISessionHandler";
 
 export interface ControllersDependences extends Core {
-  readonly sessionHandler: ISessionHandler;
-  readonly responseHandler: IResponseHandler;
+	readonly sessionHandler: ISessionHandler;
+	readonly responseHandler: IResponseHandler;
 }
 
 export type ControllerHandler<Res> = (request: Request) => Promise<IResponse<Res>>;

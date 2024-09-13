@@ -5,34 +5,34 @@ import type { IServer } from "../../Domain/IServer";
 import type { ILogger } from "../../Domain/core/ILogger";
 
 interface Dependences extends Core {
-  app: FastifyInstance;
-  port: number;
-  message: string;
+	app: FastifyInstance;
+	port: number;
+	message: string;
 }
 
 export class FastifyServer implements IServer {
-  readonly #app: FastifyInstance;
-  readonly #port: number;
-  readonly #logger: ILogger;
-  readonly #message: string;
-  constructor(d: Readonly<Dependences>) {
-    this.#app = d.app;
-    this.#port = d.port;
-    this.#logger = d.logger;
-    this.#message = d.message;
-  }
+	readonly #app: FastifyInstance;
+	readonly #port: number;
+	readonly #logger: ILogger;
+	readonly #message: string;
+	constructor(d: Readonly<Dependences>) {
+		this.#app = d.app;
+		this.#port = d.port;
+		this.#logger = d.logger;
+		this.#message = d.message;
+	}
 
-  public readonly start = async (): Promise<void> => {
-    await this.#app.listen({ port: this.#port });
-    this.#logger.info(`\n${this.constructor.name} Running in: http://127.0.0.1:${this.#port}`);
-    this.#logger.info(this.#message);
-  };
+	public readonly start = async (): Promise<void> => {
+		await this.#app.listen({ port: this.#port });
+		this.#logger.info(`\n${this.constructor.name} Running in: http://127.0.0.1:${this.#port}`);
+		this.#logger.info(this.#message);
+	};
 
-  public readonly stop = async (): Promise<void> => {
-    process.exit(0);
-  };
+	public readonly stop = async (): Promise<void> => {
+		process.exit(0);
+	};
 
-  public readonly restart = async (): Promise<void> => {
-    this.#logger.info("restarting");
-  };
+	public readonly restart = async (): Promise<void> => {
+		this.#logger.info("restarting");
+	};
 }

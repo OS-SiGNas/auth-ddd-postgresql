@@ -5,38 +5,53 @@ import { DomainError } from "../../../Domain/core/errors.factory.js";
 import { ZodError } from "zod";
 
 interface Dependences {
-  logger: ILogger;
+	logger: ILogger;
 }
 
 export class _ErrorHandler implements IErrorHandler {
-  static #instance?: _ErrorHandler;
-  static getInstance = (d: Readonly<Dependences>): _ErrorHandler => (this.#instance ??= new _ErrorHandler(d));
+	static #instance?: _ErrorHandler;
+	static getInstance = (d: Dependences): Readonly<_ErrorHandler> => (this.#instance ??= new _ErrorHandler(d));
 
-  readonly #logger: ILogger;
-  private constructor(d: Readonly<Dependences>) {
-    this.#logger = d.logger;
-  }
+	readonly #logger: ILogger;
 
-  public readonly catch = (name: string, error?: ErrorType): void => {
-    this.#logger.debug(`NAME: ${name}Error 💩`);
-    if (error === undefined) return;
+	private constructor(d: Readonly<Dependences>) {
+		this.#logger = d.logger;
+	}
 
-    /**
+	public readonly catch = (name: string, error?: ErrorType): void => {
+		this.#logger.warn(`${name}Error 💩`);
+		if (error === undefined) return;
+
+		/**
      * Strategies to handle different errors
      
     if (error instanceof StepError) this.#stepErrorsHandler(error)
-    if (error instanceof ResponseError) this.#responseErrorHandler(error)
-    if (state !== undefined && error instanceof ErrorBusiness) state.response = error;
     if (error instanceof TransactionError) this.#TransactionErrorsHandler(error) */
-    if (error instanceof DomainError) this.#errorBusiness(error);
-    if (error instanceof ZodError) this.#errorZod(error);
-  };
+		if (error instanceof ZodError) {
+			this.#errorZodHandler(error);
+			return;
+		}
 
-  readonly #errorBusiness = (error: DomainError): void => {
-    this.#logger.debug(error);
-  };
+		if (error instanceof DomainError) {
+			this.#domainErrorHandler(error);
+			return;
+		}
 
-  readonly #errorZod = (error: ZodError): void => {
-    this.#logger.debug(error.issues.map((error) => ({ path: error.path.join(": ") })));
-  };
+		if (error instanceof Error) {
+			this.#logger.error(error);
+			return;
+		}
+
+		this.#logger.error(`Throw unknown typeof -> ${typeof error}`);
+		this.#logger.error(error);
+	};
+
+	readonly #errorZodHandler = ({ issues }: ZodError): void => {
+		// const errors = issues.map((issue) => ({ path: issue.path.join(": "), message: issue.message }));
+		this.#logger.error(issues);
+	};
+
+	readonly #domainErrorHandler = (error: DomainError): void => {
+		this.#logger.debug(error);
+	};
 }
