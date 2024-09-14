@@ -1,15 +1,15 @@
-import { ENVIRONMENT, Environment, secrets } from "../../Domain/System.js";
-
+import { type Environment, type HttpService, secrets } from "../../Domain/System.js";
+// Applications share
 import { errorHandler } from "../../Applications/shared/error-handler/make.js";
 import { Logger } from "../../Applications/shared/logger-handler/logger.js";
 
-import { auth } from "../../Applications/auth/make.js";
-import { users } from "../../Applications/users/make.js";
-
 import type { IServer } from "../../Domain/IServer";
 
+const { NODE_ENV, HTTP_SERVICE, PORT } = secrets;
+
 const getHttpServerInstance = async (): Promise<IServer> => {
-	let instance: IServer | undefined;
+	let _instance: IServer | undefined;
+	const _error = (service: HttpService): Error => new Error(`Module not available in '${service}' service`);
 
 	const message: Record<Environment, string> = {
 		development: "👽 DEV MODE 👽",
@@ -17,38 +17,46 @@ const getHttpServerInstance = async (): Promise<IServer> => {
 		production: "🔥 ON 🔥",
 	} as const;
 
-	if (secrets.HTTP_SERVICE === "fastify") {
-		const Fastify = await import("fastify");
-		const { FastifyServer } = await import("./FastifyServer");
-		instance = new FastifyServer({
-			name: "fastifyServer",
-			app: Fastify(),
-			port: +secrets.PORT,
-			message: message[ENVIRONMENT],
+	if (HTTP_SERVICE === "fastify") {
+		const { default: Fastify } = await import("fastify");
+		const { FastifyServer } = await import("./FastifyServer.js");
+		const { authFastify } = await import("../../Applications/auth/make.js");
+		if (authFastify === undefined) throw _error(HTTP_SERVICE);
+		const { usersFastify } = await import("../../Applications/users/make.js");
+		if (usersFastify === undefined) throw _error(HTTP_SERVICE);
+		_instance = new FastifyServer({
+			app: Fastify({ logger: NODE_ENV !== "production" }),
+			applications: [...authFastify.getRoutes(), ...usersFastify.getRoutes()],
+			port: +PORT,
+			message: message[NODE_ENV],
 			errorHandler,
 			logger: new Logger("FastifyServer"),
 		});
 	}
 
-	if (secrets.HTTP_SERVICE === "express") {
-		const { default: Express } = await import("express");
+	if (HTTP_SERVICE === "express") {
+		const { default: Express, Router } = await import("express");
 		const { ExpressServer } = await import("./ExpressServer.js");
 		const { globalMiddlewares, lastMiddlewares } = await import("./middlewares/make.js");
-		instance = new ExpressServer({
-			name: "expressServer",
+		const { authExpress } = await import("../../Applications/auth/make.js");
+		if (authExpress === undefined) throw _error(HTTP_SERVICE);
+		const { usersExpress } = await import("../../Applications/users/make.js");
+		if (usersExpress === undefined) throw _error(HTTP_SERVICE);
+		const router = Router();
+		_instance = new ExpressServer({
 			app: Express(),
-			port: +secrets.PORT,
-			message: message[ENVIRONMENT],
+			port: +PORT,
+			message: message[NODE_ENV],
 			globalMiddlewares,
-			applications: [auth, users],
+			applications: [authExpress.getRouter(router), usersExpress.getRouter(router)],
 			lastMiddlewares,
 			errorHandler,
 			logger: new Logger("ExpressServer"),
 		});
 	}
 
-	if (instance === undefined) throw new Error("HttpServerError: instance undefined");
-	else return await Promise.resolve(instance);
+	if (_instance === undefined) throw new Error("HttpServerError: instance undefined");
+	else return await Promise.resolve(_instance);
 };
 
 export const httpServer = await getHttpServerInstance();

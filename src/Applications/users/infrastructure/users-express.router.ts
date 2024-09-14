@@ -2,31 +2,17 @@ import type { RequestHandler, Router } from "express";
 import type { IUsersController } from "../domain/IUsersController";
 
 interface Dependences {
-	router: Router;
 	controller: IUsersController;
 }
 
-export const UsersRouter = class {
-	readonly #router: Router;
+export class UsersRouterExpress {
 	readonly #controller: IUsersController;
 	constructor(d: Readonly<Dependences>) {
 		this.#controller = d.controller;
-		this.#router = d.router
-			.post("/users/create-role", this.#createRole)
-			.patch("/users/:uuid/role-to-user", this.#addUserRole)
-			.post("/users", this.#createUser)
-			.get("/users", this.#getAllUsers)
-			.get("/users/:uuid", this.#getOne)
-			.patch("/users/:uuid", this.#patchUser)
-			.delete("/users/:uuid", this.#deleteUser);
-	}
-
-	get router(): Router {
-		return this.#router;
 	}
 
 	readonly #getOne: RequestHandler = async (req, res) => {
-		const user = await this.#controller.getUser(req);
+		const user = await this.#controller.getOneUser(req);
 		return res.status(user.status.code).json(user);
 	};
 
@@ -55,13 +41,18 @@ export const UsersRouter = class {
 		return res.status(response.status.code).json(response);
 	};
 
-	/*   readonly #put: RequestHandler = async (req, res) => {
-    const user = await this.#controller.putUser(req.body);
-    return res.status(user.status.code).json(user);
-  }; */
-
 	readonly #deleteUser: RequestHandler = async (req, res) => {
 		const user = await this.#controller.deleteUser(req);
 		return res.status(user.status.code).json(user);
 	};
-};
+
+	public readonly getRouter = (router: Router): Router =>
+		router
+			.post("/users/create-role", this.#createRole)
+			.patch("/users/:uuid/role-to-user", this.#addUserRole)
+			.post("/users", this.#createUser)
+			.get("/users", this.#getAllUsers)
+			.get("/users/:uuid", this.#getOne)
+			.patch("/users/:uuid", this.#patchUser)
+			.delete("/users/:uuid", this.#deleteUser);
+}

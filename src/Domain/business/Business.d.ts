@@ -1,4 +1,5 @@
 import type { Request } from "express";
+import type { FastifyRequest } from "fastify";
 import type { IResponseHandler } from "./IResponseHandler";
 import type { Core } from "../core/Core";
 import type { IResponse } from "./IResponse";
@@ -9,7 +10,7 @@ export interface ControllersDependences extends Core {
 	readonly responseHandler: IResponseHandler;
 }
 
-export type ControllerHandler<Res> = (request: Request) => Promise<IResponse<Res>>;
+export type ControllerHandler<Res> = (request: Request | FastifyRequest) => Promise<IResponse<Res>>;
 export type BusinessHandler<P, R> = (payload: P) => Promise<R>;
 
 export type Parser<P> = (target: P) => Promise<Readonly<P>>;

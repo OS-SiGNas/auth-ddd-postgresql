@@ -17,6 +17,11 @@ import type { AccountActivationRequest } from "../domain/request/account-activat
 
 // Errors
 import { BadRequestException400, ForbiddenException403, UnauthorizedException401 } from "../../../Domain/core/errors.factory.js";
+import { RegisterRequest } from "../domain/request/register.request.js";
+import { ActivateAccountRequest } from "../domain/request/activate-account.request.js";
+import { ForgotPasswordRequest } from "../domain/request/forgot-password.request.js";
+import { ChangePasswordRequest } from "../domain/request/change-password.request.js";
+import { LoginRequest } from "../domain/request/login.request.js";
 
 interface Dependences extends ControllersDependences {
 	business: IAuthBusiness;
@@ -43,7 +48,7 @@ export class AuthController implements IAuthController {
 
 	public readonly login: ControllerHandler<UserSessionDTO> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.login(request);
+			const { body } = await this.#requestDTO.login(request as unknown as LoginRequest);
 			const userDto = await this.#business.login(body);
 			if (userDto === null) return this.#response({ error: new UnauthorizedException401("Username or password is incorrect") });
 			userDto.session = await this.#sessionHandler.generateSession({ roles: userDto.roles, userUuid: userDto.uuid });
@@ -70,7 +75,7 @@ export class AuthController implements IAuthController {
 
 	public readonly register: ControllerHandler<UserNonSensitiveData> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.register(request);
+			const { body } = await this.#requestDTO.register(request as unknown as RegisterRequest);
 			const userDto = await this.#business.register(body);
 			return this.#response({ code: HttpStatus.CREATED, data: userDto.userNonSensitiveDTO });
 		} catch (error) {
@@ -81,7 +86,7 @@ export class AuthController implements IAuthController {
 
 	public readonly activateAccount: ControllerHandler<string> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.activateAccount(request);
+			const { body } = await this.#requestDTO.activateAccount(request as unknown as ActivateAccountRequest);
 			return (await this.#business.activateAccount(body))
 				? this.#response({ data: "Url to activate account sent to email" })
 				: this.#response({ error: new BadRequestException400("Can't acctivate this account") });
@@ -111,7 +116,7 @@ export class AuthController implements IAuthController {
 
 	public readonly forgotPassword: ControllerHandler<string> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.forgotPassword(request);
+			const { body } = await this.#requestDTO.forgotPassword(request as unknown as ForgotPasswordRequest);
 			const result = await this.#business.forgotPassword(body);
 			return this.#response({ data: result ? "Verification string sended" : "" });
 		} catch (error) {
@@ -122,7 +127,7 @@ export class AuthController implements IAuthController {
 
 	public readonly changePassword: ControllerHandler<string> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.changePassword(request);
+			const { body } = await this.#requestDTO.changePassword(request as unknown as ChangePasswordRequest);
 			const result = await this.#business.changePassword(body);
 			return this.#response({ data: result ? "Password updated" : "Can't change password, try latter" });
 		} catch (error) {

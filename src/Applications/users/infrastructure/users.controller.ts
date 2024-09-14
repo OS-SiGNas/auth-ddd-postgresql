@@ -17,6 +17,8 @@ import type { AddUserRolesRequest } from "../domain/request/add-user-role.reques
 
 // Error
 import { BadRequestException400 } from "../../../Domain/core/errors.factory.js";
+import { CreateUserRequest } from "../domain/request/create-user.request.js";
+import { CreateUserRoleRequest } from "../domain/request/create-user-roles.request.js";
 
 interface Dependences extends ControllersDependences {
 	userRequestDTO: IUsersRequestDTO;
@@ -44,7 +46,7 @@ export class UsersController implements IUsersController {
 	public readonly postUser: ControllerHandler<UserNonSensitiveData> = async (request) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, request.headers.authorization);
-			const { body } = await this.#requestDTO.createUser(request);
+			const { body } = await this.#requestDTO.createUser(request as unknown as CreateUserRequest);
 			const newUser = await this.#business.createUser(body);
 			this.#logger.info("User created");
 			return this.#response({ code: HttpStatus.CREATED, data: newUser.userNonSensitiveDTO });
@@ -97,9 +99,7 @@ export class UsersController implements IUsersController {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, request.headers.authorization);
 			const { params } = await this.#requestDTO.deleteUser(request as unknown as DeleteUserRequest);
 			const deleted = await this.#business.deleteUser(params);
-			return deleted
-				? this.#response({ data: `Deleted user ${request.params.uuid}` })
-				: this.#response({ error: new BadRequestException400(`Can't delete user ${request.params.uuid}`) });
+			return deleted ? this.#response({ data: `User ${params.uuid} deleted` }) : this.#response({ error: "" });
 		} catch (error) {
 			this.#errorHandler.catch(this.#name, error);
 			return this.#response({ error });
@@ -109,7 +109,7 @@ export class UsersController implements IUsersController {
 	public readonly createRole: ControllerHandler<string> = async (request) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, request.headers.authorization);
-			const { body } = await this.#requestDTO.createRole(request);
+			const { body } = await this.#requestDTO.createRole(request as unknown as CreateUserRoleRequest);
 			await this.#business.createRole(body);
 			return this.#response({ data: "Created", code: 201 });
 		} catch (error) {

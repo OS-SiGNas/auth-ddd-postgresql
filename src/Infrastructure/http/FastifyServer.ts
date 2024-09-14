@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, RouteOptions } from "fastify";
 
 import type { Core } from "../../Domain/core/Core";
 import type { IServer } from "../../Domain/IServer";
@@ -6,6 +6,7 @@ import type { ILogger } from "../../Domain/core/ILogger";
 
 interface Dependences extends Core {
 	app: FastifyInstance;
+	applications: RouteOptions[];
 	port: number;
 	message: string;
 }
@@ -20,11 +21,12 @@ export class FastifyServer implements IServer {
 		this.#port = d.port;
 		this.#logger = d.logger;
 		this.#message = d.message;
+		d.applications.forEach((route) => this.#app.route(route));
 	}
 
 	public readonly start = async (): Promise<void> => {
 		await this.#app.listen({ port: this.#port });
-		this.#logger.info(`\n${this.constructor.name} Running in: http://127.0.0.1:${this.#port}`);
+		this.#logger.info(`Running in: http://127.0.0.1:${this.#port}`);
 		this.#logger.info(this.#message);
 	};
 

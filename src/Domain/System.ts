@@ -1,50 +1,43 @@
-import { config as dotEnvConfig } from "dotenv";
 import { Logger } from "../Applications/shared/logger-handler/logger.js";
 
 export type Environment = "development" | "production" | "test";
-type Variables =
-	| "HTTP_SERVICE"
-	| "PORT"
-	| "PG_HOST"
-	| "PG_PORT"
-	| "PG_USERNAME"
-	| "PG_PASSWORD"
-	| "PG_DATABASE"
-	| "JWT_ACCESS_SECRET_KEY"
-	| "JWT_ACCESS_EXPIRED_TIME"
-	| "JWT_REFRESH_SECRET_KEY"
-	| "JWT_REFRESH_EXPIRED_TIME"
-	| "JWT_AA_SECRET_KEY"
-	| "JWT_AA_EXPIRED_TIME";
-
-type HttpService = "express" | "fastify";
-type Secrets = Readonly<Record<Variables, string>>;
+export type HttpService = "express" | "fastify";
+interface Secrets {
+	NODE_ENV: Environment;
+	HTTP_SERVICE: HttpService;
+	PORT: string;
+	PG_HOST: string;
+	PG_PORT: string;
+	PG_USERNAME: string;
+	PG_PASSWORD: string;
+	PG_DATABASE: string;
+	JWT_ACCESS_SECRET_KEY: string;
+	JWT_ACCESS_EXPIRED_TIME: string;
+	JWT_REFRESH_SECRET_KEY: string;
+	JWT_REFRESH_EXPIRED_TIME: string;
+	JWT_AA_SECRET_KEY: string;
+	JWT_AA_EXPIRED_TIME: string;
+}
 
 class System {
-	readonly #environment: Environment;
-	readonly #logger = new Logger(System.name);
-
-	private constructor() {
-		dotEnvConfig();
-		this.#environment = process.env["ENVIRONMENT"] as Environment;
-	}
-
+	private constructor() {}
 	static #instance?: System; // crazy singleton 🤡
 	static get instance(): Readonly<System> {
-		if (this.#instance === undefined) this.#instance = new System();
-		return this.#instance;
+		return (this.#instance ??= new System());
 	}
 
-	readonly #error = (variable: Variables): Error => new Error(`💩 Environment Variable: \x1B[31m${variable}\x1B[39m is undefined`);
-	readonly #getSecretFromDotEnv = (variable: Variables): Readonly<string> => {
+	readonly #logger = new Logger(this.constructor.name);
+	readonly #error = (variable: keyof Secrets): Error => new Error(`💩 Environment Variable: \x1B[31m${variable}\x1B[39m is undefined`);
+	readonly #getSecretFromDotEnv = (variable: keyof Secrets): Readonly<string> => {
 		const target = process.env[variable];
 		if (target === undefined) throw this.#error(variable);
 		this.#logger.debug(`✓ ${variable}`);
 		return target;
 	};
 
-	public get secrets(): Secrets {
+	public get secrets(): Readonly<Secrets> {
 		return {
+			NODE_ENV: this.#getSecretFromDotEnv("NODE_ENV") as Environment,
 			HTTP_SERVICE: this.#getSecretFromDotEnv("HTTP_SERVICE") as HttpService,
 			PORT: this.#getSecretFromDotEnv("PORT"),
 			PG_HOST: this.#getSecretFromDotEnv("PG_HOST"),
@@ -62,7 +55,7 @@ class System {
 	}
 
 	#cacheSecrets?: Secrets;
-	public readonly getAsyncSecrets = async (): Promise<Secrets> => {
+	public readonly getAsyncSecrets = async (): Promise<Readonly<Secrets>> => {
 		if (this.#cacheSecrets === undefined) {
 			/** Implement async handle secrets service
       const strategy = this.#getAsyncSecretStrategy('AWS')
@@ -72,10 +65,6 @@ class System {
 
 		return await Promise.resolve(this.#cacheSecrets);
 	};
-
-	get ENVIRONMENT(): Environment {
-		return this.#environment;
-	}
 }
 
-export const { secrets, getAsyncSecrets, ENVIRONMENT } = System.instance;
+export const { secrets, getAsyncSecrets } = System.instance;

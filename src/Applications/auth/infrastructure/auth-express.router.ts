@@ -2,27 +2,13 @@ import type { RequestHandler, Router } from "express";
 import type { IAuthController } from "../domain/IAuthController";
 
 interface Dependences {
-	router: Router;
 	controller: IAuthController;
 }
 
-export const AuthRouter = class {
-	readonly #router: Router;
+export class AuthRouterExpress {
 	readonly #controller: IAuthController;
 	constructor(d: Readonly<Dependences>) {
 		this.#controller = d.controller;
-		this.#router = d.router
-			.post("/auth/login", this.#login)
-			.post("/auth/refresh", this.#refreshToken)
-			.post("/auth/register", this.#register)
-			.get("/auth/account-activation/:token", this.#accountActivation)
-			.post("/auth/activate-account", this.#activateAccount)
-			.post("/auth/forgot-password", this.#forgotPassword)
-			.patch("/auth/change-password", this.#changePassword);
-	}
-
-	get router(): Router {
-		return this.#router;
 	}
 
 	readonly #login: RequestHandler = async (req, res) => {
@@ -59,4 +45,14 @@ export const AuthRouter = class {
 		const changePassword = await this.#controller.changePassword(req);
 		return res.status(changePassword.status.code).json(changePassword);
 	};
-};
+
+	public readonly getRouter = (router: Router): Router =>
+		router
+			.post("/auth/login", this.#login)
+			.post("/auth/refresh", this.#refreshToken)
+			.post("/auth/register", this.#register)
+			.get("/auth/account-activation/:token", this.#accountActivation)
+			.post("/auth/activate-account", this.#activateAccount)
+			.post("/auth/forgot-password", this.#forgotPassword)
+			.patch("/auth/change-password", this.#changePassword);
+}

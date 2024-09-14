@@ -1,7 +1,6 @@
-import { Router } from "express";
 import jwt from "jsonwebtoken";
 // Global Domain
-import { ENVIRONMENT, secrets } from "../../Domain/System.js";
+import { secrets } from "../../Domain/System.js";
 // Application users
 import { User } from "../users/domain/entities/users.entity.js";
 // Applications shared
@@ -16,17 +15,21 @@ import { errorHandler } from "../shared/error-handler/make.js";
 import { AuthBusiness } from "./applications/auth.business.js";
 import { AuthRequestDTO } from "./domain/auth-request.dto.js";
 import { AuthController } from "./infrastructure/auth.controller.js";
-import { AuthRouter } from "./infrastructure/auth.router.js";
+
+import type { AuthRouterExpress } from "./infrastructure/auth-express.router";
+import type { AuthRouterFastify } from "./infrastructure/auth-fastify.router";
+
+const { NODE_ENV, HTTP_SERVICE, JWT_AA_EXPIRED_TIME, JWT_AA_SECRET_KEY } = secrets;
 
 const storage = new StorageHandler({
-	cacheExpiredTime: ENVIRONMENT === "production" ? 3600 * 1000 : 360 * 1000,
-	keyExpiredTime: ENVIRONMENT === "production" ? 300 * 1000 : 120 * 1000,
+	cacheExpiredTime: NODE_ENV === "production" ? 3600 * 1000 : 360 * 1000,
+	keyExpiredTime: NODE_ENV === "production" ? 300 * 1000 : 120 * 1000,
 	logger: new Logger("AuthBusinessStorage"),
 });
 
 const activateAccountTokenHandler = new TokenHandler<{ email: string }>({
-	jwtSecretKey: secrets.JWT_AA_SECRET_KEY,
-	jwtExpiredTime: secrets.JWT_AA_EXPIRED_TIME,
+	jwtSecretKey: JWT_AA_SECRET_KEY,
+	jwtExpiredTime: JWT_AA_EXPIRED_TIME,
 	sign: jwt.sign,
 	verify: jwt.verify,
 	logger: new Logger("ActivateAccountTokenHandler"),
@@ -49,9 +52,14 @@ const controller = new AuthController({
 	logger: new Logger("AuthController"),
 });
 
-const authRouter = new AuthRouter({
-	router: Router(),
-	controller,
-});
+export const authExpress = await (async (): Promise<AuthRouterExpress | undefined> => {
+	if (HTTP_SERVICE !== "express") return undefined;
+	const { AuthRouterExpress } = await import("./infrastructure/auth-express.router.js");
+	return new AuthRouterExpress({ controller });
+})();
 
-export const auth = authRouter.router;
+export const authFastify = await (async (): Promise<AuthRouterFastify | undefined> => {
+	if (HTTP_SERVICE !== "fastify") return undefined;
+	const { AuthRouterFastify } = await import("./infrastructure/auth-fastify.router.js");
+	return new AuthRouterFastify({ controller });
+})();
