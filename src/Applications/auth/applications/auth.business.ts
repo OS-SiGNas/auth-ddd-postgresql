@@ -95,8 +95,8 @@ export class AuthBusiness implements IAuthBusiness {
 	};
 
 	public readonly forgotPassword: BusinessHandler<ForgotPasswordRequest["body"], boolean> = async ({ email }) => {
-		const user = await this.#repository.findOneBy({ email });
-		if (user === null) throw new UserNotFoundException(email);
+		const user = await this.#repository.exists({ where: { email } });
+		if (user === false) throw new UserNotFoundException(email);
 		const verificationString = randomBytes(4).toString("hex");
 		this.#logger.debug(`Verification string for ${email}: '${verificationString}'`);
 		await this.#storage.set(email, { verificationString: await this.#passwordHandler.encryptPassword(verificationString) });
@@ -112,8 +112,9 @@ export class AuthBusiness implements IAuthBusiness {
 		if (storage === null) return false;
 		const isMatch = await this.#passwordHandler.comparePassword(verificationString, storage.verificationString);
 		if (isMatch === false) return false;
-		const updated = await this.#repository.update({ email }, { password: await this.#passwordHandler.encryptPassword(newPassword) });
-		if (updated.affected === undefined) return false;
-		return this.#storage.delete(email);
+		const { affected } = await this.#repository.update({ email }, { password: await this.#passwordHandler.encryptPassword(newPassword) });
+		if (affected === undefined || affected !== 1) throw new UserNotFoundException(email);
+		this.#storage.delete(email);
+		return true;
 	};
 }

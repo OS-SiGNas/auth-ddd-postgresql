@@ -1,5 +1,7 @@
 import { RoleName } from "../domain/role-name.enum.js";
 import { HttpStatus } from "../../../Domain/core/http-status.enum.js";
+// Error
+import { BadRequestException400 } from "../../../Domain/core/errors.factory.js";
 
 import type { ILogger } from "../../../Domain/core/ILogger";
 import type { ControllerHandler, ControllersDependences } from "../../../Domain/business/Business";
@@ -14,11 +16,8 @@ import type { DeleteUserRequest } from "../domain/request/delete-user.request";
 import type { GetOneUserRequest } from "../domain/request/get-one-user.request";
 import type { UpdateUserRequest } from "../domain/request/update-user.request";
 import type { AddUserRolesRequest } from "../domain/request/add-user-role.request";
-
-// Error
-import { BadRequestException400 } from "../../../Domain/core/errors.factory.js";
-import { CreateUserRequest } from "../domain/request/create-user.request.js";
-import { CreateUserRoleRequest } from "../domain/request/create-user-roles.request.js";
+import type { CreateUserRequest } from "../domain/request/create-user.request.js";
+import type { CreateUserRoleRequest } from "../domain/request/create-user-roles.request.js";
 
 interface Dependences extends ControllersDependences {
 	userRequestDTO: IUsersRequestDTO;
@@ -51,7 +50,11 @@ export class UsersController implements IUsersController {
 			this.#logger.info("User created");
 			return this.#response({ code: HttpStatus.CREATED, data: newUser.userNonSensitiveDTO });
 		} catch (error) {
-			this.#errorHandler.catch(this.#name, error);
+			this.#errorHandler.catch({
+				name: this.#name,
+				ticket: request.headers.uuid as string,
+				error,
+			});
 			return this.#response({ error });
 		}
 	};
@@ -63,7 +66,11 @@ export class UsersController implements IUsersController {
 			const user = await this.#business.getOneUser(params);
 			return this.#response({ data: user.userNonSensitiveDTO });
 		} catch (error) {
-			this.#errorHandler.catch(this.#name, error);
+			this.#errorHandler.catch({
+				name: this.#name,
+				ticket: request.headers.uuid as string,
+				error,
+			});
 			return this.#response({ error });
 		}
 	};
@@ -75,7 +82,11 @@ export class UsersController implements IUsersController {
 			const users = await this.#business.getAllUsers(payload);
 			return this.#response({ data: users });
 		} catch (error) {
-			this.#errorHandler.catch(this.#name, error);
+			this.#errorHandler.catch({
+				name: this.#name,
+				ticket: request.headers.uuid as string,
+				error,
+			});
 			return this.#response({ error });
 		}
 	};
@@ -89,7 +100,11 @@ export class UsersController implements IUsersController {
 				? this.#response({ data: `User ${payload.params.uuid} is updated` })
 				: this.#response({ error: new BadRequestException400("Can't update user: " + payload.params.uuid) });
 		} catch (error) {
-			this.#errorHandler.catch(this.#name, error);
+			this.#errorHandler.catch({
+				name: this.#name,
+				ticket: request.headers.uuid as string,
+				error,
+			});
 			return this.#response({ error });
 		}
 	};
@@ -101,7 +116,11 @@ export class UsersController implements IUsersController {
 			const deleted = await this.#business.deleteUser(params);
 			return deleted ? this.#response({ data: `User ${params.uuid} deleted` }) : this.#response({ error: "" });
 		} catch (error) {
-			this.#errorHandler.catch(this.#name, error);
+			this.#errorHandler.catch({
+				name: this.#name,
+				ticket: request.headers.uuid as string,
+				error,
+			});
 			return this.#response({ error });
 		}
 	};
@@ -113,7 +132,11 @@ export class UsersController implements IUsersController {
 			await this.#business.createRole(body);
 			return this.#response({ data: "Created", code: 201 });
 		} catch (error) {
-			this.#errorHandler.catch(this.#name, error);
+			this.#errorHandler.catch({
+				name: this.#name,
+				ticket: request.headers.uuid as string,
+				error,
+			});
 			return this.#response({ error });
 		}
 	};
@@ -125,7 +148,11 @@ export class UsersController implements IUsersController {
 			const user = await this.#business.addUserRole(payload);
 			return this.#response({ data: user.userNonSensitiveDTO });
 		} catch (error) {
-			this.#errorHandler.catch(this.#name, error);
+			this.#errorHandler.catch({
+				name: this.#name,
+				ticket: request.headers.uuid as string,
+				error,
+			});
 			return this.#response({ error });
 		}
 	};

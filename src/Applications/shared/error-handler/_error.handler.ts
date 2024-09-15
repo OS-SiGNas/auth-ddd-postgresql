@@ -1,9 +1,9 @@
-import type { ILogger } from "../../../Domain/core/ILogger";
-import type { ErrorType, IErrorHandler } from "../../../Domain/core/IErrorHandler";
 // Errors
 import { DomainError } from "../../../Domain/core/errors.factory.js";
 import { ZodError } from "zod";
 
+import type { ILogger } from "../../../Domain/core/ILogger";
+import type { Catch, IErrorHandler } from "../../../Domain/core/IErrorHandler";
 interface Dependences {
 	logger: ILogger;
 }
@@ -18,21 +18,17 @@ export class _ErrorHandler implements IErrorHandler {
 		this.#logger = d.logger;
 	}
 
-	public readonly catch = (name: string, error?: ErrorType): void => {
-		this.#logger.warn(`${name}Error 💩`);
+	public readonly catch: Catch = ({ error, name, ticket }) => {
+		this.#logger.error(`${name}Error 💩 - ${ticket}`);
 		if (error === undefined) return;
 
-		/**
-     * Strategies to handle different errors
-     
-    if (error instanceof StepError) this.#stepErrorsHandler(error)
-    if (error instanceof TransactionError) this.#TransactionErrorsHandler(error) */
 		if (error instanceof ZodError) {
 			this.#errorZodHandler(error);
 			return;
 		}
 
 		if (error instanceof DomainError) {
+			error.ticket = ticket;
 			this.#domainErrorHandler(error);
 			return;
 		}
@@ -42,7 +38,7 @@ export class _ErrorHandler implements IErrorHandler {
 			return;
 		}
 
-		this.#logger.error(`Throw unknown typeof -> ${typeof error}`);
+		this.#logger.error(`💀 Throw unknown 💀 typeof -> ${typeof error}`);
 		this.#logger.error(error);
 	};
 
@@ -52,6 +48,6 @@ export class _ErrorHandler implements IErrorHandler {
 	};
 
 	readonly #domainErrorHandler = (error: DomainError): void => {
-		this.#logger.debug(error);
+		this.#logger.error(error);
 	};
 }

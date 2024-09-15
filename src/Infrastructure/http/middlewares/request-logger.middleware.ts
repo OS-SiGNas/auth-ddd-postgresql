@@ -8,7 +8,7 @@ const httpLogger = new Logger("RequestLogger");
 export const requestLogger: RequestHandler = ({ headers, ip, method, url }, res, next) => {
 	const uuid = randomUUID();
 	headers.uuid = uuid;
-	res.setHeader("X-REQ-UUID", uuid);
+	res.setHeader("X-Request-ID", uuid);
 	const start = Date.now();
 	res.on("finish", () => {
 		const duration = Date.now() - start;

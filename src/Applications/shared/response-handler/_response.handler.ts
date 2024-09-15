@@ -53,8 +53,8 @@ export class _ResponseHandler implements IResponseHandler {
 		error: issues.map((issue) => ({ path: issue.path.join(": "), message: issue.message })),
 	});
 
-	readonly #domainErrors = <E>({ ticket, statusCode, name, message, issues }: DomainError): IResponse<E> => ({
-		status: { code: statusCode, ticket, message: this.#getStatusMessage(statusCode) },
-		error: { name, message, issues },
+	readonly #domainErrors = <E>({ statusCode, name, message }: DomainError): IResponse<E> => ({
+		status: { code: statusCode, message: this.#getStatusMessage(statusCode) },
+		error: `${name}: ${message}`,
 	});
 }

@@ -19,16 +19,17 @@ const getHttpServerInstance = async (): Promise<IServer> => {
 
 	if (HTTP_SERVICE === "fastify") {
 		const { default: Fastify } = await import("fastify");
-		const { FastifyServer } = await import("./FastifyServer.js");
+		const { FastifyServer } = await import("./fastify.server.js");
 		const { authFastify } = await import("../../Applications/auth/make.js");
 		if (authFastify === undefined) throw _error(HTTP_SERVICE);
 		const { usersFastify } = await import("../../Applications/users/make.js");
 		if (usersFastify === undefined) throw _error(HTTP_SERVICE);
+
 		_instance = new FastifyServer({
 			app: Fastify({ logger: NODE_ENV !== "production" }),
-			applications: [...authFastify.getRoutes(), ...usersFastify.getRoutes()],
 			port: +PORT,
 			message: message[NODE_ENV],
+			applications: [...authFastify.getRoutes(), ...usersFastify.getRoutes()],
 			errorHandler,
 			logger: new Logger("FastifyServer"),
 		});
@@ -36,13 +37,14 @@ const getHttpServerInstance = async (): Promise<IServer> => {
 
 	if (HTTP_SERVICE === "express") {
 		const { default: Express, Router } = await import("express");
-		const { ExpressServer } = await import("./ExpressServer.js");
+		const { ExpressServer } = await import("./express.server.js");
 		const { globalMiddlewares, lastMiddlewares } = await import("./middlewares/make.js");
 		const { authExpress } = await import("../../Applications/auth/make.js");
 		if (authExpress === undefined) throw _error(HTTP_SERVICE);
 		const { usersExpress } = await import("../../Applications/users/make.js");
 		if (usersExpress === undefined) throw _error(HTTP_SERVICE);
 		const router = Router();
+
 		_instance = new ExpressServer({
 			app: Express(),
 			port: +PORT,

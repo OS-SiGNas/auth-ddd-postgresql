@@ -11,8 +11,7 @@ export abstract class DomainError extends Error {
 	readonly statusCode: HttpStatus;
 	override readonly name: string;
 	override readonly message: string;
-	readonly ticket?: string; // TransactionUuid | number
-	readonly issues?: DomainError[];
+	ticket?: string; // TransactionUuid | number
 
 	protected constructor(d: Readonly<DependencesErr>) {
 		super(d.message);
