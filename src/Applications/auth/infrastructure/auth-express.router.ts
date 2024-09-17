@@ -1,3 +1,4 @@
+import { endpoints } from "../domain/endpoints.enum.js";
 import type { RequestHandler, Router } from "express";
 import type { IAuthController } from "../domain/IAuthController";
 
@@ -10,6 +11,15 @@ export class AuthRouterExpress {
 	constructor(d: Readonly<Dependences>) {
 		this.#controller = d.controller;
 	}
+
+	public readonly getRouter = (router: Router): Router =>
+		router
+			.post(endpoints.LOGIN, this.#login)
+			.post(endpoints.REFRESH_TOKEN, this.#refreshToken)
+			.post(endpoints.REFRESH_TOKEN, this.#register)
+			.get(endpoints.ACTIVATE_ACCOUNT, this.#activateAccount)
+			.post(endpoints.FORGOT_PASSWORD, this.#forgotPassword)
+			.patch(endpoints.CHANGE_PASSWORD, this.#changePassword);
 
 	readonly #login: RequestHandler = async (req, res) => {
 		const login = await this.#controller.login(req);
@@ -26,14 +36,9 @@ export class AuthRouterExpress {
 		return res.status(register.status.code).json(register);
 	};
 
-	readonly #accountActivation: RequestHandler = async (req, res) => {
-		const accountActivation = await this.#controller.accountActivation(req);
-		return res.status(accountActivation.status.code).json(accountActivation);
-	};
-
 	readonly #activateAccount: RequestHandler = async (req, res) => {
-		const activateAccount = await this.#controller.activateAccount(req);
-		return res.status(activateAccount.status.code).json(activateAccount);
+		const accountActivation = await this.#controller.activateAccount(req);
+		return res.status(accountActivation.status.code).json(accountActivation);
 	};
 
 	readonly #forgotPassword: RequestHandler = async (req, res) => {
@@ -45,14 +50,4 @@ export class AuthRouterExpress {
 		const changePassword = await this.#controller.changePassword(req);
 		return res.status(changePassword.status.code).json(changePassword);
 	};
-
-	public readonly getRouter = (router: Router): Router =>
-		router
-			.post("/auth/login", this.#login)
-			.post("/auth/refresh", this.#refreshToken)
-			.post("/auth/register", this.#register)
-			.get("/auth/account-activation/:token", this.#accountActivation)
-			.post("/auth/activate-account", this.#activateAccount)
-			.post("/auth/forgot-password", this.#forgotPassword)
-			.patch("/auth/change-password", this.#changePassword);
 }

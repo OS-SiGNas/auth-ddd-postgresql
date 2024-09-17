@@ -12,12 +12,15 @@ import type { UserNonSensitiveData } from "../domain/IUser";
 import type { IUsersBusiness } from "../domain/IUsersBusiness";
 import type { IUsersController } from "../domain/IUsersController";
 import type { IUsersRequestDTO } from "../domain/IUsersRequestDTO";
-import type { DeleteUserRequest } from "../domain/request/delete-user.request";
-import type { GetOneUserRequest } from "../domain/request/get-one-user.request";
-import type { UpdateUserRequest } from "../domain/request/update-user.request";
-import type { AddUserRolesRequest } from "../domain/request/add-user-role.request";
-import type { CreateUserRequest } from "../domain/request/create-user.request.js";
-import type { CreateUserRoleRequest } from "../domain/request/create-user-roles.request.js";
+import type {
+	AddUserRolesRequest,
+	CreateUserRequest,
+	CreateUserRoleRequest,
+	DeleteUserRequest,
+	GetAllUsersRequest,
+	GetOneUserRequest,
+	UpdateUserRequest,
+} from "../domain/Request.js";
 
 interface Dependences extends ControllersDependences {
 	userRequestDTO: IUsersRequestDTO;
@@ -78,7 +81,7 @@ export class UsersController implements IUsersController {
 	public readonly getAllUsers: ControllerHandler<UserNonSensitiveData[]> = async (request) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, request.headers.authorization);
-			const payload = await this.#requestDTO.getAllUsers(request as unknown as GetOneUserRequest);
+			const payload = await this.#requestDTO.getAllUsers(request as unknown as GetAllUsersRequest);
 			const users = await this.#business.getAllUsers(payload);
 			return this.#response({ data: users });
 		} catch (error) {
@@ -141,11 +144,11 @@ export class UsersController implements IUsersController {
 		}
 	};
 
-	public readonly addUserRole: ControllerHandler<UserNonSensitiveData> = async (request) => {
+	public readonly rolesToUser: ControllerHandler<UserNonSensitiveData> = async (request) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, request.headers.authorization);
-			const payload = await this.#requestDTO.addUserRoles(request as unknown as AddUserRolesRequest);
-			const user = await this.#business.addUserRole(payload);
+			const payload = await this.#requestDTO.rolesToUser(request as unknown as AddUserRolesRequest);
+			const user = await this.#business.rolesToUser(payload);
 			return this.#response({ data: user.userNonSensitiveDTO });
 		} catch (error) {
 			this.#errorHandler.catch({

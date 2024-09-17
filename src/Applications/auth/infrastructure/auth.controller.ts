@@ -1,5 +1,4 @@
 import { HttpStatus } from "../../../Domain/core/http-status.enum.js";
-// Errors
 import { BadRequestException400, ForbiddenException403, UnauthorizedException401 } from "../../../Domain/core/errors.factory.js";
 
 import type { ControllerHandler, ControllersDependences } from "../../../Domain/business/Business";
@@ -7,20 +6,19 @@ import type { ILogger } from "../../../Domain/core/ILogger";
 import type { IErrorHandler } from "../../../Domain/core/IErrorHandler";
 import type { HttpResponse } from "../../../Domain/business/IResponseHandler";
 import type { ISessionHandler } from "../../../Domain/business/ISessionHandler";
-
 import type { UserSessionDTO } from "../../users/domain/users.dto.js";
-import type { IAuthRequestDTO } from "../../users/domain/IAuthRequestDTO";
+import type { IAuthRequestDTO } from "../domain/IAuthRequestDTO.js";
 import type { UserNonSensitiveData } from "../../users/domain/IUser";
 import type { IAuthBusiness } from "../domain/IAuthBusiness";
 import type { IAuthController } from "../domain/IAuthController";
-
-import type { RefreshTokenRequest } from "../domain/request/refresh-token.request";
-import type { AccountActivationRequest } from "../domain/request/account-activation.request";
-import type { RegisterRequest } from "../domain/request/register.request";
-import type { ActivateAccountRequest } from "../domain/request/activate-account.request";
-import type { ForgotPasswordRequest } from "../domain/request/forgot-password.request";
-import type { ChangePasswordRequest } from "../domain/request/change-password.request";
-import type { LoginRequest } from "../domain/request/login.request";
+import type {
+	ActivateAccountRequest,
+	ChangePasswordRequest,
+	ForgotPasswordRequest,
+	LoginRequest,
+	RefreshTokenRequest,
+	RegisterRequest,
+} from "../domain/Request.js";
 
 interface Dependences extends ControllersDependences {
 	business: IAuthBusiness;
@@ -40,7 +38,6 @@ export class AuthController implements IAuthController {
 		this.#errorHandler = d.errorHandler;
 		this.#response = d.responseHandler.http;
 		this.#sessionHandler = d.sessionHandler;
-
 		this.#business = d.business;
 		this.#requestDTO = d.authRequestDTO;
 	}
@@ -53,11 +50,7 @@ export class AuthController implements IAuthController {
 			userDto.session = await this.#sessionHandler.generateSession({ roles: userDto.roles, userUuid: userDto.uuid });
 			return this.#response({ data: userDto.userSessionDTO });
 		} catch (error) {
-			this.#errorHandler.catch({
-				name: this.#name,
-				ticket: request.headers.uuid as string,
-				error,
-			});
+			this.#errorHandler.catch({ name: this.#name, ticket: request.headers.uuid as string, error });
 			return this.#response({ error });
 		}
 	};
@@ -71,11 +64,7 @@ export class AuthController implements IAuthController {
 			const accessToken = await this.#sessionHandler.generateAccessToken({ roles: user.roles, userUuid });
 			return this.#response({ data: accessToken });
 		} catch (error) {
-			this.#errorHandler.catch({
-				name: this.#name,
-				ticket: request.headers.uuid as string,
-				error,
-			});
+			this.#errorHandler.catch({ name: this.#name, ticket: request.headers.uuid as string, error });
 			return this.#response({ error });
 		}
 	};
@@ -86,49 +75,25 @@ export class AuthController implements IAuthController {
 			const userDto = await this.#business.register(body);
 			return this.#response({ code: HttpStatus.CREATED, data: userDto.userNonSensitiveDTO });
 		} catch (error) {
-			this.#errorHandler.catch({
-				name: this.#name,
-				ticket: request.headers.uuid as string,
-				error,
-			});
+			this.#errorHandler.catch({ name: this.#name, ticket: request.headers.uuid as string, error });
 			return this.#response({ error });
 		}
 	};
 
 	public readonly activateAccount: ControllerHandler<string> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.activateAccount(request as unknown as ActivateAccountRequest);
-			return (await this.#business.activateAccount(body))
-				? this.#response({ data: "Url to activate account sent to email" })
-				: this.#response({ error: new BadRequestException400("Can't acctivate this account") });
-		} catch (error) {
-			this.#errorHandler.catch({
-				name: this.#name,
-				ticket: request.headers.uuid as string,
-				error,
-			});
-
-			return this.#response({ error });
-		}
-	};
-
-	public readonly accountActivation: ControllerHandler<string> = async (request) => {
-		try {
-			const { params } = await this.#requestDTO.accountActivation(request as unknown as AccountActivationRequest);
-			const result = await this.#business.accountActivation(params);
+			const { params } = await this.#requestDTO.activateAccount(request as unknown as ActivateAccountRequest);
+			const result = await this.#business.activateAccount(params);
 			return result
 				? this.#response({ data: "Account activated" })
 				: this.#response({ error: new BadRequestException400("Invalid activation request") });
 		} catch (error) {
-			this.#errorHandler.catch({
-				name: this.#name,
-				ticket: request.headers.uuid as string,
-				error,
-			});
+			this.#errorHandler.catch({ name: this.#name, ticket: request.headers.uuid as string, error });
 			if (error instanceof Error) {
-				if (error.name === "TokenExpiredError") return this.#response({ error: new ForbiddenException403("Acctivation token expired") });
-				if (error.name === "invalid signature" || error.name === "JsonWebTokenError")
-					return this.#response({ error: new BadRequestException400("Invalid activation request") });
+				const isInvalidToken = error.name === "invalid signature" || error.name === "JsonWebTokenError";
+				const isTokenExpired = error.name === "TokenExpiredError";
+				if (isInvalidToken) return this.#response({ error: new BadRequestException400("Invalid activation request") });
+				if (isTokenExpired) return this.#response({ error: new ForbiddenException403("Acctivation token expired") });
 			}
 			return this.#response({ error });
 		}
@@ -140,11 +105,7 @@ export class AuthController implements IAuthController {
 			const result = await this.#business.forgotPassword(body);
 			return this.#response({ data: result ? "Verification string sended" : "" });
 		} catch (error) {
-			this.#errorHandler.catch({
-				name: this.#name,
-				ticket: request.headers.uuid as string,
-				error,
-			});
+			this.#errorHandler.catch({ name: this.#name, ticket: request.headers.uuid as string, error });
 			return this.#response({ error });
 		}
 	};
@@ -157,11 +118,7 @@ export class AuthController implements IAuthController {
 				? this.#response({ data: "Password updated" })
 				: this.#response({ error: new BadRequestException400("Invalid password change") });
 		} catch (error) {
-			this.#errorHandler.catch({
-				name: this.#name,
-				ticket: request.headers.uuid as string,
-				error,
-			});
+			this.#errorHandler.catch({ name: this.#name, ticket: request.headers.uuid as string, error });
 			return this.#response({ error });
 		}
 	};

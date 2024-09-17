@@ -22,10 +22,6 @@ export class _SessionHandler implements ISessionHandler {
 		this.#refreshTokenHandler = d.refreshTokenHandler;
 	}
 
-	public readonly validateRefreshToken = async (refreshToken: string): Promise<ITokenPayload> => {
-		return await this.#refreshTokenHandler.verifyJWT(refreshToken);
-	};
-
 	public readonly generateAccessToken = async (payload: ITokenPayload): Promise<string> => {
 		return await this.#accessTokenHandler.generateJWT(payload);
 	};
@@ -38,12 +34,6 @@ export class _SessionHandler implements ISessionHandler {
 		return { accessToken, refreshToken };
 	};
 
-	// Errors
-	readonly #malformedError = (): Error => new BadRequestException400("Malformed authorization headers");
-	readonly #forbiddenResourceError = (): Error => new ForbiddenException403("Insufficient credentials");
-	readonly #invalidSessionError = (): Error => new BadRequestException400("Invalid Session");
-	readonly #sessionExpiredError = (): Error => new ForbiddenException403("Session Expired");
-
 	public readonly validateSession = async (role: RoleName, Authorization?: string): Promise<ITokenPayload> => {
 		try {
 			if (Authorization === undefined) throw this.#malformedError();
@@ -52,12 +42,7 @@ export class _SessionHandler implements ISessionHandler {
 			if (!payload.roles.includes(role)) throw this.#forbiddenResourceError();
 			return payload;
 		} catch (error) {
-			if (error instanceof Error) {
-				if (error.name === "TokenExpiredError") throw this.#sessionExpiredError();
-				if (error.name === "JsonWebTokenError") throw this.#invalidSessionError();
-				if (error.name === "invalid signature") throw this.#invalidSessionError();
-			}
-			throw error;
+			return this.#handleJwtErrors(error);
 		}
 	};
 
@@ -68,8 +53,32 @@ export class _SessionHandler implements ISessionHandler {
 		return token;
 	};
 
+	public readonly validateRefreshToken = async (refreshToken: string): Promise<ITokenPayload> => {
+		try {
+			return await this.#refreshTokenHandler.verifyJWT(refreshToken);
+		} catch (error) {
+			return this.#handleJwtErrors(error);
+		}
+	};
+
+	// TODO: implement authentication flow by api key
 	public readonly validateApiKey = (apiKey: string): boolean => {
 		if (apiKey !== "") return false;
 		else return true;
+	};
+
+	// Errors
+	readonly #malformedError = (): Error => new BadRequestException400("Malformed authorization headers");
+	readonly #forbiddenResourceError = (): Error => new ForbiddenException403("Insufficient credentials");
+	readonly #invalidSessionError = (): Error => new BadRequestException400("Invalid session");
+	readonly #sessionExpiredError = (): Error => new ForbiddenException403("Session expired");
+
+	readonly #handleJwtErrors = (error: unknown): never => {
+		if (error instanceof Error) {
+			if (error.name === "TokenExpiredError") throw this.#sessionExpiredError();
+			if (error.name === "JsonWebTokenError") throw this.#invalidSessionError();
+			if (error.name === "invalid signature") throw this.#invalidSessionError();
+		}
+		throw error;
 	};
 }

@@ -10,5 +10,5 @@ export type Catch = ({ name, error, ticket }: Args) => void;
 interface Args {
 	name: string;
 	error: ErrorType;
-	ticket: string;
+	ticket?: string;
 }

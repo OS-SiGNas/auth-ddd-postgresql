@@ -17,7 +17,7 @@ export const postgresServer = _PostgreServer.getInstance({
 		password: secrets.PG_PASSWORD,
 		database: secrets.PG_DATABASE,
 		synchronize: true,
-		logging: secrets.NODE_ENV !== "production",
+		logging: false,
 		entities: [User, Role],
 		subscribers: [],
 		migrations: [],

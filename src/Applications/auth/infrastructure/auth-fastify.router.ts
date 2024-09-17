@@ -1,3 +1,4 @@
+import { endpoints } from "../domain/endpoints.enum.js";
 import type { RouteHandler, RouteOptions } from "fastify";
 import type { IAuthController } from "../domain/IAuthController";
 
@@ -12,13 +13,12 @@ export class AuthRouterFastify {
 	}
 
 	public readonly getRoutes = (): RouteOptions[] => [
-		{ method: "POST", url: "/auth/login", handler: this.#login },
-		{ method: "POST", url: "/auth/refresh", handler: this.#refreshToken },
-		{ method: "POST", url: "/auth/register", handler: this.#register },
-		{ method: "GET", url: "/auth/account-activation/:token", handler: this.#accountActivation },
-		{ method: "POST", url: "/auth/activate-account", handler: this.#activateAccount },
-		{ method: "POST", url: "/auth/forgot-password", handler: this.#forgotPassword },
-		{ method: "PATCH", url: "/auth/change-password", handler: this.#changePassword },
+		{ method: "POST", url: endpoints.LOGIN, handler: this.#login },
+		{ method: "POST", url: endpoints.REFRESH_TOKEN, handler: this.#refreshToken },
+		{ method: "POST", url: endpoints.REGISTER, handler: this.#register },
+		{ method: "GET", url: endpoints.ACTIVATE_ACCOUNT, handler: this.#activateAccount },
+		{ method: "POST", url: endpoints.FORGOT_PASSWORD, handler: this.#forgotPassword },
+		{ method: "PATCH", url: endpoints.CHANGE_PASSWORD, handler: this.#changePassword },
 	];
 
 	readonly #login: RouteHandler = async (req, res) => {
@@ -36,14 +36,9 @@ export class AuthRouterFastify {
 		return res.status(register.status.code).send(register);
 	};
 
-	readonly #accountActivation: RouteHandler = async (req, res) => {
-		const accountActivation = await this.#controller.accountActivation(req);
-		return res.status(accountActivation.status.code).send(accountActivation);
-	};
-
 	readonly #activateAccount: RouteHandler = async (req, res) => {
-		const activateAccount = await this.#controller.activateAccount(req);
-		return res.status(activateAccount.status.code).send(activateAccount);
+		const accountActivation = await this.#controller.activateAccount(req);
+		return res.status(accountActivation.status.code).send(accountActivation);
 	};
 
 	readonly #forgotPassword: RouteHandler = async (req, res) => {

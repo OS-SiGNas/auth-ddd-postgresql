@@ -26,8 +26,7 @@ export class FastifyServer implements IServer {
 
 	public readonly start = async (): Promise<void> => {
 		await this.#app.listen({ port: this.#port });
-		this.#logger.info(`Running in: http://127.0.0.1:${this.#port}`);
-		this.#logger.info(this.#message);
+		this.#logger.info(`Running in: http://127.0.0.1:${this.#port} ${this.#message}`);
 	};
 
 	public readonly stop = async (): Promise<void> => {

@@ -3,14 +3,15 @@ import { z } from "zod";
 import { UsersRequestDTO } from "../../users/domain/users-request.dto.js";
 
 import type { Parser } from "../../../Domain/business/Business";
-import type { IAuthRequestDTO } from "../../users/domain/IAuthRequestDTO";
-import type { LoginRequest } from "./request/login.request";
-import type { RegisterRequest } from "./request/register.request";
-import type { ForgotPasswordRequest } from "./request/forgot-password.request";
-import type { ChangePasswordRequest } from "./request/change-password.request";
-import type { RefreshTokenRequest } from "./request/refresh-token.request.js";
-import { AccountActivationRequest } from "./request/account-activation.request.js";
-import { ActivateAccountRequest } from "./request/activate-account.request.js";
+import type { IAuthRequestDTO } from "./IAuthRequestDTO";
+import type {
+	ActivateAccountRequest,
+	ChangePasswordRequest,
+	ForgotPasswordRequest,
+	LoginRequest,
+	RefreshTokenRequest,
+	RegisterRequest,
+} from "./Request.js";
 
 export class AuthRequestDTO implements IAuthRequestDTO {
 	readonly #defaults = UsersRequestDTO.defaults;
@@ -42,15 +43,6 @@ export class AuthRequestDTO implements IAuthRequestDTO {
 	};
 
 	public readonly activateAccount: Parser<ActivateAccountRequest> = async (request) => {
-		const { email } = this.#defaults;
-		const query = z.object({}).strict();
-		const params = z.object({}).strict();
-		const body = z.object({ email }).strict();
-		const schema = z.object({ query, params, body });
-		return await schema.parseAsync(request);
-	};
-
-	public readonly accountActivation: Parser<AccountActivationRequest> = async (request) => {
 		const { token } = this.#defaults;
 		const query = z.object({}).strict();
 		const params = z.object({ token }).strict();

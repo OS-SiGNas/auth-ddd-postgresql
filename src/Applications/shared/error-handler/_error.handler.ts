@@ -34,20 +34,20 @@ export class _ErrorHandler implements IErrorHandler {
 		}
 
 		if (error instanceof Error) {
-			this.#logger.error(error);
+			this.#logger.error("💀 Unhandled Error 💀", error);
 			return;
 		}
 
-		this.#logger.error(`💀 Throw unknown 💀 typeof -> ${typeof error}`);
+		this.#logger.warn(`💀 Throw unknown 💀 typeof -> ${typeof error}`);
 		this.#logger.error(error);
 	};
 
 	readonly #errorZodHandler = ({ issues }: ZodError): void => {
-		// const errors = issues.map((issue) => ({ path: issue.path.join(": "), message: issue.message }));
-		this.#logger.error(issues);
+		const errors = issues.map((issue) => ({ path: issue.path.join(": "), message: issue.message }));
+		this.#logger.debug(errors);
 	};
 
-	readonly #domainErrorHandler = (error: DomainError): void => {
-		this.#logger.error(error);
+	readonly #domainErrorHandler = ({ name, statusCode, message, ticket }: DomainError): void => {
+		this.#logger.debug({ name, message, statusCode, ticket });
 	};
 }

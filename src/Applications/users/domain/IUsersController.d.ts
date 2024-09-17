@@ -7,6 +7,6 @@ export interface IUsersController {
 	readonly postUser: ControllerHandler<UserNonSensitiveData>;
 	readonly patchUser: ControllerHandler<string>;
 	readonly createRole: ControllerHandler<string>;
-	readonly addUserRole: ControllerHandler<UserNonSensitiveData>;
+	readonly rolesToUser: ControllerHandler<UserNonSensitiveData>;
 	readonly deleteUser: ControllerHandler<string>;
 }

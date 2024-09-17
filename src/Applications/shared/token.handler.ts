@@ -4,9 +4,9 @@ import { InternalServerException500 } from "../../Domain/core/errors.factory.js"
 import type { sign, verify } from "jsonwebtoken";
 import type { ILogger } from "../../Domain/core/ILogger";
 import type { ITokenHandler } from "../../Domain/business/ITokenHandler";
+import type { Core } from "../../Domain/core/Core.js";
 
-interface Dependences {
-	logger: ILogger;
+interface Dependences extends Core {
 	sign: typeof sign;
 	verify: typeof verify;
 	jwtSecretKey: string;
@@ -14,9 +14,6 @@ interface Dependences {
 }
 
 export class TokenHandler<Payload extends object> implements ITokenHandler<Payload> {
-	// static #instance?: _TokenHandler;
-	// static readonly getInstance = (d: Readonly<Dependences>): _TokenHandler => (this.#instance ??= new _TokenHandler(d));
-
 	readonly #logger: ILogger;
 	readonly #sign: typeof sign;
 	readonly #verify: typeof verify;

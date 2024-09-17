@@ -1,19 +1,4 @@
 import { In } from "typeorm";
-import type { IPasswordHandler } from "../../../Domain/business/IPasswordHandler";
-import type { ILogger } from "../../../Domain/core/ILogger";
-import type { BusinessHandler } from "../../../Domain/business/Business";
-import type { User } from "../domain/entities/users.entity.js";
-import type { Role } from "../domain/entities/roles.entity";
-import type { UserNonSensitiveData } from "../domain/IUser";
-import type { IUsersBusiness } from "../domain/IUsersBusiness";
-// Request
-import type { CreateUserRequest } from "../domain/request/create-user.request";
-import type { GetOneUserRequest } from "../domain/request/get-one-user.request";
-import type { UpdateUserRequest } from "../domain/request/update-user.request";
-import type { DeleteUserRequest } from "../domain/request/delete-user.request";
-import type { CreateUserRoleRequest } from "../domain/request/create-user-roles.request";
-import type { AddUserRolesRequest } from "../domain/request/add-user-role.request";
-
 import { UserDTO } from "../domain/users.dto.js";
 import {
 	BadRequestException400,
@@ -21,9 +6,26 @@ import {
 	NotFoundException404,
 	UserNotFoundException,
 } from "../../../Domain/core/errors.factory.js";
-import { GetAllUsersRequest } from "../domain/request/get-all-users.request";
 
-interface Dependences {
+import type { Core } from "../../../Domain/core/Core";
+import type { ILogger } from "../../../Domain/core/ILogger";
+import type { IPasswordHandler } from "../../../Domain/business/IPasswordHandler";
+import type { BusinessHandler } from "../../../Domain/business/Business";
+import type { User } from "../domain/entities/users.entity.js";
+import type { Role } from "../domain/entities/roles.entity";
+import type { UserNonSensitiveData } from "../domain/IUser";
+import type { IUsersBusiness } from "../domain/IUsersBusiness";
+import type {
+	CreateUserRequest,
+	GetOneUserRequest,
+	GetAllUsersRequest,
+	UpdateUserRequest,
+	CreateUserRoleRequest,
+	AddUserRolesRequest,
+	DeleteUserRequest,
+} from "../domain/Request";
+
+interface Dependences extends Core {
 	usersRepository: typeof User;
 	rolesRepository: typeof Role;
 	passwordHandler: IPasswordHandler;
@@ -63,7 +65,7 @@ export class UsersBusiness implements IUsersBusiness {
 		return new UserDTO(newUser);
 	};
 
-	public readonly addUserRole: BusinessHandler<AddUserRolesRequest, UserDTO> = async ({ params, body }) => {
+	public readonly rolesToUser: BusinessHandler<AddUserRolesRequest, UserDTO> = async ({ params, body }) => {
 		const roles = await this.#rolesRepository.find({ where: { id: In(body.roles) } });
 		const user = await this.#usersRepository.findOneBy({ uuid: params.uuid });
 		if (user === null) throw new NotFoundException404(`User ${params.uuid} not found`);

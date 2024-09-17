@@ -1,3 +1,4 @@
+import { endpoints } from "../domain/endpoints.enum.js";
 import type { RequestHandler, Router } from "express";
 import type { IUsersController } from "../domain/IUsersController";
 
@@ -10,6 +11,16 @@ export class UsersRouterExpress {
 	constructor(d: Readonly<Dependences>) {
 		this.#controller = d.controller;
 	}
+
+	public readonly getRouter = (router: Router): Router =>
+		router
+			.post(endpoints.CREATE_ROLE, this.#createRole)
+			.patch(endpoints.ROLES_TO_USER, this.#rolesToUser)
+			.post(endpoints.CREATE_ROLE, this.#createUser)
+			.get(endpoints.USERS, this.#getAllUsers)
+			.get(endpoints.USERS_UUID, this.#getOne)
+			.patch(endpoints.USERS_UUID, this.#patchUser)
+			.delete(endpoints.USERS_UUID, this.#deleteUser);
 
 	readonly #getOne: RequestHandler = async (req, res) => {
 		const user = await this.#controller.getOneUser(req);
@@ -36,8 +47,8 @@ export class UsersRouterExpress {
 		return res.status(user.status.code).json(user);
 	};
 
-	readonly #addUserRole: RequestHandler = async (req, res) => {
-		const response = await this.#controller.addUserRole(req);
+	readonly #rolesToUser: RequestHandler = async (req, res) => {
+		const response = await this.#controller.rolesToUser(req);
 		return res.status(response.status.code).json(response);
 	};
 
@@ -45,14 +56,4 @@ export class UsersRouterExpress {
 		const user = await this.#controller.deleteUser(req);
 		return res.status(user.status.code).json(user);
 	};
-
-	public readonly getRouter = (router: Router): Router =>
-		router
-			.post("/users/create-role", this.#createRole)
-			.patch("/users/:uuid/role-to-user", this.#addUserRole)
-			.post("/users", this.#createUser)
-			.get("/users", this.#getAllUsers)
-			.get("/users/:uuid", this.#getOne)
-			.patch("/users/:uuid", this.#patchUser)
-			.delete("/users/:uuid", this.#deleteUser);
 }

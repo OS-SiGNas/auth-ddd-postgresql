@@ -1,5 +1,5 @@
 import { _LoggerConsole } from "./_logger-console.js";
-import { bold, cyan, yellow } from "./colors.utils.js";
+import { bold, yellow, blue } from "./colors.utils.js";
 
 import type { ILogger } from "../../../Domain/core/ILogger.js";
 
@@ -8,7 +8,7 @@ export class Logger implements ILogger {
 	readonly #logger = _LoggerConsole.getInstance();
 
 	constructor(name: string) {
-		this.#name = `[${bold(cyan(name))}]: `;
+		this.#name = `[${bold(blue(name))}]: `;
 	}
 
 	public readonly info = (text: string): void => {

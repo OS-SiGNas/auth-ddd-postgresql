@@ -1,28 +1,30 @@
 import { z } from "zod";
 import { RoleName } from "./role-name.enum.js";
+
 import type { Parser } from "../../../Domain/business/Business";
 import type { IUsersRequestDTO } from "./IUsersRequestDTO";
-import type { CreateUserRequest } from "./request/create-user.request";
-import type { DeleteUserRequest } from "./request/delete-user.request";
-import type { GetOneUserRequest } from "./request/get-one-user.request";
-import type { UpdateUserRequest } from "./request/update-user.request";
-import type { GetAllUsersRequest } from "./request/get-all-users.request";
-import type { AddUserRolesRequest } from "./request/add-user-role.request";
-import type { CreateUserRoleRequest } from "./request/create-user-roles.request";
+import type {
+	AddUserRolesRequest,
+	CreateUserRequest,
+	CreateUserRoleRequest,
+	DeleteUserRequest,
+	GetAllUsersRequest,
+	GetOneUserRequest,
+	UpdateUserRequest,
+} from "./Request.js";
 
-const { ADMIN, MODERATOR, STANDARD, TESTER } = RoleName;
+// .regex(/[A-Z]/, "La contraseña debe incluir al menos una mayúscula")
+// .regex(/[!@#$%^&*()_+{}[\]:;<>,.?~-]/, "La contraseña debe incluir al menos un carácter especial"),
+
 export class UsersRequestDTO implements IUsersRequestDTO {
-	static defaults = {
+	static readonly defaults = {
 		uuid: z.string().uuid(),
 		token: z.string().regex(/^[A-Za-z0-9\-_.]+\.[A-Za-z0-9\-_.]+\.[A-Za-z0-9\-_.]+$/),
-		createdAt: z.date(),
 		isActive: z.boolean(),
 		name: z.string().min(8).max(32),
 		email: z.string().email(),
 		password: z.string().min(10).max(64),
-		// .regex(/[A-Z]/, "La contraseña debe incluir al menos una mayúscula")
-		// .regex(/[!@#$%^&*()_+{}[\]:;<>,.?~-]/, "La contraseña debe incluir al menos un carácter especial"),
-		role: z.enum([ADMIN, STANDARD, MODERATOR, TESTER]),
+		role: z.enum([RoleName.ADMIN, RoleName.STANDARD, RoleName.MODERATOR, RoleName.TESTER]),
 		roles: z.array(z.number()),
 		hash: z.string().uuid(),
 	} as const;
@@ -52,10 +54,10 @@ export class UsersRequestDTO implements IUsersRequestDTO {
 	};
 
 	public readonly updateUser: Parser<UpdateUserRequest> = async (request) => {
-		const { uuid, createdAt, email, isActive, name } = UsersRequestDTO.defaults;
+		const { uuid, email, isActive, name } = UsersRequestDTO.defaults;
 		const query = z.object({}).strict();
 		const params = z.object({ uuid }).strict();
-		const body = z.object({ uuid, createdAt, email, isActive, name }).partial().strict();
+		const body = z.object({ uuid, email, isActive, name }).partial().strict();
 		const schema = z.object({ query, params, body });
 		return await schema.parseAsync(request);
 	};
@@ -69,7 +71,7 @@ export class UsersRequestDTO implements IUsersRequestDTO {
 		return await schema.parseAsync(request);
 	};
 
-	public readonly addUserRoles: Parser<AddUserRolesRequest> = async (request) => {
+	public readonly rolesToUser: Parser<AddUserRolesRequest> = async (request) => {
 		const { uuid, roles } = UsersRequestDTO.defaults;
 		const query = z.object({}).strict();
 		const params = z.object({ uuid }).strict();

@@ -1,5 +1,5 @@
 import { postgresServer } from "./database/make.js";
-import { httpServer } from "./http/make.js";
+import { httpServer } from "./http-server/make.js";
 
 import type { IServer } from "../Domain/IServer";
 

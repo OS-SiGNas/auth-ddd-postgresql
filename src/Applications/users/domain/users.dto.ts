@@ -1,7 +1,7 @@
 import type { ISession } from "../../../Domain/business/ISession";
 import type { IUser, UserNonSensitiveData } from "../domain/IUser";
 import type { Role } from "./entities/roles.entity";
-import { RoleName } from "./role-name.enum";
+import type { RoleName } from "./role-name.enum";
 
 export interface UserSessionDTO {
 	session: ISession;

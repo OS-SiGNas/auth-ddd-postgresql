@@ -1,25 +1,26 @@
 import { randomBytes } from "node:crypto";
 import { UserDTO } from "../../users/domain/users.dto.js";
+import { sendActivateAccountEmail } from "./notifications/email.notification.js";
 // Errors
 import { DuplicateAccountException, ForbiddenException403, UserNotFoundException } from "../../../Domain/core/errors.factory.js";
 
+import type { Core } from "../../../Domain/core/Core.js";
 import type { ILogger } from "../../../Domain/core/ILogger";
 import type { BusinessHandler } from "../../../Domain/business/Business";
 import type { IStorageHandler } from "../../../Domain/IStorageHandler";
 import type { ITokenHandler } from "../../../Domain/business/ITokenHandler";
 import type { IPasswordHandler } from "../../../Domain/business/IPasswordHandler";
-
+import type { IAuthBusiness } from "../domain/IAuthBusiness.js";
 import type { User } from "../../users/domain/entities/users.entity";
+import type {
+	LoginRequest,
+	RegisterRequest,
+	ActivateAccountRequest,
+	ForgotPasswordRequest,
+	ChangePasswordRequest,
+} from "../domain/Request";
 
-import type { IAuthBusiness } from "../domain/IAuthBusiness";
-import type { LoginRequest } from "../domain/request/login.request";
-import type { RegisterRequest } from "../domain/request/register.request";
-import type { ForgotPasswordRequest } from "../domain/request/forgot-password.request";
-import type { ChangePasswordRequest } from "../domain/request/change-password.request";
-import type { AccountActivationRequest } from "../domain/request/account-activation.request";
-import type { ActivateAccountRequest } from "../domain/request/activate-account.request";
-
-interface Dependences {
+interface Dependences extends Core {
 	repository: typeof User;
 	logger: ILogger;
 	passwordHandler: IPasswordHandler;
@@ -48,16 +49,26 @@ export class AuthBusiness implements IAuthBusiness {
 			relations: ["roles"],
 			select: { roles: { name: true } },
 		});
+
 		if (user === undefined) return null;
 		const isMatch = await this.#passwordHandler.comparePassword(password, user.password);
 		if (isMatch === false) return null;
-		if (user.isActive === false) throw new ForbiddenException403("Inactive account");
+		if (user.isActive === false) return this.#activateAccount(email);
 		return new UserDTO(user);
+	};
+
+	readonly #activateAccount = async (email: string): Promise<never> => {
+		this.#storage.delete(email);
+		const token = await this.#activateAccountTokenHandler.generateJWT({ email });
+		this.#storage.set(email, token);
+		void sendActivateAccountEmail({ emailReceiver: email, token });
+		throw new ForbiddenException403("Inactive account, Please check your email for the activation link");
 	};
 
 	public readonly getUserByUuid: BusinessHandler<string, UserDTO> = async (uuid: string) => {
 		const user = await this.#repository.findOne({ where: { uuid }, select: { roles: true } });
 		if (user === null) throw new UserNotFoundException(uuid);
+		this.#logger.debug(user);
 		return new UserDTO(user);
 	};
 
@@ -70,20 +81,9 @@ export class AuthBusiness implements IAuthBusiness {
 		return new UserDTO(user);
 	};
 
-	public readonly activateAccount: BusinessHandler<ActivateAccountRequest["body"], boolean> = async ({ email }) => {
-		const user = await this.#repository.findOne({ where: { email }, select: { isActive: true } });
-		this.#logger.debug(user);
-		if (user === null) return false;
-		this.#storage.delete(email);
-		const token = await this.#activateAccountTokenHandler.generateJWT({ email });
-		this.#storage.set(email, token);
-		this.#logger.info(`New activate account url:
-			http://localhost:4444/auth/account-activation/${token}`);
-		return true;
-	};
-
-	public readonly accountActivation: BusinessHandler<AccountActivationRequest["params"], boolean> = async ({ token }) => {
+	public readonly activateAccount: BusinessHandler<ActivateAccountRequest["params"], boolean> = async ({ token }) => {
 		const { email } = await this.#activateAccountTokenHandler.verifyJWT(token);
+		this.#logger.info("Account activation attempt");
 		const user = await this.#repository.findOneBy({ email });
 		if (user === null) return false;
 		const storedToken = await this.#storage.get<string>(user.email);

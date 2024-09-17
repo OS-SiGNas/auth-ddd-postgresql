@@ -1,4 +1,4 @@
-import { secrets } from "../../Domain/System.js";
+import { secrets, isDebug } from "../../Domain/System.js";
 import { passwordHandler } from "../shared/password-handler/make.js";
 import { Logger } from "../shared/logger-handler/logger.js";
 import { errorHandler } from "../shared/error-handler/make.js";
@@ -14,31 +14,36 @@ import { Role } from "./domain/entities/roles.entity.js";
 import type { UsersRouterExpress } from "./infrastructure/users-express.router";
 import type { UsersRouterFastify } from "./infrastructure/users-fastify.router";
 
-const { HTTP_SERVICE } = secrets;
+// Error
+import { ModuleException } from "../../Domain/core/errors.factory.js";
+
 const business = new UsersBusiness({
+	logger: new Logger("UsersBusiness"),
 	usersRepository: User,
 	rolesRepository: Role,
-	logger: new Logger("UsersBusiness"),
+	isDebug,
 	passwordHandler,
 });
 
 const controller = new UsersController({
+	logger: new Logger("UsersController"),
+	userRequestDTO: new UsersRequestDTO(),
+	isDebug,
 	business,
 	errorHandler,
-	logger: new Logger("UsersController"),
 	responseHandler,
 	sessionHandler,
-	userRequestDTO: new UsersRequestDTO(),
 });
 
-export const usersExpress = await (async (): Promise<UsersRouterExpress | undefined> => {
-	if (HTTP_SERVICE !== "express") return undefined;
-	const { UsersRouterExpress } = await import("./infrastructure/users-express.router.js");
-	return new UsersRouterExpress({ controller });
-})();
+export const getUsersRouter = async <T extends UsersRouterExpress | UsersRouterFastify>(): Promise<T> => {
+	if (secrets.HTTP_SERVICE === "express") {
+		const { UsersRouterExpress } = await import("./infrastructure/users-express.router.js");
+		return new UsersRouterExpress({ controller }) as T;
+	}
+	if (secrets.HTTP_SERVICE === "fastify") {
+		const { UsersRouterFastify } = await import("./infrastructure/users-fastify.router.js");
+		return new UsersRouterFastify({ controller }) as T;
+	}
 
-export const usersFastify = await (async (): Promise<UsersRouterFastify | undefined> => {
-	if (HTTP_SERVICE !== "fastify") return undefined;
-	const { UsersRouterFastify } = await import("./infrastructure/users-fastify.router.js");
-	return new UsersRouterFastify({ controller });
-})();
+	throw new ModuleException("Users module", 500);
+};

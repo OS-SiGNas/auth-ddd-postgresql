@@ -4,10 +4,11 @@ export type Environment = "development" | "production" | "test";
 export type HttpService = "express" | "fastify";
 interface Secrets {
 	NODE_ENV: Environment;
+	THIS_URL: string;
 	HTTP_SERVICE: HttpService;
-	PORT: string;
+	PORT: number;
 	PG_HOST: string;
-	PG_PORT: string;
+	PG_PORT: number;
 	PG_USERNAME: string;
 	PG_PASSWORD: string;
 	PG_DATABASE: string;
@@ -27,7 +28,11 @@ class System {
 	}
 
 	readonly #logger = new Logger(this.constructor.name);
-	readonly #error = (variable: keyof Secrets): Error => new Error(`💩 Environment Variable: \x1B[31m${variable}\x1B[39m is undefined`);
+	readonly #error = (variable: keyof Secrets): Error => {
+		this.#logger.error(`x ${variable}`);
+		return new Error(`💩 Environment Variable: \x1B[31m${variable}\x1B[39m is undefined`);
+	};
+
 	readonly #getSecretFromDotEnv = (variable: keyof Secrets): Readonly<string> => {
 		const target = process.env[variable];
 		if (target === undefined) throw this.#error(variable);
@@ -36,12 +41,14 @@ class System {
 	};
 
 	public get secrets(): Readonly<Secrets> {
+		this.#logger.info("Loading secrets");
 		return {
 			NODE_ENV: this.#getSecretFromDotEnv("NODE_ENV") as Environment,
+			THIS_URL: this.#getSecretFromDotEnv("THIS_URL"),
 			HTTP_SERVICE: this.#getSecretFromDotEnv("HTTP_SERVICE") as HttpService,
-			PORT: this.#getSecretFromDotEnv("PORT"),
+			PORT: +this.#getSecretFromDotEnv("PORT"),
 			PG_HOST: this.#getSecretFromDotEnv("PG_HOST"),
-			PG_PORT: this.#getSecretFromDotEnv("PG_PORT"),
+			PG_PORT: +this.#getSecretFromDotEnv("PG_PORT"),
 			PG_USERNAME: this.#getSecretFromDotEnv("PG_USERNAME"),
 			PG_PASSWORD: this.#getSecretFromDotEnv("PG_PASSWORD"),
 			PG_DATABASE: this.#getSecretFromDotEnv("PG_DATABASE"),
@@ -65,6 +72,10 @@ class System {
 
 		return await Promise.resolve(this.#cacheSecrets);
 	};
+
+	get isDebug(): boolean {
+		return secrets.NODE_ENV !== "production";
+	}
 }
 
-export const { secrets, getAsyncSecrets } = System.instance;
+export const { secrets, getAsyncSecrets, isDebug } = System.instance;

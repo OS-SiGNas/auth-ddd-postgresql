@@ -35,18 +35,17 @@ export class ExpressServer implements IServer {
 
 	public readonly start = async (): Promise<void> => {
 		this.#httpServer = this.#app.listen(this.#port, () => {
-			this.#logger.info(`Running in: http://127.0.0.1:${this.#port}`);
-			this.#logger.info(this.#message);
+			this.#logger.info(`Running in: http://127.0.0.1:${this.#port} ${this.#message}`);
 		});
 	};
 
 	public readonly stop = (): void => {
-		this.#logger.info(`STOP`);
+		this.#logger.info(`Stopping`);
 		this.#httpServer?.close();
 	};
 
 	public readonly restart = async (): Promise<void> => {
-		this.#logger.info("RESTARTING");
+		this.#logger.info("Restarting");
 		this.#httpServer?.close();
 		await this.start();
 	};
