@@ -1,4 +1,3 @@
-// Errors
 import { BadRequestException400, ForbiddenException403 } from "../../../Domain/core/errors.factory.js";
 import { RoleName } from "../../users/domain/role-name.enum.js";
 

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { Logger } from "../../../Applications/shared/logger-handler/logger.js";
+import { Logger } from "../../../Applications/shared/logger-handler/make.js";
 
 import type { RequestHandler } from "express";
 
@@ -12,7 +12,7 @@ export const requestLogger: RequestHandler = ({ headers, ip, method, url }, res,
 	const start = Date.now();
 	res.on("finish", () => {
 		const duration = Date.now() - start;
-		httpLogger.info(`[ ${ip} ] (${method}) '${headers.uuid}' - ${url} - ${duration}ms`);
+		httpLogger.info(`[ ${ip} ] (${method}) '${uuid}' - ${url} - ${res.statusCode} - ${duration}ms`);
 	});
 
 	return next();

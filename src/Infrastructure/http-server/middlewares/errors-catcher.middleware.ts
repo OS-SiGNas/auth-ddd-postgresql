@@ -1,15 +1,16 @@
 import { errorHandler } from "../../../Applications/shared/error-handler/make.js";
-import { Logger } from "../../../Applications/shared/logger-handler/logger.js";
+import { Logger } from "../../../Applications/shared/logger-handler/make.js";
 
 import type { ErrorRequestHandler } from "express";
 
-const errorCatcherLogger = new Logger("ErrorCatcherMiddleware");
+const name = "ErrorCatcherMiddleware";
+const errorCatcherLogger = new Logger(name);
 
-export const errorCatcher: ErrorRequestHandler = (error, req, res, _next) => {
-	errorCatcherLogger.info(`Catched error in ${req.url} id: ${req.headers.uuid}`);
-	errorHandler.catch("ErrorHandlerMiddleware", error);
+export const errorsCatcher: ErrorRequestHandler = (error, req, res, next) => {
+	void errorCatcherLogger.info(`Catched error in ${req.url} id: ${req.headers.uuid}`);
+	void errorHandler.catch({ name, error });
 	if (error instanceof SyntaxError) return res.status(400).send(error.message);
-	errorCatcherLogger.debug(`undlandled error in request: ${req.originalUrl}`);
-	return res.status(500).send("something has gone wrong, we are working to resolve it");
-	_next();
+	void errorCatcherLogger.warn(`undlandled error in request: ${req.originalUrl}`);
+	res.status(500).send("something has gone wrong, we are working to resolve it");
+	return next();
 };

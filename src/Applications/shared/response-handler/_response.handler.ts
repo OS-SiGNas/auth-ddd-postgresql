@@ -18,17 +18,17 @@ export class _ResponseHandler implements IResponseHandler {
 		this.#status
 			.set(200, "Success ok")
 			.set(201, "Created")
-			.set(400, "⚠ Bad Request ⚠️")
+			.set(400, "⚠ Bad request ⚠️")
 			.set(401, "🔒 Unauthorized 🔒")
-			.set(402, "Payment Required 💳")
+			.set(402, "Payment required 💳")
 			.set(403, "🔒 Forbidden 🔒")
-			.set(404, "Resourse Not Found")
+			.set(404, "Resourse not found")
 			.set(409, "Conflict with the current state of the target resource")
-			.set(422, "Unprocessable Content, fix request and try again")
-			.set(451, "Unavailable For Legal Reasons")
-			.set(500, "Internal Server Error")
+			.set(422, "Unprocessable content, fix request and try again")
+			.set(451, "Unavailable for legal reasons")
+			.set(500, "Internal server error")
 			.set(503, "service unavailable ⏳ try later")
-			.set(504, "Gateway Timeout ⌛");
+			.set(504, "Gateway timeout ⌛");
 	}
 
 	// public readonly eventResponse: EventResponse;
@@ -50,11 +50,11 @@ export class _ResponseHandler implements IResponseHandler {
 
 	readonly #unprocessableContentErrors = <E>({ issues }: ZodError): IResponse<E> => ({
 		status: { code: 422, message: this.#getStatusMessage(422) },
-		error: issues.map((issue) => ({ path: issue.path.join(": "), message: issue.message })),
+		error: issues.map(({ path, message }) => ({ path: path.join(": "), message })),
 	});
 
-	readonly #domainErrors = <E>({ statusCode, name, message }: DomainError): IResponse<E> => ({
+	readonly #domainErrors = <E>({ statusCode, message }: DomainError): IResponse<E> => ({
 		status: { code: statusCode, message: this.#getStatusMessage(statusCode) },
-		error: `${name}: ${message}`,
+		error: message,
 	});
 }

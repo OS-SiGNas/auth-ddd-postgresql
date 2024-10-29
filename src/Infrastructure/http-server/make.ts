@@ -1,11 +1,11 @@
-import { type Environment, secrets, isDebug } from "../../Domain/System.js";
-import { Logger } from "../../Applications/shared/logger-handler/logger.js";
+import { type Environment, SECRETS, isDebug } from "../../Domain/System.js";
+import { Logger } from "../../Applications/shared/logger-handler/make.js";
 import { ModuleException } from "../../Domain/core/errors.factory.js";
 
 import type { IServer } from "../../Domain/IServer";
 import type { AuthRouterExpress } from "../../Applications/auth/infrastructure/auth-express.router.js";
-import type { UsersRouterExpress } from "../../Applications/users/infrastructure/users-express.router.js";
 import type { AuthRouterFastify } from "../../Applications/auth/infrastructure/auth-fastify.router.js";
+import type { UsersRouterExpress } from "../../Applications/users/infrastructure/users-express.router.js";
 import type { UsersRouterFastify } from "../../Applications/users/infrastructure/users-fastify.router.js";
 
 const getHttpServerInstance = async (): Promise<IServer> => {
@@ -17,7 +17,7 @@ const getHttpServerInstance = async (): Promise<IServer> => {
 		production: "🔥 ON 🔥",
 	} as const;
 
-	if (secrets.HTTP_SERVICE === "fastify") {
+	if (SECRETS.HTTP_SERVICE === "fastify") {
 		const [{ default: Fastify }, { FastifyServer }, { getAuthRouter }, { getUsersRouter }] = await Promise.all([
 			import("fastify"),
 			import("./fastify.server.js"),
@@ -28,15 +28,15 @@ const getHttpServerInstance = async (): Promise<IServer> => {
 		const [auth, users] = await Promise.all([getAuthRouter<AuthRouterFastify>(), getUsersRouter<UsersRouterFastify>()]);
 		_instance = new FastifyServer({
 			app: Fastify({ logger: isDebug }),
-			port: +secrets.PORT,
-			message: message[secrets.NODE_ENV],
+			port: +SECRETS.PORT,
+			message: message[SECRETS.NODE_ENV],
 			applications: [...auth.getRoutes(), ...users.getRoutes()],
 			logger: new Logger("FastifyServer"),
 			isDebug,
 		});
 	}
 
-	if (secrets.HTTP_SERVICE === "express") {
+	if (SECRETS.HTTP_SERVICE === "express") {
 		const [{ default: Express, Router }, { ExpressServer }, { globalMiddlewares, lastMiddlewares }, { getAuthRouter }, { getUsersRouter }] =
 			await Promise.all([
 				import("express"),
@@ -50,8 +50,8 @@ const getHttpServerInstance = async (): Promise<IServer> => {
 		const [auth, users] = await Promise.all([getAuthRouter<AuthRouterExpress>(), getUsersRouter<UsersRouterExpress>()]);
 		_instance = new ExpressServer({
 			app: Express(),
-			port: +secrets.PORT,
-			message: message[secrets.NODE_ENV],
+			port: +SECRETS.PORT,
+			message: message[SECRETS.NODE_ENV],
 			globalMiddlewares,
 			applications: [auth.getRouter(router), users.getRouter(router)],
 			lastMiddlewares,

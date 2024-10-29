@@ -1,7 +1,7 @@
 import { RoleName } from "../domain/role-name.enum.js";
 import { HttpStatus } from "../../../Domain/core/http-status.enum.js";
 // Error
-import { BadRequestException400 } from "../../../Domain/core/errors.factory.js";
+import { UserNotFoundException } from "../../../Domain/core/errors.factory.js";
 
 import type { ILogger } from "../../../Domain/core/ILogger";
 import type { ControllerHandler, ControllersDependences } from "../../../Domain/business/Business";
@@ -96,12 +96,13 @@ export class UsersController implements IUsersController {
 
 	public readonly patchUser: ControllerHandler<string> = async (request) => {
 		try {
-			await this.#sessionHandler.validateSession(RoleName.ADMIN, request.headers.authorization);
+			const { roles, userUuid } = await this.#sessionHandler.validateSession(RoleName.STANDARD, request.headers.authorization);
 			const payload = await this.#requestDTO.updateUser(request as unknown as UpdateUserRequest);
+			if (userUuid !== payload.params.uuid && !roles.includes(RoleName.ADMIN)) throw new UserNotFoundException(payload.params.uuid);
 			const user = await this.#business.updateUser(payload);
 			return user
 				? this.#response({ data: `User ${payload.params.uuid} is updated` })
-				: this.#response({ error: new BadRequestException400("Can't update user: " + payload.params.uuid) });
+				: this.#response({ error: new UserNotFoundException(payload.params.uuid) });
 		} catch (error) {
 			this.#errorHandler.catch({
 				name: this.#name,

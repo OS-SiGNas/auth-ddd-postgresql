@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 // Global Domain
-import { isDebug, secrets } from "../../Domain/System.js";
+import { isDebug, SECRETS } from "../../Domain/System.js";
 import { ModuleException } from "../../Domain/core/errors.factory.js";
 // Application users
 import { User } from "../users/domain/entities/users.entity.js";
 // Applications shared
-import { Logger } from "../shared/logger-handler/logger.js";
+import { Logger } from "../shared/logger-handler/make.js";
 import { passwordHandler } from "../shared/password-handler/make.js";
 import { sessionHandler } from "../shared/session-handler/make.js";
 import { responseHandler } from "../shared/response-handler/make.js";
@@ -20,49 +20,51 @@ import { AuthController } from "./infrastructure/auth.controller.js";
 import type { AuthRouterExpress } from "./infrastructure/auth-express.router";
 import type { AuthRouterFastify } from "./infrastructure/auth-fastify.router";
 
-const { NODE_ENV, JWT_AA_EXPIRED_TIME, JWT_AA_SECRET_KEY } = secrets;
-
-const storage = new StorageHandler({
-	cacheExpiredTime: NODE_ENV === "production" ? 3600 * 1000 : 360 * 1000,
-	keyExpiredTime: NODE_ENV === "production" ? 300 * 1000 : 120 * 1000,
-	logger: new Logger("AuthBusinessStorage"),
-	isDebug,
-});
-
-const activateAccountTokenHandler = new TokenHandler<{ email: string }>({
-	logger: new Logger("ActivateAccountTokenHandler"),
-	isDebug,
-	jwtSecretKey: JWT_AA_SECRET_KEY,
-	jwtExpiredTime: JWT_AA_EXPIRED_TIME,
-	sign: jwt.sign,
-	verify: jwt.verify,
-});
-
-const business = new AuthBusiness({
-	logger: new Logger("AuthBusiness"),
-	isDebug,
-	repository: User,
-	passwordHandler,
-	storage,
-	activateAccountTokenHandler,
-});
-
-const controller = new AuthController({
-	logger: new Logger("AuthController"),
-	isDebug,
-	errorHandler,
-	business,
-	sessionHandler,
-	responseHandler,
-	authRequestDTO: new AuthRequestDTO(),
-});
-
 export const getAuthRouter = async <T extends AuthRouterExpress | AuthRouterFastify>(): Promise<T> => {
-	if (secrets.HTTP_SERVICE === "express") {
+	const HOR = 3600000;
+	const MIN = 60000;
+
+	const storage = new StorageHandler({
+		cacheExpiredTime: isDebug ? 0.5 * HOR : 6 * HOR,
+		keyExpiredTime: isDebug ? 5 * MIN : 10 * MIN,
+		logger: new Logger("AuthBusinessStorage"),
+		isDebug,
+	});
+
+	const activateAccountTokenHandler = new TokenHandler<{ email: string }>({
+		logger: new Logger("ActivateAccountTokenHandler"),
+		jwtExpiredTime: SECRETS.JWT_AA_EXPIRED_TIME,
+		jwtSecretKey: SECRETS.JWT_AA_SECRET_KEY,
+		verify: jwt.verify,
+		sign: jwt.sign,
+		isDebug,
+	});
+
+	const business = new AuthBusiness({
+		logger: new Logger("AuthBusiness"),
+		activateAccountTokenHandler,
+		repository: User,
+		passwordHandler,
+		storage,
+		isDebug,
+	});
+
+	const controller = new AuthController({
+		logger: new Logger("AuthController"),
+		authRequestDTO: new AuthRequestDTO(),
+		responseHandler,
+		sessionHandler,
+		errorHandler,
+		business,
+		isDebug,
+	});
+
+	if (SECRETS.HTTP_SERVICE === "express") {
 		const { AuthRouterExpress } = await import("./infrastructure/auth-express.router.js");
 		return new AuthRouterExpress({ controller }) as T;
 	}
-	if (secrets.HTTP_SERVICE === "fastify") {
+
+	if (SECRETS.HTTP_SERVICE === "fastify") {
 		const { AuthRouterFastify } = await import("./infrastructure/auth-fastify.router.js");
 		return new AuthRouterFastify({ controller }) as T;
 	}

@@ -11,7 +11,7 @@ import type {
 	GetAllUsersRequest,
 	GetOneUserRequest,
 	UpdateUserRequest,
-} from "./Request.js";
+} from "./Request";
 
 // .regex(/[A-Z]/, "La contraseña debe incluir al menos una mayúscula")
 // .regex(/[!@#$%^&*()_+{}[\]:;<>,.?~-]/, "La contraseña debe incluir al menos un carácter especial"),
@@ -21,8 +21,13 @@ export class UsersRequestDTO implements IUsersRequestDTO {
 		uuid: z.string().uuid(),
 		token: z.string().regex(/^[A-Za-z0-9\-_.]+\.[A-Za-z0-9\-_.]+\.[A-Za-z0-9\-_.]+$/),
 		isActive: z.boolean(),
-		name: z.string().min(8).max(32),
-		email: z.string().email(),
+		name: z
+			.string()
+			.min(8)
+			.max(32)
+			// .regex(/^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]+$/, "Invalid name")
+			.toLowerCase(),
+		email: z.string().email().toLowerCase(),
 		password: z.string().min(10).max(64),
 		role: z.enum([RoleName.ADMIN, RoleName.STANDARD, RoleName.MODERATOR, RoleName.TESTER]),
 		roles: z.array(z.number()),

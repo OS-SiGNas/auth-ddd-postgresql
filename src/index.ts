@@ -1,6 +1,7 @@
 import "reflect-metadata";
+import { exit } from "node:process";
 import { servers } from "./Infrastructure/make.js";
-import { Logger } from "./Applications/shared/logger-handler/logger.js";
+import { Logger } from "./Applications/shared/logger-handler/make.js";
 
 import type { IServer } from "./Domain/IServer";
 
@@ -10,9 +11,11 @@ void (async (servers: IServer[]): Promise<void> => {
 
 	try {
 		for (const server of servers) await server.start();
+		logger.info("All servers started");
 	} catch (error) {
-		logger.error(error);
+		logger.error("Application crashed");
+		console.trace(error);
 		for (const server of servers) server.stop();
-		Promise.reject(process.exit(0));
+		void exit(1);
 	}
 })(servers);

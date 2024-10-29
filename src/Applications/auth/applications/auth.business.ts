@@ -49,11 +49,19 @@ export class AuthBusiness implements IAuthBusiness {
 			relations: ["roles"],
 			select: { roles: { name: true } },
 		});
-
 		if (user === undefined) return null;
 		const isMatch = await this.#passwordHandler.comparePassword(password, user.password);
 		if (isMatch === false) return null;
 		if (user.isActive === false) return this.#activateAccount(email);
+		return new UserDTO(user);
+	};
+
+	public readonly register: BusinessHandler<RegisterRequest["body"], UserDTO> = async ({ email, name, password }) => {
+		const exists = await this.#repository.exists({ where: { email } });
+		if (exists) throw new DuplicateAccountException(email);
+		const encryptedPassword = await this.#passwordHandler.encryptPassword(password);
+		const schema = this.#repository.create({ email, name, password: encryptedPassword });
+		const user = await this.#repository.save(schema);
 		return new UserDTO(user);
 	};
 
@@ -68,16 +76,6 @@ export class AuthBusiness implements IAuthBusiness {
 	public readonly getUserByUuid: BusinessHandler<string, UserDTO> = async (uuid: string) => {
 		const user = await this.#repository.findOne({ where: { uuid }, select: { roles: true } });
 		if (user === null) throw new UserNotFoundException(uuid);
-		this.#logger.debug(user);
-		return new UserDTO(user);
-	};
-
-	public readonly register: BusinessHandler<RegisterRequest["body"], UserDTO> = async ({ email, name, password }) => {
-		const exists = await this.#repository.exists({ where: { email } });
-		if (exists) throw new DuplicateAccountException(email);
-		const encryptedPassword = await this.#passwordHandler.encryptPassword(password);
-		const schema = this.#repository.create({ email, name, password: encryptedPassword });
-		const user = await this.#repository.save(schema);
 		return new UserDTO(user);
 	};
 

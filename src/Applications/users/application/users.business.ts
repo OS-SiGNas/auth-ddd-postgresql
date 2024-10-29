@@ -58,7 +58,6 @@ export class UsersBusiness implements IUsersBusiness {
 		this.#logger.info(`Creating user: ${user.email} with roles: ${user.roles}`);
 		user.password = await this.#passwordHandler.encryptPassword(user.password);
 		const roles = await this.#rolesRepository.find({ where: { name: In(user.roles) } });
-		this.#logger.debug(roles);
 		if (roles.length === 0) throw new BadRequestException400("These roles cannot be assigned");
 		const schema = this.#usersRepository.create({ ...user, roles, isActive: true });
 		const newUser = await this.#usersRepository.save(schema);
@@ -76,32 +75,32 @@ export class UsersBusiness implements IUsersBusiness {
 
 	public readonly getOneUser: BusinessHandler<GetOneUserRequest["params"], UserDTO> = async ({ uuid }) => {
 		const [user] = await this.#usersRepository.find({
-			where: { uuid },
 			select: { uuid: true, name: true, email: true, createdAt: true },
 			relations: ["roles"],
+			where: { uuid },
 		});
+
 		if (user === undefined) throw new UserNotFoundException(uuid);
 		return new UserDTO(user);
 	};
 
 	public readonly getAllUsers: BusinessHandler<GetAllUsersRequest["query"], UserNonSensitiveData[]> = async () => {
 		const users = await this.#usersRepository.find({
-			where: {},
 			select: { uuid: true, name: true, email: true, createdAt: true, roles: { name: true } },
 			relations: { roles: true },
+			where: {},
 		});
+
 		return users.map((user) => new UserDTO(user).userNonSensitiveDTO);
 	};
 
 	public readonly updateUser: BusinessHandler<UpdateUserRequest, boolean> = async ({ params, body }) => {
 		const updated = await this.#usersRepository.update({ uuid: params.uuid }, { ...body });
-		this.#logger.debug(updated);
 		return updated.affected !== undefined;
 	};
 
 	public readonly deleteUser = async ({ uuid }: DeleteUserRequest["params"]): Promise<boolean> => {
 		const deleted = await this.#usersRepository.delete({ uuid });
-		this.#logger.debug(deleted);
 		return deleted.affected !== undefined;
 	};
 }

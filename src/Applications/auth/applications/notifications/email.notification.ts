@@ -1,17 +1,17 @@
 import { emailSender } from "../../../../Infrastructure/proxy/email-proxy/make.js";
-import { secrets } from "../../../../Domain/System.js";
+import { SECRETS } from "../../../../Domain/System.js";
 
 interface EmailValitadeAccountArgs {
 	token: string;
 	emailReceiver: string;
 }
 
-export const sendActivateAccountEmail = async ({ token, emailReceiver }: EmailValitadeAccountArgs): Promise<void> => {
-	await emailSender.sendEmail({
+export const sendActivateAccountEmail = ({ token, emailReceiver }: EmailValitadeAccountArgs): void => {
+	void emailSender.sendEmail({
 		from: "signas13@gmail.com",
 		subject: "Activate Account",
 		to: emailReceiver,
-		html: `<a href="${secrets.THIS_URL}/auth/activate-account/${token}"> ACTIVATE ACCOUNT </a>`,
+		html: `<a href="${SECRETS.THIS_URL}/auth/activate-account/${token}"> ACTIVATE ACCOUNT </a>`,
 	});
 };
 
@@ -20,8 +20,8 @@ interface ForgotPasswordEmailArgs {
 	emailReceiver: string;
 }
 
-export const sendForgotPasswordEmail = async ({ hash, emailReceiver }: ForgotPasswordEmailArgs): Promise<void> => {
-	await emailSender.sendEmail({
+export const sendForgotPasswordEmail = ({ hash, emailReceiver }: ForgotPasswordEmailArgs): void => {
+	void emailSender.sendEmail({
 		from: "signas13@gmail.com",
 		subject: "Forgot Password",
 		to: emailReceiver,

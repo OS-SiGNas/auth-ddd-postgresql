@@ -44,7 +44,7 @@ export class AuthController implements IAuthController {
 
 	public readonly login: ControllerHandler<UserSessionDTO> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.login(request as unknown as LoginRequest);
+			const { body } = await this.#requestDTO.login(request as LoginRequest);
 			const userDto = await this.#business.login(body);
 			if (userDto === null) return this.#response({ error: new UnauthorizedException401("Username or password is incorrect") });
 			userDto.session = await this.#sessionHandler.generateSession({ roles: userDto.roles, userUuid: userDto.uuid });
@@ -58,7 +58,7 @@ export class AuthController implements IAuthController {
 	public readonly refreshToken: ControllerHandler<string> = async (request) => {
 		this.#logger.info(`${request.hostname} refreshing token`);
 		try {
-			const { body } = await this.#requestDTO.refreshToken(request as unknown as RefreshTokenRequest);
+			const { body } = await this.#requestDTO.refreshToken(request as RefreshTokenRequest);
 			const { userUuid } = await this.#sessionHandler.validateRefreshToken(body.refreshToken);
 			const user = await this.#business.getUserByUuid(userUuid);
 			const accessToken = await this.#sessionHandler.generateAccessToken({ roles: user.roles, userUuid });
@@ -71,7 +71,7 @@ export class AuthController implements IAuthController {
 
 	public readonly register: ControllerHandler<UserNonSensitiveData> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.register(request as unknown as RegisterRequest);
+			const { body } = await this.#requestDTO.register(request as RegisterRequest);
 			const userDto = await this.#business.register(body);
 			return this.#response({ code: HttpStatus.CREATED, data: userDto.userNonSensitiveDTO });
 		} catch (error) {
@@ -82,9 +82,8 @@ export class AuthController implements IAuthController {
 
 	public readonly activateAccount: ControllerHandler<string> = async (request) => {
 		try {
-			const { params } = await this.#requestDTO.activateAccount(request as unknown as ActivateAccountRequest);
-			const result = await this.#business.activateAccount(params);
-			return result
+			const { params } = await this.#requestDTO.activateAccount(request as ActivateAccountRequest);
+			return await this.#business.activateAccount(params)
 				? this.#response({ data: "Account activated" })
 				: this.#response({ error: new BadRequestException400("Invalid activation request") });
 		} catch (error) {
@@ -101,7 +100,7 @@ export class AuthController implements IAuthController {
 
 	public readonly forgotPassword: ControllerHandler<string> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.forgotPassword(request as unknown as ForgotPasswordRequest);
+			const { body } = await this.#requestDTO.forgotPassword(request as ForgotPasswordRequest);
 			const result = await this.#business.forgotPassword(body);
 			return this.#response({ data: result ? "Verification string sended" : "" });
 		} catch (error) {
@@ -112,7 +111,7 @@ export class AuthController implements IAuthController {
 
 	public readonly changePassword: ControllerHandler<string> = async (request) => {
 		try {
-			const { body } = await this.#requestDTO.changePassword(request as unknown as ChangePasswordRequest);
+			const { body } = await this.#requestDTO.changePassword(request as ChangePasswordRequest);
 			const result = await this.#business.changePassword(body);
 			return result
 				? this.#response({ data: "Password updated" })

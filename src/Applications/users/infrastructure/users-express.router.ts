@@ -16,7 +16,7 @@ export class UsersRouterExpress {
 		router
 			.post(endpoints.CREATE_ROLE, this.#createRole)
 			.patch(endpoints.ROLES_TO_USER, this.#rolesToUser)
-			.post(endpoints.CREATE_ROLE, this.#createUser)
+			.post(endpoints.USERS, this.#createUser)
 			.get(endpoints.USERS, this.#getAllUsers)
 			.get(endpoints.USERS_UUID, this.#getOne)
 			.patch(endpoints.USERS_UUID, this.#patchUser)

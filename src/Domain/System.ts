@@ -1,7 +1,10 @@
-import { Logger } from "../Applications/shared/logger-handler/logger.js";
+import { env } from "node:process";
+import { Logger } from "../Applications/shared/logger-handler/make.js";
 
 export type Environment = "development" | "production" | "test";
 export type HttpService = "express" | "fastify";
+export type LoggerService = "console" | "winston";
+
 interface Secrets {
 	NODE_ENV: Environment;
 	THIS_URL: string;
@@ -28,19 +31,20 @@ class System {
 	}
 
 	readonly #logger = new Logger(this.constructor.name);
+
 	readonly #error = (variable: keyof Secrets): Error => {
 		this.#logger.error(`x ${variable}`);
-		return new Error(`💩 Environment Variable: \x1B[31m${variable}\x1B[39m is undefined`);
+		return new Error(`Environment Variable: \x1B[31m${variable}\x1B[39m is undefined 💩`);
 	};
 
-	readonly #getSecretFromDotEnv = (variable: keyof Secrets): Readonly<string> => {
-		const target = process.env[variable];
-		if (target === undefined) throw this.#error(variable);
-		this.#logger.debug(`✓ ${variable}`);
-		return target;
+	readonly #getSecretFromDotEnv = (target: keyof Secrets): Readonly<string> => {
+		const variable = env[target];
+		if (variable === undefined) throw this.#error(target);
+		this.#logger.debug(`✓ ${target}`);
+		return variable;
 	};
 
-	public get secrets(): Readonly<Secrets> {
+	public get SECRETS(): Readonly<Secrets> {
 		this.#logger.info("Loading secrets");
 		return {
 			NODE_ENV: this.#getSecretFromDotEnv("NODE_ENV") as Environment,
@@ -67,15 +71,15 @@ class System {
 			/** Implement async handle secrets service
       const strategy = this.#getAsyncSecretStrategy('AWS')
       this.#cacheSecrets = await strategy() */
-			this.#cacheSecrets = this.secrets;
+			this.#cacheSecrets = this.SECRETS;
 		}
 
 		return await Promise.resolve(this.#cacheSecrets);
 	};
 
 	get isDebug(): boolean {
-		return secrets.NODE_ENV !== "production";
+		return SECRETS.NODE_ENV !== "production";
 	}
 }
 
-export const { secrets, getAsyncSecrets, isDebug } = System.instance;
+export const { SECRETS, getAsyncSecrets, isDebug } = System.instance;

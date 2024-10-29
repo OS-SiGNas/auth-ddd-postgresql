@@ -28,9 +28,8 @@ export class _EmailSenderProxy {
 	}
 
 	public readonly sendEmail = async (msg: EmailMessage): Promise<void> => {
-		const info = await this.#transporter.sendMail(msg).catch((error) => this.#logger.error({ name: this.constructor.name, error }));
-		if (this.#isDebug) {
-			this.#logger.info(info);
+		const info = await this.#transporter.sendMail(msg).catch((error) => this.#logger.error(this.constructor.name, error));
+		if (this.#isDebug && info !== undefined) {
 			const { getTestMessageUrl } = await import("nodemailer");
 			const url = getTestMessageUrl(info);
 			this.#logger.info(`Link for email message: ${url}`);

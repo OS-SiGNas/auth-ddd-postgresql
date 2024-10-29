@@ -16,7 +16,7 @@ export class AuthRouterExpress {
 		router
 			.post(endpoints.LOGIN, this.#login)
 			.post(endpoints.REFRESH_TOKEN, this.#refreshToken)
-			.post(endpoints.REFRESH_TOKEN, this.#register)
+			.post(endpoints.REGISTER, this.#register)
 			.get(endpoints.ACTIVATE_ACCOUNT, this.#activateAccount)
 			.post(endpoints.FORGOT_PASSWORD, this.#forgotPassword)
 			.patch(endpoints.CHANGE_PASSWORD, this.#changePassword);
