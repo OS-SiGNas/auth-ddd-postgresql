@@ -1,6 +1,6 @@
-import type { ControllerHandler } from "../../../Domain/business/Business";
-import type { UserSessionDTO } from "../../users/domain/users.dto.ts";
-import type { UserNonSensitiveData } from "../../users/domain/IUser";
+import type { ControllerHandler } from "#Domain/business/Business";
+import type { UserSessionDTO } from "#users/v1/domain/users.dto.ts";
+import type { UserNonSensitiveData } from "#users/v1/domain/IUser";
 
 export interface IAuthController {
 	readonly login: ControllerHandler<UserSessionDTO>;

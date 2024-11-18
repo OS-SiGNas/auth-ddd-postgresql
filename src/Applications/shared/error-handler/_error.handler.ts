@@ -1,9 +1,9 @@
 // Errors
-import { DomainError } from "../../../Domain/core/errors.factory.js";
+import { DomainError } from "#Domain/core/errors.factory.js";
 import { ZodError } from "zod";
 
-import type { ILogger } from "../../../Domain/core/ILogger";
-import type { Catch, IErrorHandler } from "../../../Domain/core/IErrorHandler";
+import type { ILogger } from "#Domain/core/ILogger";
+import type { Catch, IErrorHandler } from "#Domain/core/IErrorHandler";
 
 interface Dependences {
 	logger: ILogger;

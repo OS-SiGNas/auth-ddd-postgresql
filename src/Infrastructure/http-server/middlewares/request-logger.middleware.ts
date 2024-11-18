@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { Logger } from "../../../Applications/shared/logger-handler/make.js";
+import { Logger } from "#shared/logger-handler/make.js";
 
 import type { RequestHandler } from "express";
 

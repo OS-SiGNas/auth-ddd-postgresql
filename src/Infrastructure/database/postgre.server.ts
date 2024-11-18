@@ -1,6 +1,6 @@
 import type { DataSource } from "typeorm";
-import type { IServer } from "../../Domain/IServer";
-import { ILogger } from "../../Domain/core/ILogger";
+import type { IServer } from "#Domain/IServer";
+import { ILogger } from "#Domain/core/ILogger";
 
 interface Dependences {
 	dataSource: DataSource;

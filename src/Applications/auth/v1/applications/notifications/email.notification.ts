@@ -1,5 +1,5 @@
-import { emailSender } from "../../../../Infrastructure/proxy/email-proxy/make.js";
-import { SECRETS } from "../../../../Domain/System.js";
+import { emailSender } from "../../../../../Infrastructure/proxy/email-proxy/make.js";
+import { secrets } from "#Domain/config.js";
 
 interface EmailValitadeAccountArgs {
 	token: string;
@@ -11,7 +11,7 @@ export const sendActivateAccountEmail = ({ token, emailReceiver }: EmailValitade
 		from: "signas13@gmail.com",
 		subject: "Activate Account",
 		to: emailReceiver,
-		html: `<a href="${SECRETS.THIS_URL}/auth/activate-account/${token}"> ACTIVATE ACCOUNT </a>`,
+		html: `<a href="${secrets.THIS_URL}/auth/activate-account/${token}"> ACTIVATE ACCOUNT </a>`,
 	});
 };
 

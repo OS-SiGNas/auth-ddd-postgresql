@@ -5,12 +5,12 @@ import {
 	DuplicateAccountException,
 	NotFoundException404,
 	UserNotFoundException,
-} from "../../../Domain/core/errors.factory.js";
+} from "#Domain/core/errors.factory.js";
 
-import type { Core } from "../../../Domain/core/Core";
-import type { ILogger } from "../../../Domain/core/ILogger";
-import type { IPasswordHandler } from "../../../Domain/business/IPasswordHandler";
-import type { BusinessHandler } from "../../../Domain/business/Business";
+import type { Core } from "#Domain/core/Core";
+import type { ILogger } from "#Domain/core/ILogger";
+import type { IPasswordHandler } from "#Domain/business/IPasswordHandler";
+import type { BusinessHandler } from "#Domain/business/Business";
 import type { User } from "../domain/entities/users.entity.js";
 import type { Role } from "../domain/entities/roles.entity";
 import type { UserNonSensitiveData } from "../domain/IUser";

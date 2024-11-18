@@ -1,4 +1,4 @@
-import type { ControllerHandler } from "../../../Domain/business/Business";
+import type { ControllerHandler } from "#Domain/business/Business";
 import type { UserNonSensitiveData } from "./IUser";
 
 export interface IUsersController {

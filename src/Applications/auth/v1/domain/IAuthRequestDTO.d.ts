@@ -1,4 +1,4 @@
-import type { Parser } from "../../../Domain/business/Business";
+import type { Parser } from "#Domain/business/Business";
 import type {
 	LoginRequest,
 	RegisterRequest,
@@ -6,7 +6,7 @@ import type {
 	ChangePasswordRequest,
 	ForgotPasswordRequest,
 	RefreshTokenRequest,
-} from "../../auth/domain/Request";
+} from "#auth/v1/domain/Request";
 
 export interface IAuthRequestDTO {
 	readonly login: Parser<LoginRequest>;

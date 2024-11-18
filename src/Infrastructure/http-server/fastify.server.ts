@@ -1,12 +1,12 @@
 import type { FastifyInstance, RouteOptions } from "fastify";
 
-import type { Core } from "../../Domain/core/Core";
-import type { IServer } from "../../Domain/IServer";
-import type { ILogger } from "../../Domain/core/ILogger";
+import type { Core } from "#Domain/core/Core";
+import type { IServer } from "#Domain/IServer";
+import type { ILogger } from "#Domain/core/ILogger";
 
 interface Dependences extends Core {
 	app: FastifyInstance;
-	applications: RouteOptions[];
+	apis: RouteOptions[][];
 	port: number;
 	message: string;
 }
@@ -21,7 +21,7 @@ export class FastifyServer implements IServer {
 		this.#port = d.port;
 		this.#logger = d.logger;
 		this.#message = d.message;
-		d.applications.forEach((route) => this.#app.route(route));
+		d.apis.forEach((api) => api.forEach((route) => this.#app.route(route)));
 	}
 
 	public readonly start = async (): Promise<void> => {

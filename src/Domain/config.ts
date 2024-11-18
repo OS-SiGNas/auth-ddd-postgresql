@@ -1,5 +1,5 @@
-import { env } from "node:process";
-import { Logger } from "../Applications/shared/logger-handler/make.js";
+import { env, loadEnvFile } from "node:process";
+import { Logger } from "#shared/logger-handler/make.js";
 
 export type Environment = "development" | "production" | "test";
 export type HttpService = "express" | "fastify";
@@ -23,18 +23,18 @@ interface Secrets {
 	JWT_AA_EXPIRED_TIME: string;
 }
 
-class System {
+class Config {
 	private constructor() {}
-	static #instance?: System; // crazy singleton 🤡
-	static get instance(): Readonly<System> {
-		return (this.#instance ??= new System());
+	static #instance?: Config; // crazy singleton 🤡
+	static get instance(): Readonly<Config> {
+		return (this.#instance ??= new Config());
 	}
 
 	readonly #logger = new Logger(this.constructor.name);
 
 	readonly #error = (variable: keyof Secrets): Error => {
 		this.#logger.error(`x ${variable}`);
-		return new Error(`Environment Variable: \x1B[31m${variable}\x1B[39m is undefined 💩`);
+		return new Error(`Environment Variable: \x1B[31m${variable}\x1B[39m is undefined or incompatible 💩`);
 	};
 
 	readonly #getSecretFromDotEnv = (target: keyof Secrets): Readonly<string> => {
@@ -44,15 +44,25 @@ class System {
 		return variable;
 	};
 
-	public get SECRETS(): Readonly<Secrets> {
+	readonly #validateNumber = (target: string): number => {
+		if (isNaN(+target)) throw this.#error(target as keyof Secrets);
+		return +target;
+	};
+
+	public get secrets(): Readonly<Secrets> {
 		this.#logger.info("Loading secrets");
+		const NODE_ENV = this.#getSecretFromDotEnv("NODE_ENV") as Environment;
+		if (NODE_ENV === "production") loadEnvFile(".env");
+		if (NODE_ENV === "development") loadEnvFile(".env.dev");
+		if (NODE_ENV === "test") loadEnvFile(".env.test");
+
 		return {
-			NODE_ENV: this.#getSecretFromDotEnv("NODE_ENV") as Environment,
+			NODE_ENV,
 			THIS_URL: this.#getSecretFromDotEnv("THIS_URL"),
 			HTTP_SERVICE: this.#getSecretFromDotEnv("HTTP_SERVICE") as HttpService,
-			PORT: +this.#getSecretFromDotEnv("PORT"),
+			PORT: this.#validateNumber(this.#getSecretFromDotEnv("PORT")),
 			PG_HOST: this.#getSecretFromDotEnv("PG_HOST"),
-			PG_PORT: +this.#getSecretFromDotEnv("PG_PORT"),
+			PG_PORT: this.#validateNumber(this.#getSecretFromDotEnv("PG_PORT")),
 			PG_USERNAME: this.#getSecretFromDotEnv("PG_USERNAME"),
 			PG_PASSWORD: this.#getSecretFromDotEnv("PG_PASSWORD"),
 			PG_DATABASE: this.#getSecretFromDotEnv("PG_DATABASE"),
@@ -71,15 +81,16 @@ class System {
 			/** Implement async handle secrets service
       const strategy = this.#getAsyncSecretStrategy('AWS')
       this.#cacheSecrets = await strategy() */
-			this.#cacheSecrets = this.SECRETS;
+			this.#cacheSecrets = this.secrets;
 		}
 
 		return await Promise.resolve(this.#cacheSecrets);
 	};
 
-	get isDebug(): boolean {
-		return SECRETS.NODE_ENV !== "production";
+	get IS_DEBUG(): boolean {
+		return this.secrets.NODE_ENV !== "production";
 	}
 }
 
-export const { SECRETS, getAsyncSecrets, isDebug } = System.instance;
+export const { secrets, getAsyncSecrets, IS_DEBUG } = Config.instance;
+export default Config.instance;

@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { UsersRequestDTO } from "../../users/domain/users-request.dto.js";
+import { UsersRequestDTO } from "#users/v1/domain/users-request.dto.js";
 
-import type { Parser } from "../../../Domain/business/Business";
+import type { Parser } from "#Domain/business/Business";
 import type { IAuthRequestDTO } from "./IAuthRequestDTO";
 import type {
 	ActivateAccountRequest,

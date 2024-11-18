@@ -1,9 +1,9 @@
-import { SECRETS, isDebug } from "../../Domain/System.js";
-import { passwordHandler } from "../shared/password-handler/make.js";
-import { Logger } from "../shared/logger-handler/make.js";
-import { errorHandler } from "../shared/error-handler/make.js";
-import { responseHandler } from "../shared/response-handler/make.js";
-import { sessionHandler } from "../shared/session-handler/make.js";
+import { IS_DEBUG, secrets } from "#Domain/config.js";
+import { passwordHandler } from "#shared/password-handler/make.js";
+import { Logger } from "#shared/logger-handler/make.js";
+import { errorHandler } from "#shared/error-handler/make.js";
+import { responseHandler } from "#shared/response-handler/make.js";
+import { sessionHandler } from "#shared/session-handler/make.js";
 
 import { UsersBusiness } from "./application/users.business.js";
 import { UsersRequestDTO } from "./domain/users-request.dto.js";
@@ -15,7 +15,7 @@ import type { UsersRouterExpress } from "./infrastructure/users-express.router";
 import type { UsersRouterFastify } from "./infrastructure/users-fastify.router";
 
 // Error
-import { ModuleException } from "../../Domain/core/errors.factory.js";
+import { ModuleException } from "#Domain/core/errors.factory.js";
 
 export const getUsersRouter = async <T extends UsersRouterExpress | UsersRouterFastify>(): Promise<T> => {
 	const business = new UsersBusiness({
@@ -23,7 +23,7 @@ export const getUsersRouter = async <T extends UsersRouterExpress | UsersRouterF
 		usersRepository: User,
 		rolesRepository: Role,
 		passwordHandler,
-		isDebug,
+		IS_DEBUG,
 	});
 
 	const controller = new UsersController({
@@ -33,15 +33,15 @@ export const getUsersRouter = async <T extends UsersRouterExpress | UsersRouterF
 		sessionHandler,
 		errorHandler,
 		business,
-		isDebug,
+		IS_DEBUG,
 	});
 
-	if (SECRETS.HTTP_SERVICE === "express") {
+	if (secrets.HTTP_SERVICE === "express") {
 		const { UsersRouterExpress } = await import("./infrastructure/users-express.router.js");
 		return new UsersRouterExpress({ controller }) as T;
 	}
 
-	if (SECRETS.HTTP_SERVICE === "fastify") {
+	if (secrets.HTTP_SERVICE === "fastify") {
 		const { UsersRouterFastify } = await import("./infrastructure/users-fastify.router.js");
 		return new UsersRouterFastify({ controller }) as T;
 	}

@@ -1,4 +1,4 @@
-import type { Parser } from "../../../Domain/business/Business";
+import type { Parser } from "#Domain/business/Business";
 import type {
 	AddUserRolesRequest,
 	CreateUserRequest,

@@ -1,6 +1,6 @@
 import { red, yellow, bold, blue, bgYellow, bgRed, bgBlue } from "./colors.utils.js";
 
-import type { ILogger } from "../../../Domain/core/ILogger.js";
+import type { ILogger } from "#Domain/core/ILogger.js";
 
 export const Logger = (() => {
 	const date = (): string => `[${new Date().toLocaleString()}]`;

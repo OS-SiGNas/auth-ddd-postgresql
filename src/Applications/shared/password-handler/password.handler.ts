@@ -1,5 +1,5 @@
 import type { hash, compare, genSalt } from "bcryptjs";
-import type { IPasswordHandler } from "../../../Domain/business/IPasswordHandler";
+import type { IPasswordHandler } from "#Domain/business/IPasswordHandler";
 
 interface Dependences {
 	hash: typeof hash;

@@ -1,8 +1,8 @@
 import { clearInterval } from "node:timers";
 
-import type { ILogger } from "../../Domain/core/ILogger";
-import type { IStorageHandler } from "../../Domain/IStorageHandler";
-import { Core } from "../../Domain/core/Core";
+import type { Core } from "#Domain/core/Core";
+import type { ILogger } from "#Domain/core/ILogger";
+import type { IStorageHandler } from "#Domain/IStorageHandler";
 
 interface Dependences extends Core {
 	keyExpiredTime: number;
@@ -16,7 +16,7 @@ export class StorageHandler implements IStorageHandler {
 	readonly #keyExpiredTime: number;
 
 	constructor(d: Readonly<Dependences>) {
-		this.#isDebug = d.isDebug;
+		this.#isDebug = d.IS_DEBUG;
 		this.#storage = new Map();
 		this.#logger = d.logger;
 		this.#keyExpiredTime = d.keyExpiredTime;

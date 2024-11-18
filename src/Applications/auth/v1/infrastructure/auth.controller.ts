@@ -1,14 +1,14 @@
-import { HttpStatus } from "../../../Domain/core/http-status.enum.js";
-import { BadRequestException400, ForbiddenException403, UnauthorizedException401 } from "../../../Domain/core/errors.factory.js";
+import { HttpStatus } from "#Domain/core/http-status.enum.js";
+import { BadRequestException400, ForbiddenException403, UnauthorizedException401 } from "#Domain/core/errors.factory.js";
 
-import type { ControllerHandler, ControllersDependences } from "../../../Domain/business/Business";
-import type { ILogger } from "../../../Domain/core/ILogger";
-import type { IErrorHandler } from "../../../Domain/core/IErrorHandler";
-import type { HttpResponse } from "../../../Domain/business/IResponseHandler";
-import type { ISessionHandler } from "../../../Domain/business/ISessionHandler";
-import type { UserSessionDTO } from "../../users/domain/users.dto.js";
+import type { ControllerHandler, ControllersDependences } from "#Domain/business/Business";
+import type { ILogger } from "#Domain/core/ILogger";
+import type { IErrorHandler } from "#Domain/core/IErrorHandler";
+import type { HttpResponse } from "#Domain/business/IResponseHandler";
+import type { ISessionHandler } from "#Domain/business/ISessionHandler";
+import type { UserSessionDTO } from "#users/v1/domain/users.dto.js";
+import type { UserNonSensitiveData } from "#users/v1/domain/IUser";
 import type { IAuthRequestDTO } from "../domain/IAuthRequestDTO.js";
-import type { UserNonSensitiveData } from "../../users/domain/IUser";
 import type { IAuthBusiness } from "../domain/IAuthBusiness";
 import type { IAuthController } from "../domain/IAuthController";
 import type {
@@ -83,7 +83,7 @@ export class AuthController implements IAuthController {
 	public readonly activateAccount: ControllerHandler<string> = async (request) => {
 		try {
 			const { params } = await this.#requestDTO.activateAccount(request as ActivateAccountRequest);
-			return await this.#business.activateAccount(params)
+			return (await this.#business.activateAccount(params))
 				? this.#response({ data: "Account activated" })
 				: this.#response({ error: new BadRequestException400("Invalid activation request") });
 		} catch (error) {

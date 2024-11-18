@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { RoleName } from "./role-name.enum.js";
 
-import type { Parser } from "../../../Domain/business/Business";
+import type { Parser } from "#Domain/business/Business";
 import type { IUsersRequestDTO } from "./IUsersRequestDTO";
 import type {
 	AddUserRolesRequest,
@@ -20,7 +20,6 @@ export class UsersRequestDTO implements IUsersRequestDTO {
 	static readonly defaults = {
 		uuid: z.string().uuid(),
 		token: z.string().regex(/^[A-Za-z0-9\-_.]+\.[A-Za-z0-9\-_.]+\.[A-Za-z0-9\-_.]+$/),
-		isActive: z.boolean(),
 		name: z
 			.string()
 			.min(8)
@@ -28,7 +27,7 @@ export class UsersRequestDTO implements IUsersRequestDTO {
 			// .regex(/^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]+$/, "Invalid name")
 			.toLowerCase(),
 		email: z.string().email().toLowerCase(),
-		password: z.string().min(10).max(64),
+		password: z.string().min(10).max(30),
 		role: z.enum([RoleName.ADMIN, RoleName.STANDARD, RoleName.MODERATOR, RoleName.TESTER]),
 		roles: z.array(z.number()),
 		hash: z.string().uuid(),
@@ -59,10 +58,10 @@ export class UsersRequestDTO implements IUsersRequestDTO {
 	};
 
 	public readonly updateUser: Parser<UpdateUserRequest> = async (request) => {
-		const { uuid, email, isActive, name } = UsersRequestDTO.defaults;
+		const { uuid, email, name } = UsersRequestDTO.defaults;
 		const query = z.object({}).strict();
 		const params = z.object({ uuid }).strict();
-		const body = z.object({ uuid, email, isActive, name }).partial().strict();
+		const body = z.object({ uuid, email, name }).partial().strict();
 		const schema = z.object({ query, params, body });
 		return await schema.parseAsync(request);
 	};

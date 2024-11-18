@@ -1,6 +1,6 @@
 import { postgresServer } from "./database/make.js";
 import { httpServer } from "./http-server/make.js";
 
-import type { IServer } from "../Domain/IServer";
+import type { IServer } from "#Domain/IServer";
 
 export const servers: IServer[] = [postgresServer, httpServer];

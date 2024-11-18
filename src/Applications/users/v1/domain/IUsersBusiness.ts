@@ -1,4 +1,4 @@
-import type { BusinessHandler } from "../../../Domain/business/Business.js";
+import type { BusinessHandler } from "#Domain/business/Business.js";
 import type { UserNonSensitiveData } from "./IUser.js";
 import type { UserDTO } from "../domain/users.dto.js";
 import type {

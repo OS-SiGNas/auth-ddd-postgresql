@@ -1,17 +1,16 @@
 import { randomBytes } from "node:crypto";
-import { UserDTO } from "../../users/domain/users.dto.js";
+import { DuplicateAccountException, ForbiddenException403, UserNotFoundException } from "#Domain/core/errors.factory.js";
+import { UserDTO } from "#users/v1/domain/users.dto.js";
 import { sendActivateAccountEmail } from "./notifications/email.notification.js";
-// Errors
-import { DuplicateAccountException, ForbiddenException403, UserNotFoundException } from "../../../Domain/core/errors.factory.js";
 
-import type { Core } from "../../../Domain/core/Core.js";
-import type { ILogger } from "../../../Domain/core/ILogger";
-import type { BusinessHandler } from "../../../Domain/business/Business";
-import type { IStorageHandler } from "../../../Domain/IStorageHandler";
-import type { ITokenHandler } from "../../../Domain/business/ITokenHandler";
-import type { IPasswordHandler } from "../../../Domain/business/IPasswordHandler";
+import type { Core } from "#Domain/core/Core.js";
+import type { ILogger } from "#Domain/core/ILogger";
+import type { BusinessHandler } from "#Domain/business/Business";
+import type { IStorageHandler } from "#Domain/IStorageHandler";
+import type { ITokenHandler } from "#Domain/business/ITokenHandler";
+import type { IPasswordHandler } from "#Domain/business/IPasswordHandler";
+import type { User } from "#users/v1/domain/entities/users.entity";
 import type { IAuthBusiness } from "../domain/IAuthBusiness.js";
-import type { User } from "../../users/domain/entities/users.entity";
 import type {
 	LoginRequest,
 	RegisterRequest,

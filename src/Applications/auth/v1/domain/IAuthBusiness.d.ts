@@ -1,5 +1,5 @@
-import type { BusinessHandler } from "../../../Domain/business/Business";
-import type { UserDTO } from "../../users/domain/users.dto";
+import type { BusinessHandler } from "#Domain/business/Business";
+import type { UserDTO } from "#users/v1/domain/users.dto";
 import type { ActivateAccountRequest, ChangePasswordRequest, ForgotPasswordRequest, LoginRequest, RegisterRequest } from "./Request";
 
 export interface IAuthBusiness {
