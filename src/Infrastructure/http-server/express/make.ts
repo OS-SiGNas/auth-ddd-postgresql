@@ -1,10 +1,12 @@
 import { IS_DEBUG, secrets } from "#Domain/config.js";
 import { Logger } from "#shared/logger-handler/make.js";
 
+import type { RequestHandler } from "express";
+import type { ExpressServer } from "./express.server.js";
 import type { AuthRouterExpress } from "#auth/v1/infrastructure/auth-express.router.js";
 import type { UsersRouterExpress } from "#users/v1/infrastructure/users-express.router.js";
 
-export const getExpressServer = async (message: string) => {
+export const getExpressServer = async (message: string): Promise<ExpressServer> => {
 	const [
 		{ default: Express, Router }, // 0
 		{ ExpressServer }, // 1
@@ -17,7 +19,7 @@ export const getExpressServer = async (message: string) => {
 
 	const _router = Router();
 
-	const _v1 = async () => {
+	const _v1 = async (): Promise<RequestHandler[]> => {
 		const [{ getAuthRouter }, { getUsersRouter }] = await Promise.all([
 			import("#auth/v1/make.js"), // 0
 			import("#users/v1/make.js"), // 1

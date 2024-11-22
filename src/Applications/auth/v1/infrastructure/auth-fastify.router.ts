@@ -1,5 +1,5 @@
 import { endpoints } from "../domain/endpoints.enum.js";
-import type { RouteHandler, RouteOptions } from "fastify";
+import type { FastifyPluginCallback, RouteHandler, RouteOptions } from "fastify";
 import type { IAuthController } from "../domain/IAuthController";
 
 interface Dependences {
@@ -11,6 +11,17 @@ export class AuthRouterFastify {
 	constructor(d: Dependences) {
 		this.#controller = d.controller;
 	}
+
+	public readonly plugin: FastifyPluginCallback = (instance, _, done) => {
+		instance.post(endpoints.LOGIN, this.#login);
+		instance.post(endpoints.REFRESH_TOKEN, this.#refreshToken);
+		instance.post(endpoints.REGISTER, this.#register);
+		instance.get(endpoints.ACTIVATE_ACCOUNT, this.#activateAccount);
+		instance.post(endpoints.FORGOT_PASSWORD, this.#forgotPassword);
+		instance.patch(endpoints.CHANGE_PASSWORD, this.#changePassword);
+
+		done();
+	};
 
 	public readonly getRoutes = (): RouteOptions[] => [
 		{ method: "POST", url: endpoints.LOGIN, handler: this.#login },

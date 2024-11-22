@@ -1,5 +1,5 @@
 import { endpoints } from "../domain/endpoints.enum.js";
-import type { RouteHandler, RouteOptions } from "fastify";
+import type { FastifyPluginCallback, RouteHandler, RouteOptions } from "fastify";
 import type { IUsersController } from "../domain/IUsersController";
 
 interface Dependences {
@@ -11,6 +11,18 @@ export class UsersRouterFastify {
 	constructor(d: Dependences) {
 		this.#controller = d.controller;
 	}
+
+	public readonly plugin: FastifyPluginCallback = (fastify, _, done) => {
+		fastify.post(endpoints.CREATE_ROLE, this.#createRole);
+		fastify.patch(endpoints.ROLES_TO_USER, this.#rolesToUser);
+		fastify.post(endpoints.USERS, this.#createUser);
+		fastify.get(endpoints.USERS, this.#getAllUsers);
+		fastify.get(endpoints.CREATE_ROLE, this.#getOne);
+		fastify.patch(endpoints.CREATE_ROLE, this.#patchUser);
+		fastify.delete(endpoints.USERS_UUID, this.#deleteUser);
+
+		done();
+	};
 
 	public readonly getRoutes = (): RouteOptions[] => [
 		{ method: "POST", url: endpoints.CREATE_ROLE, handler: this.#createRole },

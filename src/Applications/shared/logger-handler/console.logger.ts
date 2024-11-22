@@ -3,7 +3,7 @@ import { red, yellow, bold, blue, bgYellow, bgRed, bgBlue } from "./colors.utils
 import type { ILogger } from "#Domain/core/ILogger.js";
 
 export const Logger = (() => {
-	const date = (): string => `[${new Date().toLocaleString()}]`;
+	const date = (): string => `[${new Date().toLocaleString(undefined, { hour12: false })}]`;
 
 	const info = (message: string, ...meta: unknown[]): void => {
 		const strTag = bgYellow("[INFO]");

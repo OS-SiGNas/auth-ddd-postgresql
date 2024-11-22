@@ -1,4 +1,5 @@
 import { env, loadEnvFile } from "node:process";
+import { z } from "zod";
 import { Logger } from "#shared/logger-handler/make.js";
 
 export type Environment = "development" | "production" | "test";
@@ -38,7 +39,7 @@ class Config {
 	};
 
 	readonly #getSecretFromDotEnv = (target: keyof Secrets): Readonly<string> => {
-		const variable = env[target];
+		const variable = env[String(target)];
 		if (variable === undefined) throw this.#error(target);
 		this.#logger.debug(`✓ ${target}`);
 		return variable;
@@ -49,6 +50,24 @@ class Config {
 		return +target;
 	};
 
+	readonly #zodConfig = z.object({
+		NODE_ENV: z.enum(["production", "development", "test"]),
+		THIS_URL: z.string().url(),
+		HTTP_SERVICE: z.enum(["fastify", "express"]),
+		PORT: z.number().min(3000).max(65535),
+		PG_HOST: z.string(),
+		PG_PORT: z.number().min(3000).max(65535),
+		PG_USERNAME: z.string(),
+		PG_PASSWORD: z.string(),
+		PG_DATABASE: z.string(),
+		JWT_ACCESS_SECRET_KEY: z.string(),
+		JWT_ACCESS_EXPIRED_TIME: z.string(),
+		JWT_REFRESH_SECRET_KEY: z.string(),
+		JWT_REFRESH_EXPIRED_TIME: z.string(),
+		JWT_AA_SECRET_KEY: z.string(),
+		JWT_AA_EXPIRED_TIME: z.string(),
+	});
+
 	public get secrets(): Readonly<Secrets> {
 		this.#logger.info("Loading secrets");
 		const NODE_ENV = this.#getSecretFromDotEnv("NODE_ENV") as Environment;
@@ -56,7 +75,7 @@ class Config {
 		if (NODE_ENV === "development") loadEnvFile(".env.dev");
 		if (NODE_ENV === "test") loadEnvFile(".env.test");
 
-		return {
+		const secrets = {
 			NODE_ENV,
 			THIS_URL: this.#getSecretFromDotEnv("THIS_URL"),
 			HTTP_SERVICE: this.#getSecretFromDotEnv("HTTP_SERVICE") as HttpService,
@@ -73,6 +92,8 @@ class Config {
 			JWT_AA_SECRET_KEY: this.#getSecretFromDotEnv("JWT_AA_SECRET_KEY"),
 			JWT_AA_EXPIRED_TIME: this.#getSecretFromDotEnv("JWT_AA_EXPIRED_TIME"),
 		} as const;
+
+		return this.#zodConfig.parse(secrets);
 	}
 
 	#cacheSecrets?: Secrets;

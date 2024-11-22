@@ -48,9 +48,13 @@ export class StorageHandler implements IStorageHandler {
 	readonly #clean = async (): Promise<void> => {
 		this.#logger.info(`Cleaning storage with ${this.#storage.size} elements`);
 		const now = Date.now();
-		for (const [key, element] of this.#storage) {
+		/* for (const [key, element] of this.#storage) {
 			if (now - element.createdAt > this.#keyExpiredTime) this.#storage.delete(key);
-		}
+		} */
+		this.#storage.forEach((element, key) => {
+			if (now - element.createdAt > this.#keyExpiredTime) this.#storage.delete(key);
+		});
+
 		this.#logger.info(`Storage cleaned, number of elements: ${this.#storage.size}`);
 		return await Promise.resolve(undefined);
 	};

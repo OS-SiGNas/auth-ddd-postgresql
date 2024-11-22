@@ -1,6 +1,6 @@
 // Errors
-import { DomainError } from "#Domain/core/errors.factory.js";
 import { ZodError } from "zod";
+import { DomainError } from "#Domain/core/errors.factory.js";
 
 import type { ILogger } from "#Domain/core/ILogger";
 import type { Catch, IErrorHandler } from "#Domain/core/IErrorHandler";
