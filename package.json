@@ -23,7 +23,7 @@
 		"swc": "swc src -d ./dist --strip-leading-paths",
 		"swc:watch": "swc src -wd ./dist --strip-leading-paths",
 		"prettier": "prettier --write src",
-		"lint": "eslint ./src/**/*.ts",
+		"lint": "eslint ./src",
 		"test": ""
 	},
 	"imports": {

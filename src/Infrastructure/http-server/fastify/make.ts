@@ -26,7 +26,6 @@ export const getFastifyServer = async (message: string): Promise<FastifyServer> 
 	return new FastifyServer({
 		globalMiddlewares: [fastifyHelmet, fastifyCors],
 		app: Fastify({ logger: IS_DEBUG }),
-
 		port: +secrets.PORT,
 		message,
 		apis: [await v1()],

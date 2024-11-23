@@ -9,6 +9,7 @@ import { Role } from "#users/v1/domain/entities/roles.entity.js";
 
 export const postgresServer = _PostgreServer.getInstance({
 	logger: new Logger("PostgreServer"),
+	retryTime: secrets.PG_RETRY_TIME,
 	dataSource: new DataSource({
 		type: "postgres",
 		host: secrets.PG_HOST,

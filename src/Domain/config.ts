@@ -16,6 +16,7 @@ interface Secrets {
 	PG_USERNAME: string;
 	PG_PASSWORD: string;
 	PG_DATABASE: string;
+	PG_RETRY_TIME: number;
 	JWT_ACCESS_SECRET_KEY: string;
 	JWT_ACCESS_EXPIRED_TIME: string;
 	JWT_REFRESH_SECRET_KEY: string;
@@ -50,24 +51,6 @@ class Config {
 		return +target;
 	};
 
-	readonly #zodConfig = z.object({
-		NODE_ENV: z.enum(["production", "development", "test"]),
-		THIS_URL: z.string().url(),
-		HTTP_SERVICE: z.enum(["fastify", "express"]),
-		PORT: z.number().min(3000).max(65535),
-		PG_HOST: z.string(),
-		PG_PORT: z.number().min(3000).max(65535),
-		PG_USERNAME: z.string(),
-		PG_PASSWORD: z.string(),
-		PG_DATABASE: z.string(),
-		JWT_ACCESS_SECRET_KEY: z.string(),
-		JWT_ACCESS_EXPIRED_TIME: z.string(),
-		JWT_REFRESH_SECRET_KEY: z.string(),
-		JWT_REFRESH_EXPIRED_TIME: z.string(),
-		JWT_AA_SECRET_KEY: z.string(),
-		JWT_AA_EXPIRED_TIME: z.string(),
-	});
-
 	public get secrets(): Readonly<Secrets> {
 		this.#logger.info("Loading secrets");
 		const NODE_ENV = this.#getSecretFromDotEnv("NODE_ENV") as Environment;
@@ -75,7 +58,7 @@ class Config {
 		if (NODE_ENV === "development") loadEnvFile(".env.dev");
 		if (NODE_ENV === "test") loadEnvFile(".env.test");
 
-		const secrets = {
+		return {
 			NODE_ENV,
 			THIS_URL: this.#getSecretFromDotEnv("THIS_URL"),
 			HTTP_SERVICE: this.#getSecretFromDotEnv("HTTP_SERVICE") as HttpService,
@@ -85,6 +68,7 @@ class Config {
 			PG_USERNAME: this.#getSecretFromDotEnv("PG_USERNAME"),
 			PG_PASSWORD: this.#getSecretFromDotEnv("PG_PASSWORD"),
 			PG_DATABASE: this.#getSecretFromDotEnv("PG_DATABASE"),
+			PG_RETRY_TIME: this.#validateNumber(this.#getSecretFromDotEnv("PG_RETRY_TIME")),
 			JWT_ACCESS_SECRET_KEY: this.#getSecretFromDotEnv("JWT_ACCESS_SECRET_KEY"),
 			JWT_ACCESS_EXPIRED_TIME: this.#getSecretFromDotEnv("JWT_ACCESS_EXPIRED_TIME"),
 			JWT_REFRESH_SECRET_KEY: this.#getSecretFromDotEnv("JWT_REFRESH_SECRET_KEY"),
@@ -92,8 +76,6 @@ class Config {
 			JWT_AA_SECRET_KEY: this.#getSecretFromDotEnv("JWT_AA_SECRET_KEY"),
 			JWT_AA_EXPIRED_TIME: this.#getSecretFromDotEnv("JWT_AA_EXPIRED_TIME"),
 		} as const;
-
-		return this.#zodConfig.parse(secrets);
 	}
 
 	#cacheSecrets?: Secrets;
