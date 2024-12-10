@@ -1,12 +1,12 @@
-import { env } from "node:process";
-import { Logger } from "../Applications/shared/logger-handler/make.js";
+import { env, loadEnvFile } from "node:process";
 
-export type Environment = "development" | "production" | "test";
+export type Environment = "development" | "production" | "testing";
 export type HttpService = "express" | "fastify";
 export type LoggerService = "console" | "winston";
 
 interface Secrets {
 	NODE_ENV: Environment;
+	LOGGER_SERVICE: LoggerService;
 	THIS_URL: string;
 	HTTP_SERVICE: HttpService;
 	PORT: number;
@@ -23,34 +23,61 @@ interface Secrets {
 	JWT_AA_EXPIRED_TIME: string;
 }
 
-class System {
-	private constructor() {}
-	static #instance?: System; // crazy singleton 🤡
-	static get instance(): Readonly<System> {
-		return (this.#instance ??= new System());
+class Config {
+	static #instance?: Config; // crazy singleton 🤡
+	static get instance(): Readonly<Config> {
+		return (this.#instance ??= new Config());
 	}
 
-	readonly #logger = new Logger(this.constructor.name);
+	readonly #NODE_ENV: Environment;
 
-	readonly #error = (variable: keyof Secrets): Error => {
-		this.#logger.error(`x ${variable}`);
-		return new Error(`Environment Variable: \x1B[31m${variable}\x1B[39m is undefined 💩`);
+	private constructor() {
+		this.#NODE_ENV = this.#getSecretFromDotEnv("NODE_ENV") as Environment;
+		const environments: Environment[] = ["development", "production", "testing"];
+		if (!environments.includes(this.#NODE_ENV)) throw this.#error("NODE_ENV", environments);
+		if (this.#NODE_ENV === "production") loadEnvFile(".env");
+		if (this.#NODE_ENV === "development") loadEnvFile(".env.dev");
+		if (this.#NODE_ENV === "testing") loadEnvFile(".env.test");
+	}
+
+	readonly #error = (variable: keyof Secrets, cause?: unknown): Error => {
+		console.error(`[ERROR] x ${variable}`);
+		return new Error(`Environment Variable: \x1B[31m${variable}\x1B[39m is undefined or incompatible 💩`, { cause });
 	};
 
 	readonly #getSecretFromDotEnv = (target: keyof Secrets): Readonly<string> => {
-		const variable = env[target];
-		if (variable === undefined) throw this.#error(target);
-		this.#logger.debug(`✓ ${target}`);
-		return variable;
+		const _secret = env[String(target)];
+		if (_secret === undefined || _secret.length === 0) throw this.#error(target);
+		console.debug(`[DEBUG] ✓ ${target}: ${_secret}`);
+		return _secret;
 	};
 
-	public get SECRETS(): Readonly<Secrets> {
-		this.#logger.info("Loading secrets");
+	readonly #validateNumber = (target: string): number => {
+		if (isNaN(+target)) throw this.#error(target as keyof Secrets, "Secret is NaN");
+		return +target;
+	};
+
+	get IS_DEBUG(): boolean {
+		return this.#NODE_ENV !== "production";
+	}
+
+	public get secrets(): Readonly<Secrets> {
+		console.info("[INFO]  Loading secrets");
+
+		const LOGGER_SERVICE = this.#getSecretFromDotEnv("LOGGER_SERVICE") as LoggerService;
+		const _loggers: LoggerService[] = ["console", "winston"];
+		if (!_loggers.includes(LOGGER_SERVICE)) throw this.#error("LOGGER_SERVICE", _loggers);
+
+		const HTTP_SERVICE = this.#getSecretFromDotEnv("HTTP_SERVICE") as HttpService;
+		const _httpServices: HttpService[] = ["express", "fastify"];
+		if (!_httpServices.includes(HTTP_SERVICE)) throw this.#error("HTTP_SERVICE", _httpServices);
+
 		return {
-			NODE_ENV: this.#getSecretFromDotEnv("NODE_ENV") as Environment,
+			NODE_ENV: this.#NODE_ENV,
+			LOGGER_SERVICE,
 			THIS_URL: this.#getSecretFromDotEnv("THIS_URL"),
-			HTTP_SERVICE: this.#getSecretFromDotEnv("HTTP_SERVICE") as HttpService,
-			PORT: +this.#getSecretFromDotEnv("PORT"),
+			HTTP_SERVICE,
+			PORT: this.#validateNumber(this.#getSecretFromDotEnv("PORT")),
 			PG_HOST: this.#getSecretFromDotEnv("PG_HOST"),
 			PG_PORT: +this.#getSecretFromDotEnv("PG_PORT"),
 			PG_USERNAME: this.#getSecretFromDotEnv("PG_USERNAME"),
@@ -71,15 +98,11 @@ class System {
 			/** Implement async handle secrets service
       const strategy = this.#getAsyncSecretStrategy('AWS')
       this.#cacheSecrets = await strategy() */
-			this.#cacheSecrets = this.SECRETS;
+			this.#cacheSecrets = this.secrets;
 		}
 
 		return await Promise.resolve(this.#cacheSecrets);
 	};
-
-	get isDebug(): boolean {
-		return SECRETS.NODE_ENV !== "production";
-	}
 }
 
-export const { SECRETS, getAsyncSecrets, isDebug } = System.instance;
+export const { secrets, getAsyncSecrets, IS_DEBUG } = Config.instance;

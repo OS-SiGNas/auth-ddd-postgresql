@@ -1,2 +1,2 @@
-// export * from "./winston.logger.js";
-export * from "./console.logger.js";
+// export { Logger } from "./winston.logger.js";
+export { Logger } from "./console.logger.js";
