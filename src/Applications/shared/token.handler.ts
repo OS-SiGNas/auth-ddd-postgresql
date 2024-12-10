@@ -1,10 +1,10 @@
 // Errors
-import { InternalServerException500 } from "../../Domain/core/errors.factory.js";
+import { InternalServerException500 } from "#Domain/core/errors.factory.js";
 
 import type { sign, verify } from "jsonwebtoken";
-import type { ILogger } from "../../Domain/core/ILogger";
-import type { ITokenHandler } from "../../Domain/business/ITokenHandler";
-import type { Core } from "../../Domain/core/Core.js";
+import type { ILogger } from "#Domain/core/ILogger";
+import type { ITokenHandler } from "#Domain/business/ITokenHandler";
+import type { Core } from "#Domain/core/Core.js";
 
 interface Dependences extends Core {
 	sign: typeof sign;

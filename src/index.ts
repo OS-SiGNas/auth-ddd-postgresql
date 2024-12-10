@@ -1,9 +1,9 @@
 import "reflect-metadata";
 import { exit } from "node:process";
 import { servers } from "./Infrastructure/make.js";
-import { Logger } from "./Applications/shared/logger-handler/make.js";
+import { Logger } from "#shared/logger-handler/make.js";
 
-import type { IServer } from "./Domain/IServer";
+import type { IServer } from "#Domain/IServer";
 
 void (async (servers: IServer[]): Promise<void> => {
 	const logger = new Logger("Main");

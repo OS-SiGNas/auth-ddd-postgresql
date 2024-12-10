@@ -1,7 +1,7 @@
 import { env } from "process";
 import { createLogger, format, transports } from "winston";
 
-import type { ILogger } from "../../../Domain/core/ILogger";
+import type { ILogger } from "#Domain/core/ILogger";
 
 export const Logger = (() => {
 	const { combine, colorize, timestamp, printf, align } = format;

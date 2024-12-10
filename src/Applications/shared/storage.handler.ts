@@ -1,8 +1,8 @@
 import { clearInterval } from "node:timers";
 
-import type { ILogger } from "../../Domain/core/ILogger";
-import type { IStorageHandler } from "../../Domain/IStorageHandler";
-import { Core } from "../../Domain/core/Core";
+import type { Core } from "#Domain/core/Core";
+import type { ILogger } from "#Domain/core/ILogger";
+import type { IStorageHandler } from "#Domain/IStorageHandler";
 
 interface Dependences extends Core {
 	keyExpiredTime: number;
@@ -16,7 +16,7 @@ export class StorageHandler implements IStorageHandler {
 	readonly #keyExpiredTime: number;
 
 	constructor(d: Readonly<Dependences>) {
-		this.#isDebug = d.isDebug;
+		this.#isDebug = d.IS_DEBUG;
 		this.#storage = new Map();
 		this.#logger = d.logger;
 		this.#keyExpiredTime = d.keyExpiredTime;
@@ -48,9 +48,13 @@ export class StorageHandler implements IStorageHandler {
 	readonly #clean = async (): Promise<void> => {
 		this.#logger.info(`Cleaning storage with ${this.#storage.size} elements`);
 		const now = Date.now();
-		for (const [key, element] of this.#storage) {
+		/* for (const [key, element] of this.#storage) {
 			if (now - element.createdAt > this.#keyExpiredTime) this.#storage.delete(key);
-		}
+		} */
+		this.#storage.forEach((element, key) => {
+			if (now - element.createdAt > this.#keyExpiredTime) this.#storage.delete(key);
+		});
+
 		this.#logger.info(`Storage cleaned, number of elements: ${this.#storage.size}`);
 		return await Promise.resolve(undefined);
 	};

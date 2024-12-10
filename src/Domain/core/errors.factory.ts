@@ -25,7 +25,6 @@ export abstract class DomainError extends Error {
 //  FACTORY ERRORS:
 
 const createError = (name: string) => {
-	// return class AbstractError extends ErrorBusiness {
 	return class AbstractDomainError extends DomainError {
 		constructor(message: string, statusCode: HttpStatus, ticket?: string) {
 			super({ ticket, name, statusCode, message });

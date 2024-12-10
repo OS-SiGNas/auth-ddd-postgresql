@@ -1,6 +1,6 @@
 import type { Transporter } from "nodemailer";
-import type { Core } from "../../../Domain/core/Core";
-import type { ILogger } from "../../../Domain/core/ILogger";
+import type { Core } from "#Domain/core/Core";
+import type { ILogger } from "#Domain/core/ILogger";
 
 interface EmailMessage {
 	from: string;
@@ -24,7 +24,7 @@ export class _EmailSenderProxy {
 	private constructor(d: Dependences) {
 		this.#transporter = d.transporter;
 		this.#logger = d.logger;
-		this.#isDebug = d.isDebug;
+		this.#isDebug = d.IS_DEBUG;
 	}
 
 	public readonly sendEmail = async (msg: EmailMessage): Promise<void> => {
