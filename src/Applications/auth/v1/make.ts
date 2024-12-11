@@ -20,7 +20,7 @@ import { AuthController } from "./infrastructure/auth.controller.js";
 import type { AuthRouterExpress } from "./infrastructure/auth-express.router";
 import type { AuthRouterFastify } from "./infrastructure/auth-fastify.router";
 
-export const getAuthRouter = async <T extends AuthRouterExpress | AuthRouterFastify>(): Promise<T> => {
+export const getAuthApp = async <T extends AuthRouterExpress | AuthRouterFastify>(): Promise<T> => {
 	const HOR = 3600000;
 	const MIN = 60000;
 

@@ -31,36 +31,33 @@ class Config {
 	}
 
 	readonly #NODE_ENV: Environment;
+	#cacheSecrets?: Secrets;
 
 	private constructor() {
 		this.#NODE_ENV = this.#getSecretFromDotEnv("NODE_ENV") as Environment;
-		const environments: Environment[] = ["development", "production", "testing"];
-		if (!environments.includes(this.#NODE_ENV)) throw this.#error("NODE_ENV", environments);
+		const _environments: Environment[] = ["development", "production", "testing"];
+		if (!_environments.includes(this.#NODE_ENV)) throw this.#error("NODE_ENV", _environments);
 		if (this.#NODE_ENV === "production") loadEnvFile(".env");
 		if (this.#NODE_ENV === "development") loadEnvFile(".env.dev");
 		if (this.#NODE_ENV === "testing") loadEnvFile(".env.test");
 	}
+
+	readonly #getSecretFromDotEnv = (target: keyof Secrets): Readonly<string> => {
+		const _secret = env[String(target)];
+		if (_secret === undefined || _secret.length === 0) throw this.#error(target);
+		console.debug(`[DEBUG] ✓ ${target}`);
+		return _secret;
+	};
 
 	readonly #error = (variable: keyof Secrets, cause?: unknown): Error => {
 		console.error(`[ERROR] x ${variable}`);
 		return new Error(`Environment Variable: \x1B[31m${variable}\x1B[39m is undefined or incompatible 💩`, { cause });
 	};
 
-	readonly #getSecretFromDotEnv = (target: keyof Secrets): Readonly<string> => {
-		const _secret = env[String(target)];
-		if (_secret === undefined || _secret.length === 0) throw this.#error(target);
-		console.debug(`[DEBUG] ✓ ${target}: ${_secret}`);
-		return _secret;
-	};
-
 	readonly #validateNumber = (target: string): number => {
 		if (isNaN(+target)) throw this.#error(target as keyof Secrets, "Secret is NaN");
 		return +target;
 	};
-
-	get IS_DEBUG(): boolean {
-		return this.#NODE_ENV !== "production";
-	}
 
 	public get secrets(): Readonly<Secrets> {
 		console.info("[INFO]  Loading secrets");
@@ -94,7 +91,6 @@ class Config {
 		} as const;
 	}
 
-	#cacheSecrets?: Secrets;
 	public readonly getAsyncSecrets = async (): Promise<Readonly<Secrets>> => {
 		if (this.#cacheSecrets === undefined) {
 			/** Implement async handle secrets service
@@ -102,9 +98,12 @@ class Config {
       this.#cacheSecrets = await strategy() */
 			this.#cacheSecrets = this.secrets;
 		}
-
 		return await Promise.resolve(this.#cacheSecrets);
 	};
+
+	get IS_DEBUG(): boolean {
+		return this.#NODE_ENV !== "production";
+	}
 }
 
 export const { secrets, getAsyncSecrets, IS_DEBUG } = Config.instance;
