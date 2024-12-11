@@ -17,7 +17,7 @@ import type { UsersRouterFastify } from "./infrastructure/users-fastify.router";
 // Error
 import { ModuleException } from "#Domain/core/errors.factory.js";
 
-export const getUsersRouter = async <T extends UsersRouterExpress | UsersRouterFastify>(): Promise<T> => {
+export const getUsersApp = async <T extends UsersRouterExpress | UsersRouterFastify>(): Promise<T> => {
 	const business = new UsersBusiness({
 		logger: new Logger("UsersBusiness"),
 		usersRepository: User,

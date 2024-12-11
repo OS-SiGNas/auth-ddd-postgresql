@@ -9,7 +9,7 @@ const getHttpServerInstance = async (): Promise<IServer> => {
 
 	const _message: Record<Environment, string> = {
 		development: "👽 DEV MODE 👽",
-		test: "🪲 TEST MODE 🪲",
+		testing: "🪲 TEST MODE 🪲",
 		production: "🔥 ON 🔥",
 	} as const;
 
