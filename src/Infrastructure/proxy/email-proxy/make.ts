@@ -1,7 +1,7 @@
 import { createTransport } from "nodemailer";
 import { _EmailSenderProxy } from "./email-sender.proxy.js";
 import { Logger } from "#shared/logger-handler/make.js";
-import { IS_DEBUG } from "#Domain/config.js";
+import { IS_DEBUG } from "#config";
 
 export const emailSender = _EmailSenderProxy.getInstance({
 	IS_DEBUG,

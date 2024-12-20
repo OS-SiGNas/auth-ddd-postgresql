@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
 
-import { secrets } from "#Domain/config.js";
+import { secrets } from "#config";
 import { _PostgreServer } from "./postgre.server.js";
 import { Logger } from "../../Applications/shared/logger-handler/make.js";
 // Entities

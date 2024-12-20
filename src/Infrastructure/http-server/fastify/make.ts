@@ -3,7 +3,7 @@ import { fastifyHelmet } from "@fastify/helmet";
 import { fastifyCors } from "@fastify/cors";
 
 import { FastifyServer } from "./fastify.server.js";
-import { IS_DEBUG, secrets } from "#Domain/config.js";
+import { IS_DEBUG, secrets } from "#config";
 import { Logger } from "#shared/logger-handler/make.js";
 // v1
 import { getAuthApp } from "#auth/v1/make.js";

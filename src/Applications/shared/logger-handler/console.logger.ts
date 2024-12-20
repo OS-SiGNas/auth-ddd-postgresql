@@ -6,26 +6,26 @@ export const Logger = (() => {
 	const date = (): string => `[${new Date().toLocaleString(undefined, { hour12: false })}]`;
 
 	const info = (message: string, ...meta: unknown[]): void => {
-		const strTag = yellow("[INFO]");
-		const strDate = bold(yellow(date()));
+		const strTag = bold(yellow("[INFO]"));
+		const strDate = yellow(date());
 		console.info(`🟡 ${strTag}  ${strDate} :: ${message}`, ...meta);
 	};
 
 	const warn = (message: string, ...meta: unknown[]): void => {
-		const strTag = red("[WARN] ");
-		const strDate = bold(yellow(date()));
+		const strTag = bold(yellow("[WARN] "));
+		const strDate = yellow(date());
 		console.warn(`🟠 ${strTag} ${strDate} :: ${message}`, ...meta);
 	};
 
 	const error = (...error: unknown[]): void => {
-		const strTag = red("[ERROR]");
-		const strDate = bold(red(date()));
+		const strTag = bold(red("[ERROR]"));
+		const strDate = red(date());
 		console.error(`🛑 ${strTag} ${strDate} ::`, ...error);
 	};
 
 	const debug = (...object: unknown[]): void => {
-		const strTag = blue("[DEBUG]");
-		const strDate = bold(blue(date()));
+		const strTag = bold(blue("[DEBUG]"));
+		const strDate = blue(date());
 		console.debug(`🔵 ${strTag} ${strDate} ::`, ...object);
 	};
 

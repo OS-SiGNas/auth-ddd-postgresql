@@ -1,7 +1,7 @@
-import { secrets } from "#Domain/config.js";
+import { secrets } from "#config";
 import { ModuleException } from "#Domain/core/errors.factory.js";
 
-import type { Environment } from "#Domain/config.js";
+import type { Environment } from "#config";
 import type { IServer } from "#Domain/IServer";
 
 const getHttpServerInstance = async (): Promise<IServer> => {

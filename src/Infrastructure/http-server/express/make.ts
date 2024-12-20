@@ -1,5 +1,5 @@
 import Express from "express";
-import { IS_DEBUG, secrets } from "#Domain/config.js";
+import { IS_DEBUG, secrets } from "#config";
 import { Logger } from "#shared/logger-handler/make.js";
 
 import { ExpressServer } from "./express.server.js";

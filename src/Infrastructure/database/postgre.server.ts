@@ -12,12 +12,12 @@ export class _PostgreServer implements IServer {
 	static #instance?: _PostgreServer;
 	static getInstance = (d: Dependences): Readonly<_PostgreServer> => (this.#instance ??= new _PostgreServer(d));
 
+	#connection?: DataSource;
 	readonly #dataSource: DataSource;
 	readonly #logger: ILogger;
-	#connection?: DataSource;
-	#timeRetrying?: NodeJS.Timeout;
-	#nextTry = 1;
-	#maximunRetryTime: number;
+	readonly #maximunRetryTime: number;
+	#timeOutRetrying?: NodeJS.Timeout;
+	#nextTry = 60000;
 
 	private constructor(d: Readonly<Dependences>) {
 		this.#dataSource = d.dataSource;
@@ -28,12 +28,12 @@ export class _PostgreServer implements IServer {
 	public readonly start = async (): Promise<void> => {
 		this.#logger.info("Starting connection");
 		try {
-			if (this.#timeRetrying !== undefined) clearTimeout(this.#timeRetrying);
+			if (this.#timeOutRetrying !== undefined) clearTimeout(this.#timeOutRetrying);
 			this.#connection ??= await this.#dataSource.initialize();
 		} catch (error) {
 			if (error instanceof AggregateError) {
 				error.errors.forEach((e) => this.#logger.error(e.message));
-				this.#timeRetrying = setTimeout(async () => await this.restart(), this.#nextTry);
+				this.#timeOutRetrying = setTimeout(async () => await this.restart(), this.#nextTry);
 				this.#logger.debug(`Next try connection in: ${this.#nextTry / 1000}s`);
 			} else throw error;
 		} finally {
