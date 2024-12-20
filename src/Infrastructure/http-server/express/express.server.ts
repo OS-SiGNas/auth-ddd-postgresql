@@ -38,13 +38,14 @@ export class ExpressServer implements IServer {
 	};
 
 	public readonly stop = (): void => {
-		this.#logger.info(`Stopping`);
+		this.#httpServer?.closeIdleConnections();
 		this.#httpServer?.close();
+		this.#logger.info(`Stopped`);
 	};
 
 	public readonly restart = async (): Promise<void> => {
 		this.#logger.info("Restarting");
 		this.#httpServer?.close();
-		await this.start();
+		await Promise.resolve(this.start());
 	};
 }

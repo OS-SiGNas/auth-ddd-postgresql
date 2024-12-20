@@ -38,6 +38,6 @@ export class FastifyServer implements IServer {
 	public readonly restart = async (): Promise<void> => {
 		await this.stop();
 		this.#logger.info("restarting");
-		await this.start();
+		await Promise.resolve(this.start());
 	};
 }
