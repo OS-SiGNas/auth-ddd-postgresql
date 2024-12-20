@@ -3,11 +3,13 @@
 This application is example for DDD, and framework abstraction, you can switch build strateggy like express or fastify, logger winston or console with a environment variable. look #Domain/config.ts.
 
 # dotenv config:
+
 ```
 .env for producction
 .env.dev for development mode
 .env.test for testing mode
 ```
+
 ```
 # Http
 
@@ -27,7 +29,7 @@ PG_RETRY_TIME=1800000
 
 # ACCESS TOKEN
 
-JWT_ACCESS_SECRET_KEY=LaGallinaPelipescuesipelicrespa
+JWT_ACCESS_SECRET_KEY=
 JWT_ACCESS_EXPIRED_TIME=1h
 
 # REFRESH TOKEN
@@ -40,4 +42,5 @@ JWT_REFRESH_EXPIRED_TIME=24h
 JWT_AA_SECRET_KEY=
 JWT_AA_EXPIRED_TIME=15m
 ```
+
 ### script dev:concurrently is the best option for development mode
