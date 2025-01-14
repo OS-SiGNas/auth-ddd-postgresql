@@ -1,4 +1,4 @@
-import { IS_DEBUG, secrets } from "#config";
+import { DEBUG_MODE, secrets } from "#config";
 import { passwordHandler } from "#shared/password-handler/make.js";
 import { Logger } from "#shared/logger-handler/make.js";
 import { errorHandler } from "#shared/error-handler/make.js";
@@ -23,7 +23,7 @@ export const getUsersApp = async <T extends UsersRouterExpress | UsersRouterFast
 		usersRepository: User,
 		rolesRepository: Role,
 		passwordHandler,
-		IS_DEBUG,
+		DEBUG_MODE,
 	});
 
 	const controller = new UsersController({
@@ -33,7 +33,7 @@ export const getUsersApp = async <T extends UsersRouterExpress | UsersRouterFast
 		sessionHandler,
 		errorHandler,
 		business,
-		IS_DEBUG,
+		DEBUG_MODE,
 	});
 
 	if (secrets.HTTP_SERVICE === "express") {

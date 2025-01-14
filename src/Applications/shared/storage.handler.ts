@@ -16,7 +16,7 @@ export class StorageHandler implements IStorageHandler {
 	readonly #keyExpiredTime: number;
 
 	constructor(d: Readonly<Dependences>) {
-		this.#isDebug = d.IS_DEBUG;
+		this.#isDebug = d.DEBUG_MODE;
 		this.#storage = new Map();
 		this.#logger = d.logger;
 		this.#keyExpiredTime = d.keyExpiredTime;

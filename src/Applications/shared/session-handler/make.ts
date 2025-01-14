@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import { ITokenPayload } from "#Domain/business/ISession.js";
-import { secrets, IS_DEBUG } from "#config";
+import { secrets, DEBUG_MODE } from "#config";
 import { TokenHandler } from "../token.handler.js";
 import { Logger } from "../logger-handler/make.js";
 import { _SessionHandler } from "./_session.handler.js";
@@ -15,7 +15,7 @@ export const sessionHandler = _SessionHandler.getInstance({
 		logger: new Logger("AccessTokenHandler"),
 		sign,
 		verify,
-		IS_DEBUG,
+		DEBUG_MODE,
 	}),
 	refreshTokenHandler: new TokenHandler<ITokenPayload>({
 		jwtSecretKey: secrets.JWT_REFRESH_SECRET_KEY,
@@ -23,6 +23,6 @@ export const sessionHandler = _SessionHandler.getInstance({
 		logger: new Logger("RefreshTokenHandler"),
 		sign,
 		verify,
-		IS_DEBUG,
+		DEBUG_MODE,
 	}),
 });

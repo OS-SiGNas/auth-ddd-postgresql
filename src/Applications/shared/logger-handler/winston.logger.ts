@@ -16,7 +16,7 @@ export const Logger = (() => {
 		),
 	});
 
-	return class Logger implements ILogger {
+	return class WinstonLogger implements ILogger {
 		readonly #name: string;
 
 		constructor(name: string) {

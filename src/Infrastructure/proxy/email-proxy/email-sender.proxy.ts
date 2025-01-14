@@ -24,7 +24,7 @@ export class _EmailSenderProxy {
 	private constructor(d: Dependences) {
 		this.#transporter = d.transporter;
 		this.#logger = d.logger;
-		this.#isDebug = d.IS_DEBUG;
+		this.#isDebug = d.DEBUG_MODE;
 	}
 
 	public readonly sendEmail = async (msg: EmailMessage): Promise<void> => {

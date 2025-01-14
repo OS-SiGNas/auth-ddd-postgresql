@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 // Global Domain
-import { secrets, IS_DEBUG } from "#config";
+import { secrets, DEBUG_MODE } from "#config";
 import { ModuleException } from "#Domain/core/errors.factory.js";
 // Application users
 import { User } from "#users/v1/domain/entities/users.entity.js";
@@ -25,10 +25,10 @@ export const getAuthApp = async <T extends AuthRouterExpress | AuthRouterFastify
 	const MIN = 60000;
 
 	const storage = new StorageHandler({
-		cacheExpiredTime: IS_DEBUG ? 0.5 * HOR : 6 * HOR,
-		keyExpiredTime: IS_DEBUG ? 5 * MIN : 10 * MIN,
+		cacheExpiredTime: DEBUG_MODE ? 0.5 * HOR : 6 * HOR,
+		keyExpiredTime: DEBUG_MODE ? 5 * MIN : 10 * MIN,
 		logger: new Logger("AuthBusinessStorage"),
-		IS_DEBUG,
+		DEBUG_MODE,
 	});
 
 	const activateAccountTokenHandler = new TokenHandler<{ email: string }>({
@@ -37,7 +37,7 @@ export const getAuthApp = async <T extends AuthRouterExpress | AuthRouterFastify
 		jwtSecretKey: secrets.JWT_AA_SECRET_KEY,
 		verify: jwt.verify,
 		sign: jwt.sign,
-		IS_DEBUG,
+		DEBUG_MODE,
 	});
 
 	const business = new AuthBusiness({
@@ -46,7 +46,7 @@ export const getAuthApp = async <T extends AuthRouterExpress | AuthRouterFastify
 		repository: User,
 		passwordHandler,
 		storage,
-		IS_DEBUG,
+		DEBUG_MODE,
 	});
 
 	const controller = new AuthController({
@@ -56,7 +56,7 @@ export const getAuthApp = async <T extends AuthRouterExpress | AuthRouterFastify
 		sessionHandler,
 		errorHandler,
 		business,
-		IS_DEBUG,
+		DEBUG_MODE,
 	});
 
 	if (secrets.HTTP_SERVICE === "express") {

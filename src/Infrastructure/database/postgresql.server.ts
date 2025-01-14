@@ -12,6 +12,7 @@ export class _PostgreServer implements IServer {
 	static #instance?: _PostgreServer;
 	static getInstance = (d: Dependences): Readonly<_PostgreServer> => (this.#instance ??= new _PostgreServer(d));
 
+	#isRunning: boolean;
 	#connection?: DataSource;
 	readonly #dataSource: DataSource;
 	readonly #logger: ILogger;
@@ -20,12 +21,14 @@ export class _PostgreServer implements IServer {
 	#nextTry = 60000;
 
 	private constructor(d: Readonly<Dependences>) {
+		this.#isRunning = false;
 		this.#dataSource = d.dataSource;
 		this.#logger = d.logger;
 		this.#maximunRetryTime = d.retryTime;
 	}
 
 	public readonly start = async (): Promise<void> => {
+		if (this.#isRunning) return;
 		this.#logger.info("Starting connection");
 		try {
 			if (this.#timeOutRetrying !== undefined) clearTimeout(this.#timeOutRetrying);
@@ -37,11 +40,15 @@ export class _PostgreServer implements IServer {
 				this.#logger.debug(`Next try connection in: ${this.#nextTry / 1000}s`);
 			} else throw error;
 		} finally {
-			if (this.#connection !== undefined) this.#logger.info("Connection success");
+			if (this.#connection !== undefined) {
+				this.#isRunning = true;
+				this.#logger.info("Connection success");
+			}
 		}
 	};
 
 	public readonly stop = async (): Promise<void> => {
+		if (!this.#isRunning) return;
 		await this.#connection?.destroy().then(() => (this.#connection = undefined));
 		this.#logger.warn("Connection stoped");
 	};

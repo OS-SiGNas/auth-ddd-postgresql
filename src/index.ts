@@ -1,28 +1,32 @@
 import "reflect-metadata";
-import { servers } from "./Infrastructure/make.js";
+import { DEBUG_MODE } from "#config";
 import { Logger } from "#shared/logger-handler/make.js";
+import { servers } from "./Infrastructure/make.js";
 
-import type { IServer } from "#Domain/IServer";
+void class {
+	static readonly #logger = new Logger("Main");
 
-void (async (servers: IServer[]): Promise<void> => {
-	const _logger = new Logger("Main");
-	_logger.info(`Application init`);
-
-	const _shutdownGracefully = (): void => {
-		for (const { stop } of servers) stop();
-		_logger.info("Exiting");
-		process.exit(1);
+	public static readonly init = async (): Promise<void> => {
+		this.#logger.info("Starting Application");
+		try {
+			await this.#boot();
+			process.on("SIGINT", this.#shutdownGracefully);
+			process.on("SIGTERM", this.#shutdownGracefully);
+		} catch (error) {
+			this.#logger.error("Application crashed");
+			if (DEBUG_MODE) console.trace("\n", error);
+			await this.#shutdownGracefully();
+		}
 	};
 
-	try {
+	static readonly #boot = async (): Promise<void> => {
 		for (const { start } of servers) await start();
-		_logger.info("All servers started");
-	} catch (error) {
-		_logger.error("Application crashed");
-		console.trace("\n", error);
-		_shutdownGracefully();
-	}
+		this.#logger.info("All servers started");
+	};
 
-	process.on("SIGINT", _shutdownGracefully);
-	process.on("SIGTERM", _shutdownGracefully);
-})(servers);
+	static readonly #shutdownGracefully = async (): Promise<void> => {
+		for (const { stop } of servers) await stop();
+		this.#logger.info("Shudown Gracefully");
+		process.exit(1);
+	};
+}.init();

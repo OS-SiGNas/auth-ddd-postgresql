@@ -1,6 +1,12 @@
 import { secrets } from "#config";
+import { ModuleException } from "#Domain/core/errors.factory.js";
 
-//export { Logger } from "./winston.logger.js";
-//export { Logger } from "./console.logger.js";
+import type { Logger as WinstonLogger } from "./winston.logger";
+import type { Logger as ConsoleLogger } from "./console.logger";
 
-export const { Logger } = await import(`./${secrets.LOGGER_SERVICE}.logger.js`);
+type PromiseLogger = Promise<typeof WinstonLogger | typeof ConsoleLogger>;
+export const Logger = await (async (): PromiseLogger => {
+	if (secrets.LOGGER_SERVICE === "console") return (await import("./console.logger.js")).Logger;
+	if (secrets.LOGGER_SERVICE === "winston") return (await import("./winston.logger.js")).Logger;
+	throw new ModuleException("Logger class undefined", 500);
+})();

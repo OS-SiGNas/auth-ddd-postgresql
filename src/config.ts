@@ -1,21 +1,7 @@
 import { env, loadEnvFile } from "node:process";
+import { z, ZodError } from "zod";
 
-export type Environment = "development" | "production" | "testing";
-export type HttpService = "express" | "fastify";
-export type LoggerService = "console" | "winston";
-
-interface Secrets {
-	NODE_ENV: Environment;
-	LOGGER_SERVICE: LoggerService;
-	THIS_URL: string;
-	HTTP_SERVICE: HttpService;
-	PORT: number;
-	PG_HOST: string;
-	PG_PORT: number;
-	PG_USERNAME: string;
-	PG_PASSWORD: string;
-	PG_DATABASE: string;
-	PG_RETRY_TIME: number;
+interface JsonWebTokenSecrets {
 	JWT_ACCESS_SECRET_KEY: string;
 	JWT_ACCESS_EXPIRED_TIME: string;
 	JWT_REFRESH_SECRET_KEY: string;
@@ -24,86 +10,94 @@ interface Secrets {
 	JWT_AA_EXPIRED_TIME: string;
 }
 
+interface PostgreSQLSecrets {
+	PG_HOST: string;
+	PG_PORT: number;
+	PG_USERNAME: string;
+	PG_PASSWORD: string;
+	PG_DATABASE: string;
+	PG_RETRY_TIME: number;
+}
+
+type Environment = "development" | "production" | "testing";
+type HttpService = "express" | "fastify";
+type LoggerService = "console" | "winston";
+
+interface Secrets extends JsonWebTokenSecrets, PostgreSQLSecrets {
+	THIS_URL: string;
+	PORT: number;
+	LOGGER_SERVICE: LoggerService;
+	HTTP_SERVICE: HttpService;
+}
+
 class Config {
 	static #instance?: Config; // crazy singleton 🤡
 	static get instance(): Readonly<Config> {
 		return (this.#instance ??= new Config());
 	}
 
+	readonly #env: NodeJS.ProcessEnv;
 	readonly #NODE_ENV: Environment;
-	#cacheSecrets?: Secrets;
+	readonly #secrets: Secrets;
 
 	private constructor() {
-		this.#NODE_ENV = this.#getSecretFromDotEnv("NODE_ENV") as Environment;
-		const _environments: Environment[] = ["development", "production", "testing"];
-		if (!_environments.includes(this.#NODE_ENV)) throw this.#error("NODE_ENV", _environments);
-		if (this.#NODE_ENV === "production") loadEnvFile(".env");
-		if (this.#NODE_ENV === "development") loadEnvFile(".env.dev");
-		if (this.#NODE_ENV === "testing") loadEnvFile(".env.test");
+		try {
+			this.#env = env;
+			this.#NODE_ENV = this.#getEnvironment();
+			this.#secrets = this.#getSecrets();
+		} catch (error) {
+			let cause: string[] | undefined;
+			if (error instanceof ZodError) cause = error.issues.map(({ path, message }) => `${path}: ${message}`);
+			throw new Error("Dotenv file incompatible", Array.isArray(cause) ? { cause } : undefined);
+		}
 	}
 
-	readonly #getSecretFromDotEnv = (target: keyof Secrets): Readonly<string> => {
-		const _secret = env[String(target)];
-		if (_secret === undefined || _secret.length === 0) throw this.#error(target);
-		console.debug(`[DEBUG] ✓ ${target}`);
-		return _secret;
+	readonly #getEnvironment = (): Environment => {
+		const NODE_ENV: Environment = z.enum(["production", "testing", "development"]).parse(this.#env.NODE_ENV);
+		if (NODE_ENV === "production") loadEnvFile(".env");
+		if (NODE_ENV === "development") loadEnvFile(".env.dev");
+		if (NODE_ENV === "testing") loadEnvFile(".env.test");
+		return NODE_ENV;
 	};
 
-	readonly #error = (variable: keyof Secrets, cause?: unknown): Error => {
-		console.error(`[ERROR] x ${variable}`);
-		return new Error(`Environment Variable: \x1B[31m${variable}\x1B[39m is undefined or incompatible 💩`, { cause });
-	};
+	readonly #getSecrets = (): Secrets => {
+		const zString = z.string().min(1);
+		const zPort = z.string().transform(Number).pipe(z.number().positive().min(3000).max(35536));
+		const zNumber = z.string().transform(Number).pipe(z.number().positive());
+		const zPassword = z.string().min(8).max(64);
+		const schema = {
+			LOGGER_SERVICE: z.enum(["winston", "console"]),
+			HTTP_SERVICE: z.enum(["express", "fastify"]),
+			THIS_URL: zString,
+			PORT: zPort,
+			PG_HOST: zString,
+			PG_PORT: zPort,
+			PG_USERNAME: zString,
+			PG_PASSWORD: zPassword,
+			PG_DATABASE: zString,
+			PG_RETRY_TIME: zNumber,
+			JWT_ACCESS_SECRET_KEY: zString,
+			JWT_ACCESS_EXPIRED_TIME: zString,
+			JWT_REFRESH_SECRET_KEY: zString,
+			JWT_REFRESH_EXPIRED_TIME: zString,
+			JWT_AA_SECRET_KEY: zString,
+			JWT_AA_EXPIRED_TIME: zString,
+		};
 
-	readonly #validateNumber = (target: string): number => {
-		if (isNaN(+target)) throw this.#error(target as keyof Secrets, "Secret is NaN");
-		return +target;
+		return z.object(schema).parse(this.#env);
 	};
 
 	public get secrets(): Readonly<Secrets> {
-		console.info("[INFO]  Loading secrets");
-
-		const LOGGER_SERVICE = this.#getSecretFromDotEnv("LOGGER_SERVICE") as LoggerService;
-		const _loggers: LoggerService[] = ["console", "winston"];
-		if (!_loggers.includes(LOGGER_SERVICE)) throw this.#error("LOGGER_SERVICE", _loggers);
-
-		const HTTP_SERVICE = this.#getSecretFromDotEnv("HTTP_SERVICE") as HttpService;
-		const _httpServices: HttpService[] = ["express", "fastify"];
-		if (!_httpServices.includes(HTTP_SERVICE)) throw this.#error("HTTP_SERVICE", _httpServices);
-
-		return {
-			NODE_ENV: this.#NODE_ENV,
-			LOGGER_SERVICE,
-			THIS_URL: this.#getSecretFromDotEnv("THIS_URL"),
-			HTTP_SERVICE,
-			PORT: this.#validateNumber(this.#getSecretFromDotEnv("PORT")),
-			PG_HOST: this.#getSecretFromDotEnv("PG_HOST"),
-			PG_PORT: this.#validateNumber(this.#getSecretFromDotEnv("PG_PORT")),
-			PG_USERNAME: this.#getSecretFromDotEnv("PG_USERNAME"),
-			PG_PASSWORD: this.#getSecretFromDotEnv("PG_PASSWORD"),
-			PG_DATABASE: this.#getSecretFromDotEnv("PG_DATABASE"),
-			PG_RETRY_TIME: this.#validateNumber(this.#getSecretFromDotEnv("PG_RETRY_TIME")),
-			JWT_ACCESS_SECRET_KEY: this.#getSecretFromDotEnv("JWT_ACCESS_SECRET_KEY"),
-			JWT_ACCESS_EXPIRED_TIME: this.#getSecretFromDotEnv("JWT_ACCESS_EXPIRED_TIME"),
-			JWT_REFRESH_SECRET_KEY: this.#getSecretFromDotEnv("JWT_REFRESH_SECRET_KEY"),
-			JWT_REFRESH_EXPIRED_TIME: this.#getSecretFromDotEnv("JWT_REFRESH_EXPIRED_TIME"),
-			JWT_AA_SECRET_KEY: this.#getSecretFromDotEnv("JWT_AA_SECRET_KEY"),
-			JWT_AA_EXPIRED_TIME: this.#getSecretFromDotEnv("JWT_AA_EXPIRED_TIME"),
-		} as const;
+		return this.#secrets;
 	}
 
-	public readonly getAsyncSecrets = async (): Promise<Readonly<Secrets>> => {
-		if (this.#cacheSecrets === undefined) {
-			/** Implement async handle secrets service
-      const strategy = this.#getAsyncSecretStrategy('AWS')
-      this.#cacheSecrets = await strategy() */
-			this.#cacheSecrets = this.secrets;
-		}
-		return await Promise.resolve(this.#cacheSecrets);
-	};
+	public get NODE_ENV(): Readonly<Environment> {
+		return this.#NODE_ENV;
+	}
 
-	get IS_DEBUG(): boolean {
+	public get DEBUG_MODE(): boolean {
 		return this.#NODE_ENV !== "production";
 	}
 }
 
-export const { secrets, getAsyncSecrets, IS_DEBUG } = Config.instance;
+export const { secrets, NODE_ENV, DEBUG_MODE } = Config.instance;

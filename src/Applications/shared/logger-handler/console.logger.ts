@@ -1,6 +1,6 @@
 import { red, yellow, bold, blue } from "./colors.utils.js";
 
-import type { ILogger } from "#Domain/core/ILogger.js";
+import type { ILogger } from "#Domain/core/ILogger";
 
 export const Logger = (() => {
 	const date = (): string => `[${new Date().toLocaleString(undefined, { hour12: false })}]`;
@@ -29,7 +29,7 @@ export const Logger = (() => {
 		console.debug(`🔵 ${strTag} ${strDate} ::`, ...object);
 	};
 
-	return class Logger implements ILogger {
+	return class ConsoleLogger implements ILogger {
 		readonly #name: string;
 
 		constructor(name: string) {

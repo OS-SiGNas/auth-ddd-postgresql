@@ -3,7 +3,7 @@ import { fastifyHelmet } from "@fastify/helmet";
 import { fastifyCors } from "@fastify/cors";
 
 import { FastifyServer } from "./fastify.server.js";
-import { IS_DEBUG, secrets } from "#config";
+import { DEBUG_MODE, secrets } from "#config";
 import { Logger } from "#shared/logger-handler/make.js";
 // v1
 import { getAuthApp } from "#auth/v1/make.js";
@@ -25,11 +25,11 @@ export const getFastifyServer = async (message: string): Promise<FastifyServer> 
 
 	return new FastifyServer({
 		globalMiddlewares: [fastifyHelmet, fastifyCors],
-		app: Fastify({ logger: IS_DEBUG }),
+		app: Fastify({ logger: DEBUG_MODE }),
 		port: +secrets.PORT,
 		message,
 		apis: [await _v1()],
 		logger: new Logger("FastifyServer"),
-		IS_DEBUG,
+		DEBUG_MODE,
 	});
 };

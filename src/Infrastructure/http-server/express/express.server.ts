@@ -19,8 +19,10 @@ export class ExpressServer implements IServer {
 	readonly #logger: ILogger;
 	readonly #message: string;
 	#httpServer?: Server;
+	#isRunning: boolean;
 
 	constructor(d: Readonly<Dependences>) {
+		this.#isRunning = false;
 		this.#app = d.app;
 		this.#port = d.port;
 		this.#message = d.message;
@@ -32,20 +34,24 @@ export class ExpressServer implements IServer {
 	}
 
 	public readonly start = async (): Promise<void> => {
+		if (this.#isRunning) return;
 		this.#httpServer = this.#app.listen(this.#port, () => {
 			this.#logger.info(`Running in: http://127.0.0.1:${this.#port} ${this.#message}`);
+			this.#isRunning = true;
 		});
 	};
 
-	public readonly stop = (): void => {
+	public readonly stop = async (): Promise<void> => {
+		if (!this.#isRunning) return;
 		this.#httpServer?.closeIdleConnections();
 		this.#httpServer?.close();
-		this.#logger.info(`Stopped`);
+		this.#isRunning = false;
+		Promise.resolve(this.#logger.info(`Stopped`));
 	};
 
 	public readonly restart = async (): Promise<void> => {
 		this.#logger.info("Restarting");
-		this.#httpServer?.close();
+		await this.stop();
 		await Promise.resolve(this.start());
 	};
 }

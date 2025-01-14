@@ -1,5 +1,5 @@
 import Express, { Router } from "express";
-import { IS_DEBUG, secrets } from "#config";
+import { DEBUG_MODE, secrets } from "#config";
 import { Logger } from "#shared/logger-handler/make.js";
 
 import { ExpressServer } from "./express.server.js";
@@ -32,6 +32,6 @@ export const getExpressServer = async (message: string): Promise<ExpressServer> 
 		apis: [await _v1()],
 		lastMiddlewares,
 		logger: new Logger("ExpressServer"),
-		IS_DEBUG,
+		DEBUG_MODE,
 	});
 };

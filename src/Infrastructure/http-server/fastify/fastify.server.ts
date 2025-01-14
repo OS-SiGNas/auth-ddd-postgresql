@@ -16,7 +16,9 @@ export class FastifyServer implements IServer {
 	readonly #port: number;
 	readonly #logger: ILogger;
 	readonly #message: string;
+	#isRunning: boolean;
 	constructor(d: Readonly<Dependences>) {
+		this.#isRunning = false;
 		this.#app = d.app;
 		this.#port = d.port;
 		this.#logger = d.logger;
@@ -27,17 +29,21 @@ export class FastifyServer implements IServer {
 	}
 
 	public readonly start = async (): Promise<void> => {
+		if (this.#isRunning) return;
 		await this.#app.listen({ port: this.#port });
 		this.#logger.info(`Running in: http://127.0.0.1:${this.#port} ${this.#message}`);
+		this.#isRunning = true;
 	};
 
 	public readonly stop = async (): Promise<void> => {
+		if (!this.#isRunning) return;
 		await this.#app.close();
+		this.#isRunning = false;
 	};
 
 	public readonly restart = async (): Promise<void> => {
-		await this.stop();
 		this.#logger.info("restarting");
+		await this.stop();
 		await Promise.resolve(this.start());
 	};
 }
