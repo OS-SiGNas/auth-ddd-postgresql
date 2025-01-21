@@ -21,7 +21,7 @@ void class {
 
 	static readonly #boot = async (): Promise<void> => {
 		for (const { start } of servers) await start();
-		this.#logger.info("All servers started");
+		this.#logger.info(servers.length + " Servers started");
 	};
 
 	static readonly #shutdownGracefully = async (): Promise<void> => {

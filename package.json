@@ -14,7 +14,7 @@
 		"dev:tsx": "export NODE_ENV=development && tsx --watch ./src/index.ts",
 		"dev:ts": "export NODE_ENV=development && nodemon --watch 'src/**/*.ts' --exec 'ts-node --esm src/index.ts'",
 		"dev:tsc": "export NODE_ENV=development && nodemon --watch 'src/**/*.ts' --exec 'tsc && node dist/index.js'",
-		"dev:node": "export NODE_ENV=development && node --experimental-loader=ts-node/esm --experimental-specifier-resolution=node --watch src/index.ts",
+		"dev:node": "NODE_ENV=development node --experimental-loader=ts-node/esm --experimental-specifier-resolution=node --watch src/index.ts",
 		"typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
 		"migration:generate": "typeorm migration:generate ./migrations/PostRefactoring",
 		"migration:run": "typeorm migration:run -- -d path-to-datasource-config",
@@ -68,6 +68,6 @@
 		"tsx": "^4.19.2",
 		"typeorm": "^0.3.20",
 		"winston": "^3.17.0",
-		"zod": "^3.23.8"
+		"zod": "^3.24.1"
 	}
 }

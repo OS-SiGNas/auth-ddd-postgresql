@@ -1,11 +1,11 @@
-import { env } from "process";
+import { env } from "node:process";
 import { createLogger, format, transports } from "winston";
 
 import type { ILogger } from "#Domain/core/ILogger";
 
 export const Logger = (() => {
 	const { combine, colorize, timestamp, printf, align } = format;
-	const winston = createLogger({
+	const _winston = createLogger({
 		level: env.LOG_LEVEL ?? "debug",
 		transports: [new transports.Console()],
 		format: combine(
@@ -24,19 +24,19 @@ export const Logger = (() => {
 		}
 
 		public readonly info = (message: string): void => {
-			winston.info(`🟡 [${this.#name}] ${message}`);
+			_winston.info(`🟡 [${this.#name}] ${message}`);
 		};
 
 		public readonly warn = (message: string): void => {
-			winston.warn(`🟠 [${this.#name}] ${message}`);
+			_winston.warn(`🟠 [${this.#name}] ${message}`);
 		};
 
 		public readonly error = (message: string): void => {
-			winston.error(`🔴 [${this.#name}] ${message}`);
+			_winston.error(`🔴 [${this.#name}] ${message}`);
 		};
 
 		public readonly debug = (message: unknown): void => {
-			winston.debug(`🔵 [${this.#name}] ${message}`);
+			_winston.debug(`🔵 [${this.#name}] ${message}`);
 		};
 	};
 })();

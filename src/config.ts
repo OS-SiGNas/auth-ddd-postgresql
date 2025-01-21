@@ -46,9 +46,9 @@ class Config {
 			this.#NODE_ENV = this.#getEnvironment();
 			this.#secrets = this.#getSecrets();
 		} catch (error) {
-			let cause: string[] | undefined;
-			if (error instanceof ZodError) cause = error.issues.map(({ path, message }) => `${path}: ${message}`);
-			throw new Error("Dotenv file incompatible", Array.isArray(cause) ? { cause } : undefined);
+			if (!(error instanceof ZodError)) throw error;
+			const cause: string[] = error.issues.map(({ path, message }) => `${path}: ${message}`);
+			throw new Error("( Config ) Dotenv file incompatible 💩", { cause });
 		}
 	}
 
@@ -61,7 +61,7 @@ class Config {
 	};
 
 	readonly #getSecrets = (): Secrets => {
-		const zString = z.string().min(1);
+		const zString = z.string().nonempty();
 		const zPort = z.string().transform(Number).pipe(z.number().positive().min(3000).max(35536));
 		const zNumber = z.string().transform(Number).pipe(z.number().positive());
 		const zPassword = z.string().min(8).max(64);
