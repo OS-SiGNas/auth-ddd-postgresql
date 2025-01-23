@@ -1,6 +1,10 @@
 import { env, loadEnvFile } from "node:process";
 import { z, ZodError } from "zod";
 
+export type Environment = "development" | "production" | "testing";
+type HttpService = "express" | "fastify";
+type LoggerService = "console" | "winston";
+
 interface JsonWebTokenSecrets {
 	JWT_ACCESS_SECRET_KEY: string;
 	JWT_ACCESS_EXPIRED_TIME: string;
@@ -18,10 +22,6 @@ interface PostgreSQLSecrets {
 	PG_DATABASE: string;
 	PG_RETRY_TIME: number;
 }
-
-type Environment = "development" | "production" | "testing";
-type HttpService = "express" | "fastify";
-type LoggerService = "console" | "winston";
 
 interface Secrets extends JsonWebTokenSecrets, PostgreSQLSecrets {
 	THIS_URL: string;

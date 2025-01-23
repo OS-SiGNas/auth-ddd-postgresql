@@ -1,4 +1,5 @@
 import type { DataSource } from "typeorm";
+
 import type { IServer } from "#Domain/IServer";
 import type { ILogger } from "#Domain/core/ILogger";
 
@@ -29,9 +30,9 @@ export class _PostgreServer implements IServer {
 
 	public readonly start = async (): Promise<void> => {
 		if (this.#isRunning) return;
-		this.#logger.info("Starting connection");
+		this.#logger.info("Starting database connection");
+		if (this.#timeOutRetrying !== undefined) clearTimeout(this.#timeOutRetrying);
 		try {
-			if (this.#timeOutRetrying !== undefined) clearTimeout(this.#timeOutRetrying);
 			this.#connection ??= await this.#dataSource.initialize();
 		} catch (error) {
 			if (error instanceof AggregateError) {

@@ -13,7 +13,7 @@ import type { UsersRouterFastify } from "#users/v1/infrastructure/users-fastify.
 import type { AuthRouterFastify } from "#auth/v1/infrastructure/auth-fastify.router";
 import type { FastifyPluginCallback } from "fastify";
 
-export const getFastifyServer = async (message: string): Promise<FastifyServer> => {
+export const getFastifyServer = async (): Promise<FastifyServer> => {
 	const _v1 = async (): Promise<FastifyPluginCallback[]> => {
 		const [auth, users] = await Promise.all([
 			getAuthApp<AuthRouterFastify>(), // 0
@@ -27,7 +27,6 @@ export const getFastifyServer = async (message: string): Promise<FastifyServer> 
 		globalMiddlewares: [fastifyHelmet, fastifyCors],
 		app: Fastify({ logger: DEBUG_MODE }),
 		port: +secrets.PORT,
-		message,
 		apis: [await _v1()],
 		logger: new Logger("FastifyServer"),
 		DEBUG_MODE,

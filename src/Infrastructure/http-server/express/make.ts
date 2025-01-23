@@ -12,7 +12,7 @@ import type { RequestHandler } from "express";
 import type { AuthRouterExpress } from "#auth/v1/infrastructure/auth-express.router";
 import type { UsersRouterExpress } from "#users/v1/infrastructure/users-express.router";
 
-export const getExpressServer = async (message: string): Promise<ExpressServer> => {
+export const getExpressServer = async (): Promise<ExpressServer> => {
 	const eRouter = Router();
 
 	const _v1 = async (): Promise<RequestHandler[]> => {
@@ -27,7 +27,6 @@ export const getExpressServer = async (message: string): Promise<ExpressServer> 
 	return new ExpressServer({
 		app: Express(),
 		port: +secrets.PORT,
-		message,
 		globalMiddlewares,
 		apis: [await _v1()],
 		lastMiddlewares,

@@ -10,14 +10,12 @@ interface Dependences extends Core {
 	apis: RequestHandler[][];
 	lastMiddlewares: Array<RequestHandler | ErrorRequestHandler>;
 	port: number;
-	message: string;
 }
 
 export class ExpressServer implements IServer {
 	readonly #app: Application;
 	readonly #port: number;
 	readonly #logger: ILogger;
-	readonly #message: string;
 	#httpServer?: Server;
 	#isRunning: boolean;
 
@@ -25,7 +23,6 @@ export class ExpressServer implements IServer {
 		this.#isRunning = false;
 		this.#app = d.app;
 		this.#port = d.port;
-		this.#message = d.message;
 		this.#logger = d.logger;
 
 		this.#app.use(d.globalMiddlewares); // 1: first position for express global middlewares
@@ -35,8 +32,9 @@ export class ExpressServer implements IServer {
 
 	public readonly start = async (): Promise<void> => {
 		if (this.#isRunning) return;
+		this.#logger.info("Starting http server");
 		this.#httpServer = this.#app.listen(this.#port, () => {
-			this.#logger.info(`Running in: http://127.0.0.1:${this.#port} ${this.#message}`);
+			this.#logger.info(`Running in: http://127.0.0.1:${this.#port}`);
 			this.#isRunning = true;
 		});
 	};
