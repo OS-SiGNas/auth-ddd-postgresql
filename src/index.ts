@@ -2,7 +2,6 @@ import "reflect-metadata";
 
 import { DEBUG_MODE, NODE_ENV } from "#config";
 
-//  TODO: import { eventBus } from "#shared/event-handler/make.js"
 import { Logger } from "#shared/logger-handler/make.js";
 import { servers } from "./Infrastructure/make.js";
 
