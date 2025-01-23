@@ -13,18 +13,18 @@ export const index = new (class {
 export default new (class { */
 void new (class {
 	#hasError: boolean = false;
-
 	readonly #servers: IServer[] = servers;
 	readonly #logger = new Logger("API-GATEWAY");
 	readonly #environment: Environment = NODE_ENV;
-	readonly #envMessage: Record<Environment, string> = {
+	readonly #environmentMessage: string = {
 		development: "👽 DEV MODE 👽",
 		testing: "🪲 TEST MODE 🪲",
 		production: "🔥 ON 🔥",
-	};
+	}[this.#environment];
 
 	/** asynn */ constructor() {
 		this.#logger.info("Starting Application");
+		this.#logger.info(this.#environmentMessage);
 		void (async (): Promise<void> => {
 			try {
 				await this.#boot();
@@ -40,7 +40,6 @@ void new (class {
 	}
 
 	readonly #boot = async (): Promise<void> => {
-		this.#logger.info(this.#envMessage[this.#environment]);
 		for (const { start } of this.#servers) await start();
 		this.#logger.info(servers.length + ` Servers started successfully`);
 	};
