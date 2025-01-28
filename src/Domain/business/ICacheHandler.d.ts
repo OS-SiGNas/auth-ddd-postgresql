@@ -1,4 +1,4 @@
-export interface IStorageHandler {
+export interface ICacheHandler {
 	/**
 	 * @param key unique string identify
 	 * @param value data */

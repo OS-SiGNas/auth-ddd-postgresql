@@ -1,6 +1,6 @@
 // Errors
 import { ZodError } from "zod";
-import { DomainError } from "#Domain/core/errors.factory.js";
+import { DomainError, TimeoutException504 } from "#Domain/core/errors.factory.js";
 
 import type { ILogger } from "#Domain/core/ILogger";
 import type { Catch, IErrorHandler } from "#Domain/core/IErrorHandler";
@@ -35,7 +35,11 @@ export class _ErrorHandler implements IErrorHandler {
 		}
 
 		if (error instanceof Error) {
-			this.#logger.error("💀 Unhandled Error 💀", error);
+			if (error.message.includes("DataSource is not set for this entit")) {
+				throw new TimeoutException504("External resource unavailable", ticket);
+			}
+
+			this.#logger.error(`💀 Unhandled Error ${error.name} 💀`, error);
 			return;
 		}
 

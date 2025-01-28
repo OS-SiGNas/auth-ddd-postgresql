@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-import { ITokenPayload } from "#Domain/business/ISession.js";
+import { ITokenPayload } from "#Domain/business/sessions/ISession.js";
 import { secrets, DEBUG_MODE } from "#config";
 import { TokenHandler } from "../token.handler.js";
 import { Logger } from "../logger-handler/make.js";

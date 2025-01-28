@@ -34,9 +34,11 @@
 		"paths": {
 			"#config": ["./src/config"],
 			"#Domain/*": ["./src/Domain/*"],
+			"#Infrastructure/*": ["./src/Infrastructure/*"],
 			"#auth/*": ["./src/Applications/auth/*"],
 			"#users/*": ["./src/Applications/users/*"],
-			"#shared/*": ["./src/Applications/shared/*"]
+			"#shared/*": ["./src/Applications/shared/*"],
+			"#subscribers/*": ["./src/Applications/subscribers/*"]
 		} /* Specify a set of entries that re-map imports to additional lookup locations. */,
 		// "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
 		// "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

@@ -1,4 +1,4 @@
-import { emailSender } from "../../../../../Infrastructure/proxy/email-proxy/make.js";
+import { emailSender } from "#Infrastructure/proxy/email-proxy/make.js";
 import { secrets } from "#config";
 
 interface EmailValitadeAccountArgs {

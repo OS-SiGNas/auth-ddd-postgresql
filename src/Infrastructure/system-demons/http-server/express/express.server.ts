@@ -1,7 +1,7 @@
 import type { Server } from "http";
 import type { Application, ErrorRequestHandler, RequestHandler } from "express";
 import type { Core } from "#Domain/core/Core";
-import type { IServer } from "#Domain/IServer";
+import type { SystemDemon } from "#Domain/SystemDemon";
 import type { ILogger } from "#Domain/core/ILogger";
 
 interface Dependences extends Core {
@@ -12,7 +12,7 @@ interface Dependences extends Core {
 	port: number;
 }
 
-export class ExpressServer implements IServer {
+export class ExpressServer implements SystemDemon {
 	readonly #app: Application;
 	readonly #port: number;
 	readonly #logger: ILogger;

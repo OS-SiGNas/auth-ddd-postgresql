@@ -1,14 +1,19 @@
 import { randomBytes } from "node:crypto";
-import { DuplicateAccountException, ForbiddenException403, UserNotFoundException } from "#Domain/core/errors.factory.js";
+import {
+	BadRequestException400,
+	DuplicateAccountException,
+	ForbiddenException403,
+	UserNotFoundException,
+} from "#Domain/core/errors.factory.js";
 import { UserDTO } from "#users/v1/domain/users.dto.js";
 import { sendActivateAccountEmail } from "./notifications/email.notification.js";
 
 import type { Core } from "#Domain/core/Core.js";
 import type { ILogger } from "#Domain/core/ILogger";
-import type { BusinessHandler } from "#Domain/business/Business";
-import type { IStorageHandler } from "#Domain/IStorageHandler";
-import type { ITokenHandler } from "#Domain/business/ITokenHandler";
-import type { IPasswordHandler } from "#Domain/business/IPasswordHandler";
+import type { BusinessHandler } from "#Domain/business/Business.js";
+import type { ICacheHandler } from "#Domain/business/ICacheHandler.js";
+import type { ITokenHandler } from "#Domain/business/ITokenHandler.js";
+import type { IPasswordHandler } from "#Domain/business/IPasswordHandler.js";
 import type { User } from "#users/v1/domain/entities/users.entity";
 import type { IAuthBusiness } from "../domain/IAuthBusiness.js";
 import type {
@@ -24,7 +29,7 @@ interface Dependences extends Core {
 	logger: ILogger;
 	passwordHandler: IPasswordHandler;
 	activateAccountTokenHandler: ITokenHandler<{ email: string }>;
-	storage: IStorageHandler;
+	storage: ICacheHandler;
 }
 
 export class AuthBusiness implements IAuthBusiness {
@@ -32,7 +37,7 @@ export class AuthBusiness implements IAuthBusiness {
 	readonly #logger: ILogger;
 	readonly #passwordHandler: IPasswordHandler;
 	readonly #activateAccountTokenHandler: ITokenHandler<{ email: string }>;
-	readonly #storage: IStorageHandler;
+	readonly #storage: ICacheHandler;
 
 	constructor(d: Readonly<Dependences>) {
 		this.#repository = d.repository;
@@ -50,8 +55,8 @@ export class AuthBusiness implements IAuthBusiness {
 		});
 		if (user === undefined) return null;
 		const isMatch = await this.#passwordHandler.comparePassword(password, user.password);
-		if (isMatch === false) return null;
-		if (user.isActive === false) return this.#activateAccount(email);
+		if (!isMatch) return null;
+		if (!user.isActive) return this.#activateAccount(email);
 		return new UserDTO(user);
 	};
 
@@ -78,17 +83,17 @@ export class AuthBusiness implements IAuthBusiness {
 		return new UserDTO(user);
 	};
 
-	public readonly activateAccount: BusinessHandler<ActivateAccountRequest["params"], boolean> = async ({ token }) => {
+	public readonly activateAccount: BusinessHandler<ActivateAccountRequest["params"], UserDTO> = async ({ token }) => {
 		const { email } = await this.#activateAccountTokenHandler.verifyJWT(token);
 		this.#logger.info("Account activation attempt");
 		const user = await this.#repository.findOneBy({ email });
-		if (user === null) return false;
+		if (user === null) throw new BadRequestException400("Invalid token");
 		const storedToken = await this.#storage.get<string>(user.email);
-		if (storedToken === null) return false;
-		if (storedToken !== token) return false;
+		if (storedToken === null || storedToken !== token) throw new BadRequestException400("Invalid token");
 		user.isActive = true;
 		await this.#repository.save(user);
-		return this.#storage.delete(user.email);
+		this.#storage.delete(user.email);
+		return new UserDTO(user);
 	};
 
 	public readonly forgotPassword: BusinessHandler<ForgotPasswordRequest["body"], boolean> = async ({ email }) => {

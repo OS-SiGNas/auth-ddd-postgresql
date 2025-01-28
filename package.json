@@ -10,8 +10,8 @@
 	"scripts": {
 		"start": "export NODE_ENV=production && node dist/index.js",
 		"dev": "export NODE_ENV=development && nodemon --watch 'dist/**/*.js' --exec 'node dist/index.js'",
-		"dev:concurrently:deprecated": "concurrently 'pnpm run dev' 'pnpm run swc:watch'",
 		"dev:concurrently": "NODE_ENV=development concurrently 'sh ./dev-mode.sh' 'sh ./dev-swc.sh' ",
+		"dev:concurrently:deprecated": "concurrently 'pnpm run dev' 'pnpm run swc:watch'",
 		"dev:tsx": "export NODE_ENV=development && tsx --watch ./src/index.ts",
 		"dev:ts": "export NODE_ENV=development && nodemon --watch 'src/**/*.ts' --exec 'ts-node --esm src/index.ts'",
 		"dev:tsc": "export NODE_ENV=development && nodemon --watch 'src/**/*.ts' --exec 'tsc && node dist/index.js'",
@@ -24,12 +24,15 @@
 		"swc:watch": "swc src -wd ./dist --strip-leading-paths",
 		"prettier": "prettier --write src",
 		"lint": "eslint ./src",
+		"check": "tsc --noEmit",
 		"test": ""
 	},
 	"imports": {
 		"#config": "./dist/config.js",
 		"#Domain/*": "./dist/Domain/*",
+		"#Infrastructure/*": "./dist/Infrastructure/*",
 		"#shared/*": "./dist/Applications/shared/*",
+		"#subscribers/*": "./dist/Applications/subscribers/*",
 		"#auth/*": "./dist/Applications/auth/*",
 		"#users/*": "./dist/Applications/users/*"
 	},

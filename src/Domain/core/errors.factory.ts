@@ -1,4 +1,4 @@
-import { HttpStatus } from "./http-status.enum.js";
+import type { HttpStatus } from "#Domain/business/http/http-status.enum";
 
 interface DependencesErr {
 	ticket?: string;

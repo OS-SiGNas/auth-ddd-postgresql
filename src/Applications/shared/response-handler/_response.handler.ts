@@ -1,7 +1,7 @@
-import type { HttpStatus } from "#Domain/core/http-status.enum.js";
-import type { IResponse } from "#Domain/business/IResponse";
-import type { ErrorType } from "#Domain/core/IErrorHandler";
-import type { HttpResponse, IResponseHandler } from "#Domain/business/IResponseHandler";
+import type { HttpStatus } from "#Domain/business/http/http-status.enum.js";
+import type { IResponse } from "#Domain/business/http/IResponse.js";
+import type { ErrorType } from "#Domain/core/IErrorHandler.js";
+import type { HttpResponse, IResponseHandler } from "#Domain/business/http/IResponseHandler.js";
 
 // Errors
 import { ZodError } from "zod";

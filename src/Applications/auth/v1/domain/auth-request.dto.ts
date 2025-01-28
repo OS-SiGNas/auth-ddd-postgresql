@@ -17,12 +17,12 @@ export class AuthRequestDTO implements IAuthRequestDTO {
 	readonly #defaults = UsersRequestDTO.defaults;
 
 	readonly login: Parser<LoginRequest> = async (request) => {
-		const { email, password } = this.#defaults;
+		const { email, password, uuid } = this.#defaults;
 		const params = z.object({}).strict();
 		const query = z.object({}).strict();
 		const body = z.object({ email, password }).strict();
-		const schema = z.object({ params, query, body });
-		return await schema.parseAsync(request);
+		const headers = z.object({ uuid });
+		return await z.object({ params, query, body, headers }).parseAsync(request);
 	};
 
 	public readonly refreshToken: Parser<RefreshTokenRequest> = async (request) => {
@@ -43,11 +43,11 @@ export class AuthRequestDTO implements IAuthRequestDTO {
 	};
 
 	public readonly activateAccount: Parser<ActivateAccountRequest> = async (request) => {
-		const { token } = this.#defaults;
+		const { token, uuid } = this.#defaults;
 		const query = z.object({}).strict();
 		const params = z.object({ token }).strict();
-		const schema = z.object({ query, params });
-		return await schema.parseAsync(request);
+		const headers = z.object({ uuid });
+		return await z.object({ query, params, headers }).parseAsync(request);
 	};
 
 	public readonly forgotPassword: Parser<ForgotPasswordRequest> = async (request) => {

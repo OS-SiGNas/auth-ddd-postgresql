@@ -1,8 +1,8 @@
 import { BadRequestException400, ForbiddenException403 } from "#Domain/core/errors.factory.js";
 import { RoleName } from "#users/v1/domain/role-name.enum.js";
 
-import type { ISession, ITokenPayload } from "#Domain/business/ISession";
-import type { ISessionHandler } from "#Domain/business/ISessionHandler";
+import type { ISession, ITokenPayload } from "#Domain/business/sessions/ISession";
+import type { ISessionHandler } from "#Domain/business/sessions/ISessionHandler";
 import type { ITokenHandler } from "#Domain/business/ITokenHandler";
 
 interface Dependences {

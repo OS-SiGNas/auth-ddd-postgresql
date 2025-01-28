@@ -24,6 +24,7 @@ interface PostgreSQLSecrets {
 }
 
 interface Secrets extends JsonWebTokenSecrets, PostgreSQLSecrets {
+	APP_NAME: string;
 	THIS_URL: string;
 	PORT: number;
 	LOGGER_SERVICE: LoggerService;
@@ -66,6 +67,7 @@ class Config {
 		const zNumber = z.string().transform(Number).pipe(z.number().positive());
 		const zPassword = z.string().min(8).max(64);
 		const schema = {
+			APP_NAME: zString,
 			LOGGER_SERVICE: z.enum(["winston", "console"]),
 			HTTP_SERVICE: z.enum(["express", "fastify"]),
 			THIS_URL: zString,

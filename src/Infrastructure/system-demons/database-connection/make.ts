@@ -1,8 +1,8 @@
 import { DataSource } from "typeorm";
 
-import { secrets } from "#config";
-import { _PostgreServer } from "./postgresql.server.js";
-import { Logger } from "../../Applications/shared/logger-handler/make.js";
+import { DEBUG_MODE, secrets } from "#config";
+import { _PostgreServer } from "./postgresql.connection.js";
+import { Logger } from "#shared/logger-handler/make.js";
 
 // Entities
 import { User } from "#users/v1/domain/entities/users.entity.js";
@@ -10,7 +10,7 @@ import { Role } from "#users/v1/domain/entities/roles.entity.js";
 
 const entities = [User, Role];
 
-export const postgresServer = _PostgreServer.getInstance({
+export const postgresConnection = _PostgreServer.getInstance({
 	logger: new Logger("PostgreServer"),
 	retryTime: secrets.PG_RETRY_TIME,
 
@@ -22,7 +22,7 @@ export const postgresServer = _PostgreServer.getInstance({
 		password: secrets.PG_PASSWORD,
 		database: secrets.PG_DATABASE,
 		synchronize: true,
-		logging: true,
+		logging: DEBUG_MODE,
 		entities,
 		subscribers: [],
 		migrations: [],

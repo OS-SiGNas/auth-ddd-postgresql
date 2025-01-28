@@ -1,6 +1,6 @@
 import type { DataSource } from "typeorm";
 
-import type { IServer } from "#Domain/IServer";
+import type { SystemDemon } from "#Domain/SystemDemon";
 import type { ILogger } from "#Domain/core/ILogger";
 
 interface Dependences {
@@ -9,7 +9,7 @@ interface Dependences {
 	logger: ILogger;
 }
 
-export class _PostgreServer implements IServer {
+export class _PostgreServer implements SystemDemon {
 	static #instance?: _PostgreServer;
 	static getInstance = (d: Dependences): Readonly<_PostgreServer> => (this.#instance ??= new _PostgreServer(d));
 

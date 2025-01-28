@@ -2,14 +2,14 @@ import { clearInterval } from "node:timers";
 
 import type { Core } from "#Domain/core/Core";
 import type { ILogger } from "#Domain/core/ILogger";
-import type { IStorageHandler } from "#Domain/IStorageHandler";
+import type { ICacheHandler } from "#Domain/business/ICacheHandler";
 
 interface Dependences extends Core {
 	keyExpiredTime: number;
 	cacheExpiredTime: number;
 }
 
-export class StorageHandler implements IStorageHandler {
+export class StorageHandler implements ICacheHandler {
 	readonly #logger: ILogger;
 	readonly #isDebug: boolean;
 	readonly #storage: Map<string, { createdAt: number; value: unknown }>;

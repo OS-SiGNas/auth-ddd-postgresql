@@ -1,5 +1,5 @@
-import type { ErrorType } from "../core/IErrorHandler";
-import type { HttpStatus } from "../core/http-status.enum.ts";
+import type { ErrorType } from "#Domain/core/IErrorHandler";
+import type { HttpStatus } from "./http-status.enum";
 
 export interface IResponse<R> {
 	readonly status: Status;

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, UUID } from "node:crypto";
 import { Logger } from "#shared/logger-handler/make.js";
 
 import type { RequestHandler } from "express";
@@ -7,7 +7,7 @@ const httpLogger = new Logger("RequestLogger");
 
 export const requestLogger: RequestHandler = ({ headers, ip, method, url }, res, next) => {
 	const uuid = randomUUID();
-	headers.uuid = uuid;
+	headers.uuid = uuid as UUID;
 	res.setHeader("X-Request-ID", uuid);
 	const start = Date.now();
 	res.on("finish", () => {

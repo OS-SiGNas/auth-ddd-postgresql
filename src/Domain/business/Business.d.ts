@@ -1,10 +1,10 @@
 import type { Request } from "express";
 import type { FastifyRequest } from "fastify";
-import type { IResponseHandler } from "./IResponseHandler";
-import type { Core } from "../core/Core";
-import type { IResponse } from "./IResponse";
-import type { ISessionHandler } from "./ISessionHandler";
-import type { IErrorHandler } from "../core/IErrorHandler";
+import type { IResponseHandler } from "./http/IResponseHandler";
+import type { Core } from "#Domain/core/Core";
+import type { IResponse } from "./http/IResponse";
+import type { ISessionHandler } from "./sessions/ISessionHandler";
+import type { IErrorHandler } from "#Domain/core/IErrorHandler";
 
 export interface ControllersDependences extends Core {
 	readonly sessionHandler: ISessionHandler;
