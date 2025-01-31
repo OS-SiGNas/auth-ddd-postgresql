@@ -1,8 +1,6 @@
 import { randomUUID } from "node:crypto";
-
-import { secrets } from "#config";
+import { secrets } from "#Config";
 import { eventBus } from "#Infrastructure/event-bus.js";
-
 import { Logger } from "#shared/logger-handler/make.js";
 
 import type { UUID } from "node:crypto";
@@ -15,24 +13,25 @@ interface Default {
 	emitter: string;
 }
 
-interface Data<Msg> {
+interface Payload<Msg> {
 	action: Actions;
 	moduleEmitter: string;
 	context: Record<string, string>;
 	transactionId: UUID;
-	message?: Msg;
+	message: Msg;
 }
 
-export interface IEvent<Msg> extends Readonly<Default>, Readonly<Data<Msg>> {}
+export interface IEvent<Msg> extends Readonly<Default>, Readonly<Payload<Msg>> {}
 
 export const DomainEvent = class<Msg> {
 	readonly #logger: ILogger = new Logger("DomainEvent");
+	readonly #bus = eventBus;
 	readonly #event: IEvent<Msg>;
 
-	/**
-	 * [ Domain Event Bus ]
-	 * This constructor "new" emits the domain event when constructed.  */
-	constructor(e: Data<Msg | undefined>) {
+	/** Domain Event Bus
+	 * @param e: data event public
+	 * @constructor "new" emits the domain event when constructed.  */
+	constructor(p: Payload<Msg>) {
 		this.#event = {
 			// private
 			id: randomUUID(),
@@ -40,19 +39,18 @@ export const DomainEvent = class<Msg> {
 			emitter: secrets.APP_NAME,
 
 			// public
-			action: e.action,
-			transactionId: e.transactionId,
-			moduleEmitter: e.moduleEmitter,
-			context: e.context,
-			message: e.message,
+			action: p.action,
+			transactionId: p.transactionId,
+			moduleEmitter: p.moduleEmitter,
+			context: p.context,
+			message: p.message,
 		};
 
-		eventBus.emit(e.action, this.#event);
+		void this.#bus.emit(p.action, this.#event);
 	}
 
 	public get default(): Readonly<Default> {
 		this.#logger.debug(`Get - Defaults - ${this.#event.moduleEmitter}`);
-
 		return {
 			id: this.#event.id,
 			createdAt: this.#event.createdAt,
@@ -60,15 +58,18 @@ export const DomainEvent = class<Msg> {
 		};
 	}
 
-	public get data(): Readonly<Data<Msg>> {
+	public get payload(): Readonly<Payload<undefined>> {
 		this.#logger.info(`Get - Data - ${this.#event.moduleEmitter}`);
-
 		return {
 			action: this.#event.action,
 			transactionId: this.#event.transactionId,
 			moduleEmitter: this.#event.moduleEmitter,
 			context: this.#event.context,
-			message: this.#event.message,
+			message: undefined,
 		};
+	}
+
+	public get message(): Readonly<Msg> {
+		return this.#event.message;
 	}
 };

@@ -28,7 +28,7 @@
 		"test": ""
 	},
 	"imports": {
-		"#config": "./dist/config.js",
+		"#Config": "./dist/config.js",
 		"#Domain/*": "./dist/Domain/*",
 		"#Infrastructure/*": "./dist/Infrastructure/*",
 		"#shared/*": "./dist/Applications/shared/*",

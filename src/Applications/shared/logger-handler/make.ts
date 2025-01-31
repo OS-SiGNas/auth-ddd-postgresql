@@ -1,4 +1,4 @@
-import { secrets } from "#config";
+import { secrets } from "#Config";
 import { ModuleException } from "#Domain/core/errors.factory.js";
 
 import type { Logger as WinstonLogger } from "./winston.logger";

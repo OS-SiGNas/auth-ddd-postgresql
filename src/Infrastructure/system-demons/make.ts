@@ -3,4 +3,9 @@ import { httpServer } from "./http-server/make.js";
 
 import type { SystemDemon } from "#Domain/SystemDemon.js";
 
-export const systemDemons: SystemDemon[] = [httpServer, postgresConnection];
+export const systemDemons: SystemDemon[] = [
+	/** TODO: 
+  rabbitMQConnection */
+	httpServer,
+	postgresConnection,
+];

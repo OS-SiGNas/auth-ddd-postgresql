@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 // Global Domain
-import { secrets, DEBUG_MODE } from "#config";
+import { secrets, DEBUG_MODE } from "#Config";
 import { ModuleException } from "#Domain/core/errors.factory.js";
 // Application users
 import { User } from "#users/v1/domain/entities/users.entity.js";

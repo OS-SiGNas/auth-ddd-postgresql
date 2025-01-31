@@ -1,4 +1,4 @@
-import { DEBUG_MODE, secrets } from "#config";
+import { DEBUG_MODE, secrets } from "#Config";
 import { passwordHandler } from "#shared/password-handler/make.js";
 import { Logger } from "#shared/logger-handler/make.js";
 import { errorHandler } from "#shared/error-handler/make.js";

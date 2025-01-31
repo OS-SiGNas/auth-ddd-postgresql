@@ -1,13 +1,24 @@
 import { EventEmitter } from "node:events";
-
 import type { DomainEventMap } from "#Domain/business/events/DomainEventMap";
 
-export const eventBus = new EventEmitter<DomainEventMap>();
+export const { eventBus } = new (class {
+	readonly #eventBus: EventEmitter<DomainEventMap>;
 
-void Promise.all([
-	// import Subscribers
-	import("#subscribers/login.subscriber.js"),
-	import("#subscribers/account-activated.subscriber.js"),
-]);
+	constructor() {
+		this.#eventBus = new EventEmitter();
+		void Promise.all(this.#subscribers);
+	}
 
-export type DomainEvenBus = typeof eventBus;
+	public get eventBus(): EventEmitter<DomainEventMap> {
+		return this.#eventBus;
+	}
+
+	readonly #subscribers: object[] = [
+		// Auth Subscribers
+		import("#subscribers/auth/login.subscriber.js"),
+		import("#subscribers/auth/account-activated.subscriber.js"),
+
+		// Users Subscribers
+		// import("#subscribers/users"),
+	];
+})();

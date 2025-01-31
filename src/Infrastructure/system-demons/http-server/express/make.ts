@@ -1,5 +1,5 @@
 import Express, { Router } from "express";
-import { DEBUG_MODE, secrets } from "#config";
+import { DEBUG_MODE, secrets } from "#Config";
 import { Logger } from "#shared/logger-handler/make.js";
 
 import { ExpressServer } from "./express.server.js";

@@ -1,5 +1,5 @@
 import { emailSender } from "#Infrastructure/proxy/email-proxy/make.js";
-import { secrets } from "#config";
+import { secrets } from "#Config";
 
 interface EmailValitadeAccountArgs {
 	token: string;

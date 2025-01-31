@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
 
-import { DEBUG_MODE, secrets } from "#config";
+import { DEBUG_MODE, secrets } from "#Config";
 import { _PostgreServer } from "./postgresql.connection.js";
 import { Logger } from "#shared/logger-handler/make.js";
 
