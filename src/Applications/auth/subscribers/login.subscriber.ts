@@ -33,7 +33,7 @@ void new (class {
 
 			for (const s of settled) {
 				if (s.status === "rejected") this.#logger.error(s.status, s.reason);
-				else console.log(s.value);
+				else this.#logger.debug(`${s.status}:`, s.value);
 			}
 
 			try {

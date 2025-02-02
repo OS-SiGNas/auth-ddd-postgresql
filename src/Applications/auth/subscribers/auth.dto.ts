@@ -5,10 +5,11 @@ import { DomainEvent, type IEvent } from "#Domain/business/events/domain-event.j
 import { UserSessionDTO } from "#users/v1/domain/users.dto.js";
 import { UsersRequestDTO } from "#users/v1/domain/users-request.dto.js";
 
-export const authDto = new (class {
-	readonly [Actions.LOGIN] = async (o: IEvent<UserSessionDTO>): Promise<Readonly<IEvent<UserSessionDTO>>> => {
-		const { defaults } = UsersRequestDTO;
+type Parser<T> = (o: IEvent<T>) => Promise<Readonly<IEvent<T>>>;
 
+export const authDto = new (class {
+	readonly [Actions.LOGIN]: Parser<UserSessionDTO> = async (e) => {
+		const { defaults } = UsersRequestDTO;
 		const eventSchema = {
 			...DomainEvent.defaultsSchema,
 			...DomainEvent.payloadSchema,
@@ -17,7 +18,7 @@ export const authDto = new (class {
 		const event = await z
 			.object(eventSchema)
 			.strict()
-			.parseAsync({ ...o, message: undefined });
+			.parseAsync({ ...e, message: undefined });
 
 		const session = { accessToken: defaults.token, refreshToken: defaults.token };
 		const user = {
@@ -28,9 +29,15 @@ export const authDto = new (class {
 			roles: defaults.rolesArr,
 		};
 
-		const userParsed: UserSessionDTO["user"] = await z.object(user).strict().parseAsync(o.message.user);
-		const sessionParsed: UserSessionDTO["session"] = await z.object(session).strict().parseAsync(o.message.session);
+		const userParsed: UserSessionDTO["user"] = await z.object(user).strict().parseAsync(e.message.user);
+		const sessionParsed: UserSessionDTO["session"] = await z.object(session).strict().parseAsync(e.message.session);
 
-		return { ...event, message: { user: userParsed, session: sessionParsed } };
+		return {
+			...event,
+			message: {
+				user: userParsed,
+				session: sessionParsed,
+			},
+		};
 	};
 })();

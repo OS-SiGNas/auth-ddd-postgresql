@@ -15,8 +15,8 @@ export const { eventBus } = new (class {
 
 	readonly #subscribers: object[] = [
 		// Auth Subscribers
-		import("#subscribers/auth/login.subscriber.js"),
-		import("#subscribers/auth/account-activated.subscriber.js"),
+		import("#auth/subscribers/login.subscriber.js"),
+		import("#auth/subscribers/account-activated.subscriber.js"),
 
 		// Users Subscribers
 		// import("#subscribers/users"),
