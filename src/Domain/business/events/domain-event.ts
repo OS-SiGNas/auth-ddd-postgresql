@@ -1,10 +1,13 @@
 import { randomUUID } from "node:crypto";
+import { z } from "zod";
+
 import { secrets } from "#Config";
 import { eventBus } from "#Infrastructure/event-bus.js";
 import { Logger } from "#shared/logger-handler/make.js";
 
+import { Actions } from "./actions.enum";
+
 import type { UUID } from "node:crypto";
-import type { Actions } from "./actions.enum";
 import type { ILogger } from "#Domain/core/ILogger";
 
 interface Default {
@@ -24,12 +27,36 @@ interface Payload<Msg> {
 export interface IEvent<Msg> extends Readonly<Default>, Readonly<Payload<Msg>> {}
 
 export const DomainEvent = class<Msg> {
+	static readonly #zUUID = z
+		.string()
+		.uuid()
+		.transform((val) => val as UUID);
+
+	public static defaultsSchema = {
+		id: this.#zUUID,
+		emitter: z.string(),
+		createdAt: z.date(),
+	};
+
+	public static payloadSchema = {
+		action: z.enum([
+			// Actions
+			Actions.REBOOT,
+			Actions.LOGIN,
+			Actions.ACCOUNT_ACTIVATED,
+			Actions.NEW_ACCOUNT_REGISTERED,
+		]),
+		context: z.object({}),
+		moduleEmitter: z.string().nonempty(),
+		transactionId: this.#zUUID,
+	};
+
 	readonly #logger: ILogger = new Logger("DomainEvent");
 	readonly #bus = eventBus;
 	readonly #event: IEvent<Msg>;
 
 	/** Domain Event Bus
-	 * @param e: data event public
+	 * @param p: payload event public data
 	 * @constructor "new" emits the domain event when constructed.  */
 	constructor(p: Payload<Msg>) {
 		this.#event = {

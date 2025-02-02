@@ -1,6 +1,6 @@
 import { DEBUG_MODE } from "#Config";
 import { Actions } from "#Domain/business/events/actions.enum.js";
-import { DomainEvenBus, eventBus } from "#Infrastructure/event-bus.js";
+import { eventBus } from "#Infrastructure/event-bus.js";
 import { errorHandler } from "#shared/error-handler/make.js";
 import { Logger } from "#shared/logger-handler/make.js";
 
@@ -15,10 +15,11 @@ type Handler = (event: IEvent<UserNonSensitiveData>) => Promise<void>;
 export const accountAcctivatedSubscriber = new (class {
 	readonly #action = Actions.ACCOUNT_ACTIVATED;
 
-	readonly #eventBus: DomainEvenBus = eventBus;
+	readonly #bus = eventBus;
 	readonly #logger = new Logger(`Subscriber: ${this.#action}`);
+
 	constructor() {
-		void this.#eventBus
+		void this.#bus
 			// .on(this.#name, this.#something)
 			.on(this.#action, this.#callback)
 			.on(this.#action, async (e) => {

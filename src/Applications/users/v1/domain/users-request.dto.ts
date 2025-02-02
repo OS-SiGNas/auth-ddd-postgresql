@@ -17,6 +17,7 @@ import type {
 // .regex(/[!@#$%^&*()_+{}[\]:;<>,.?~-]/, "La contraseña debe incluir al menos un carácter especial"),
 
 export class UsersRequestDTO implements IUsersRequestDTO {
+	static readonly #roles = z.enum([RoleName.ADMIN, RoleName.STANDARD, RoleName.MODERATOR, RoleName.TESTER]);
 	static readonly defaults = {
 		uuid: z.string().uuid(),
 		token: z.string().regex(/^[A-Za-z0-9\-_.]+\.[A-Za-z0-9\-_.]+\.[A-Za-z0-9\-_.]+$/),
@@ -28,8 +29,9 @@ export class UsersRequestDTO implements IUsersRequestDTO {
 			.toLowerCase(),
 		email: z.string().email().toLowerCase(),
 		password: z.string().min(10).max(30),
-		role: z.enum([RoleName.ADMIN, RoleName.STANDARD, RoleName.MODERATOR, RoleName.TESTER]),
+		role: this.#roles,
 		roles: z.array(z.number()),
+		rolesArr: z.array(this.#roles),
 		hash: z.string().uuid(),
 	} as const;
 

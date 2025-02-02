@@ -1,6 +1,7 @@
 import { DEBUG_MODE } from "#Config";
 import { Actions } from "#Domain/business/events/actions.enum.js";
 import { eventBus } from "#Infrastructure/event-bus.js";
+import { authDto } from "./auth.dto.js";
 import { Logger } from "#shared/logger-handler/make.js";
 import { errorHandler } from "#shared/error-handler/make.js";
 // Errors import { EventException } from "#Domain/core/errors.factory.js";
@@ -9,7 +10,7 @@ import type { IEvent } from "#Domain/business/events/domain-event";
 import type { UserSessionDTO } from "#users/v1/domain/users.dto";
 import type { ILogger } from "#Domain/core/ILogger";
 
-type Handler = (event: Readonly<IEvent<UserSessionDTO>>) => Promise<void>;
+type Handler = (event: IEvent<UserSessionDTO>) => Promise<void>;
 
 void new (class {
 	readonly #action = Actions.LOGIN;
@@ -21,9 +22,8 @@ void new (class {
 		void this.#bus.on(this.#action, async (e) => await this.rrhh.subscribers(e);
 		void this.#bus.on(this.#action, this.#callback) */
 		void this.#bus.on(this.#action, this.#exec);
-		void this.#bus.on(this.#action, async (e) => {
-			this.#logger.info(`New session: ${e.message.user.email}`);
-
+		void this.#bus.on(this.#action, async (domainEvent) => {
+			const e = await authDto.LOGIN(domainEvent);
 			const settled = await Promise.allSettled([
 				// Subscribers steps
 				this.#step1(e),
@@ -45,8 +45,9 @@ void new (class {
 		});
 	}
 
-	readonly #exec: Handler = async ({ emitter, transactionId /*, message */ }) => {
+	readonly #exec: Handler = async ({ emitter, transactionId, message }) => {
 		if (DEBUG_MODE) this.#logger.info(`Exec: ${transactionId}`);
+		this.#logger.info(`New session: ${message.user.email}`);
 		try {
 			return await Promise.resolve();
 		} catch (error) {
