@@ -1,16 +1,19 @@
 import { BadRequestException400 } from "#Domain/errors/error.factory.js";
 import { HeadersEnum } from "#Domain/response/headers.enum.js";
-import { errorHandler } from "#shared/error-handler/make.js";
-import { responseHandler } from "#shared/response-handler/make.js";
-import { Logger } from "#shared/logger-handler/make.js";
+import { errorHandler } from "#common/error-handler/make.js";
+import { responseHandler } from "#common/response-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
 
 import type { ErrorRequestHandler, Request } from "express";
+import type { Catch } from "#Domain/errors/IErrorHandler";
+import type { HttpResponse } from "#Domain/response/IResponseHandler";
+import type { ILogger } from "#Domain/core/ILogger";
 
 export const { errorsCatcher } = new (class {
 	readonly #name = "ErrorCatcherMiddleware";
-	readonly #logger = new Logger(this.#name);
-	readonly #response = responseHandler.http;
-	readonly #catch = errorHandler.catch;
+	readonly #logger: ILogger = new Logger(this.#name);
+	readonly #response: HttpResponse = responseHandler.http;
+	readonly #catch: Catch = errorHandler.catch;
 
 	public readonly errorsCatcher: ErrorRequestHandler = (error, req, res, next) => {
 		const ticket = (res.getHeader(HeadersEnum.CORRELATION_ID) as string) ?? (req as Request).correlationId;

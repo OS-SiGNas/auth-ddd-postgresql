@@ -1,5 +1,5 @@
-import { Logger } from "#shared/logger-handler/make.js";
-import { bgWhite } from "#shared/logger-handler/colors.utils.js";
+import { Logger } from "#common/logger-handler/make.js";
+import { bgWhite } from "#common/logger-handler/colors.utils.js";
 
 import type { RequestHandler, Request } from "express";
 

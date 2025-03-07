@@ -25,9 +25,14 @@ export class ExpressServer implements SystemDemon {
 		this.#port = d.port;
 		this.#logger = d.logger;
 
-		this.#app.use(d.globalMiddlewares); // 1: first position for express global middlewares
-		d.apis.forEach((api, i) => this.#app.use(`/v${i + 1}`, api)); // 2: then, api applications endpoints
-		this.#app.use(d.lastMiddlewares); // 3: finally last position middlewares
+		// 1: first position for express global middlewares
+		this.#app.use(d.globalMiddlewares);
+
+		// 2: then, api applications endpoints
+		d.apis.forEach((api, i) => this.#app.use(`/v${i + 1}`, api));
+
+		// 3: finally last position middlewares
+		this.#app.use(d.lastMiddlewares);
 	}
 
 	public readonly start = async (): Promise<void> => {

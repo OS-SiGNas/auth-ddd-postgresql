@@ -1,9 +1,10 @@
 import { DEBUG_MODE, secrets } from "#Config";
-import { passwordHandler } from "#shared/password-handler/make.js";
-import { Logger } from "#shared/logger-handler/make.js";
-import { errorHandler } from "#shared/error-handler/make.js";
-import { responseHandler } from "#shared/response-handler/make.js";
-import { sessionHandler } from "#shared/session-handler/make.js";
+import { ModuleException } from "#Domain/errors/error.factory.js";
+import { passwordHandler } from "#common/password-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
+import { errorHandler } from "#common/error-handler/make.js";
+import { responseHandler } from "#common/response-handler/make.js";
+import { sessionHandler } from "#common/session-handler/make.js";
 
 import { UsersBusiness } from "./application/users.business.js";
 import { UsersRequestDTO } from "./domain/users-request.dto.js";
@@ -13,9 +14,6 @@ import { Role } from "./domain/entities/roles.entity.js";
 
 import type { UsersRouterExpress } from "./infrastructure/users-express.router";
 import type { UsersRouterFastify } from "./infrastructure/users-fastify.router";
-
-// Error
-import { ModuleException } from "#Domain/errors/error.factory.js";
 
 export const getUsersApp = async <T extends UsersRouterExpress | UsersRouterFastify>(): Promise<T> => {
 	const business = new UsersBusiness({

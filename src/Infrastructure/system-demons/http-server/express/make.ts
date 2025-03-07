@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 
 import { DEBUG_MODE, secrets } from "#Config";
-import { Logger } from "#shared/logger-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
 import { setCorrelationId } from "./middlewares/setCorrelationId.middleware.js";
 import { requestLogger } from "./middlewares/requestLogger.middleware.js";
 import { notFound } from "./middlewares/notFound.middleware.js";

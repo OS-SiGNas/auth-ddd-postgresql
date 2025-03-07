@@ -4,7 +4,7 @@ import { secrets, DEBUG_MODE, NODE_ENV } from "#Config";
 import { Actions } from "#Domain/events/actions.enum.js";
 import { systemDemons } from "#Infrastructure/system-demons/make.js";
 import { eventBus } from "#Infrastructure/event-bus.js";
-import { Logger } from "#shared/logger-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
 
 import type { Environment } from "#Config";
 import type { SystemDemon } from "#Domain/SystemDemon";
@@ -47,19 +47,13 @@ void new (class {
 	};
 
 	readonly #reboot = async (): Promise<void> => {
-		try {
-			this.#logger.warn("Rebooting");
-			await Promise.all(this.#demons.map(({ restart }) => restart()));
-		} catch (error) {
-			this.#logger.error("Rebbot protocol failed", error);
-			await this.#reboot();
-		}
+		this.#logger.warn("Rebooting demons");
+		await Promise.all(this.#demons.map(({ restart }) => restart()));
 	};
 
 	readonly #subscribers = (): void => {
 		void process.on("SIGINT", this.#shutdown);
 		void process.on("SIGTERM", this.#shutdown);
-
 		void eventBus.on(Actions.REBOOT, async (event) => {
 			this.#logger.warn(`ACTION: ${event.action} - ID: ${event.id}`);
 			return await Promise.resolve(this.#reboot());

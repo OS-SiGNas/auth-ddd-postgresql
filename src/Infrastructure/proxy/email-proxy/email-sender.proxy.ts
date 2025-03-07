@@ -14,9 +14,11 @@ interface Dependences extends Core {
 	transporter: Transporter;
 }
 
+type GetInstance = (d: Dependences) => Readonly<_EmailSenderProxy>;
+
 export class _EmailSenderProxy {
 	static #instance: _EmailSenderProxy;
-	static getInstance = (d: Dependences): Readonly<_EmailSenderProxy> => (this.#instance ??= new _EmailSenderProxy(d));
+	static getInstance: GetInstance = (d) => (this.#instance ??= new _EmailSenderProxy(d));
 
 	readonly #isDebug: boolean;
 	readonly #logger: ILogger;

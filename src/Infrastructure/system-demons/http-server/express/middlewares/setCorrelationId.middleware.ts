@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { HeadersEnum } from "#Domain/response/headers.enum.js";
-import { Logger } from "#shared/logger-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
 
 import type { Request, RequestHandler } from "express";
 

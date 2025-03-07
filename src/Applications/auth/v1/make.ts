@@ -4,14 +4,14 @@ import { secrets, DEBUG_MODE } from "#Config";
 import { ModuleException } from "#Domain/errors/error.factory.js";
 // Application users
 import { User } from "#users/v1/domain/entities/users.entity.js";
-// Applications shared
-import { Logger } from "#shared/logger-handler/make.js";
-import { passwordHandler } from "#shared/password-handler/make.js";
-import { sessionHandler } from "#shared/session-handler/make.js";
-import { responseHandler } from "#shared/response-handler/make.js";
-import { StorageHandler } from "#shared/storage.handler.js";
-import { TokenHandler } from "#shared/token.handler.js";
-import { errorHandler } from "#shared/error-handler/make.js";
+// Common
+import { passwordHandler } from "#common/password-handler/make.js";
+import { responseHandler } from "#common/response-handler/make.js";
+import { sessionHandler } from "#common/session-handler/make.js";
+import { errorHandler } from "#common/error-handler/make.js";
+import { StorageHandler } from "#common/storage.handler.js";
+import { TokenHandler } from "#common/token.handler.js";
+import { Logger } from "#common/logger-handler/make.js";
 // local
 import { AuthBusiness } from "./applications/auth.business.js";
 import { AuthRequestDTO } from "./domain/auth-request.dto.js";

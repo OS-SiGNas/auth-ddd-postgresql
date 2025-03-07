@@ -5,7 +5,7 @@ import { secrets } from "#Config";
 import { UnprocessableException422 } from "#Domain/errors/error.factory.js";
 import { eventBus } from "#Infrastructure/event-bus.js";
 import { rabbitmq } from "#Infrastructure/system-demons/queue-connection/make.js";
-import { Logger } from "#shared/logger-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
 import { actionParseStrategies } from "#subscribers/domain/action-parse-strategies.js";
 import { Actions } from "./actions.enum.js";
 

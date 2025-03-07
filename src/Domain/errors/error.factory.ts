@@ -4,15 +4,8 @@ import type { UUID } from "node:crypto";
 
 export type Ticket = string | UUID | undefined;
 
-interface DependencesException {
+interface DependencesException extends ErrorOptions {
 	ticket?: Ticket;
-	cause?: unknown;
-}
-
-interface PayloadFactory {
-	name: string;
-	code?: HttpStatus;
-	defaultMessage?: string;
 }
 
 export abstract class DomainException extends Error {
@@ -21,6 +14,12 @@ export abstract class DomainException extends Error {
 	protected constructor(message: string, d?: DependencesException) {
 		super(message, d?.cause !== undefined ? { cause: d?.cause } : undefined);
 	}
+}
+
+interface PayloadFactory {
+	name: string;
+	code?: HttpStatus;
+	defaultMessage?: string;
 }
 
 type ExceptionsFactory = (p: PayloadFactory) => new (message: string, d?: DependencesException) => DomainException;

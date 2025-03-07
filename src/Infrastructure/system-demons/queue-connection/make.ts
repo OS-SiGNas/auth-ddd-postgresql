@@ -1,9 +1,9 @@
 import { connect } from "amqplib";
 import { secrets } from "#Config";
-import { Logger } from "#shared/logger-handler/make.js";
-import { RabbitMQConnection } from "./rabbitmq.connection.js";
 import { eventBus } from "#Infrastructure/event-bus.js";
-import { errorHandler } from "#shared/error-handler/make.js";
+import { errorHandler } from "#common/error-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
+import { RabbitMQConnection } from "./rabbitmq.connection.js";
 
 export const rabbitmq = new RabbitMQConnection({
 	connect,

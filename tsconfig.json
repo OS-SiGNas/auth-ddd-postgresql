@@ -1,6 +1,6 @@
 {
 	"include": ["src/**/*"],
-	"exclude": ["node_modules", "dist"],
+	"exclude": ["node_modules", "dist", "src/test"],
 	"compilerOptions": {
 		/* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -37,7 +37,7 @@
 			"#Infrastructure/*": ["./src/Infrastructure/*"],
 			"#auth/*": ["./src/Applications/auth/*"],
 			"#users/*": ["./src/Applications/users/*"],
-			"#shared/*": ["./src/Applications/shared/*"],
+			"#common/*": ["./src/Applications/common/*"],
 			"#subscribers/*": ["./src/Applications/subscribers/*"]
 		} /* Specify a set of entries that re-map imports to additional lookup locations. */,
 		// "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */

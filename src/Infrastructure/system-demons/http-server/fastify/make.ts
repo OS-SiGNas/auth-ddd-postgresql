@@ -4,7 +4,7 @@ import { fastifyCors } from "@fastify/cors";
 
 import { FastifyServer } from "./fastify.server.js";
 import { DEBUG_MODE, secrets } from "#Config";
-import { Logger } from "#shared/logger-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
 // v1
 import { getAuthApp } from "#auth/v1/make.js";
 import { getUsersApp } from "#users/v1/make.js";

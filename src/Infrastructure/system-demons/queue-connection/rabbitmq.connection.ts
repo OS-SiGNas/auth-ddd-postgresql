@@ -7,8 +7,10 @@
     - security.update_last_activity_on_user_updated
 */
 
-import { DomainEvent, type IEvent } from "#Domain/events/domain-event.js";
-import type { connect, Connection, Channel, Options, ConsumeMessage } from "amqplib";
+import { DomainEvent } from "#Domain/events/domain-event.js";
+
+import type { connect, Channel, Options, ConsumeMessage, ChannelModel } from "amqplib";
+import type { IEvent } from "#Domain/events/domain-event";
 import type { SystemDemon } from "#Domain/SystemDemon";
 import type { DomainEventBus } from "#Domain/events/DomainEventBus";
 import type { IErrorHandler } from "#Domain/errors/IErrorHandler";
@@ -24,13 +26,13 @@ interface Dependences {
 }
 
 export class RabbitMQConnection {
+	#isRunning: boolean;
 	readonly #connect: typeof connect;
 	readonly #queue: string;
 	readonly #options: Options.Connect;
 	readonly #errorHandler: IErrorHandler;
 	readonly #logger: ILogger;
-	#isRunning: boolean;
-	#conn: Connection;
+	#conn: ChannelModel;
 	#channel: Channel;
 
 	constructor(d: Dependences) {

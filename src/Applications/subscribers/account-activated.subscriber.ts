@@ -1,8 +1,8 @@
 import { DEBUG_MODE } from "#Config";
 import { Actions } from "#Domain/events/actions.enum.js";
 import { eventBus } from "#Infrastructure/event-bus.js";
-import { errorHandler } from "#shared/error-handler/make.js";
-import { Logger } from "#shared/logger-handler/make.js";
+import { errorHandler } from "#common/error-handler/make.js";
+import { Logger } from "#common/logger-handler/make.js";
 
 // Errors
 // import { EventException } from "#Domain/core/errors.factory.js";
