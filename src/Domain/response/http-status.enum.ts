@@ -4,6 +4,7 @@ export const enum HttpStatus {
 	SWITCHING_PROTOCOLS = 101,
 	PROCESSING = 102,
 	EARLYHINTS = 103,
+
 	// Success
 	OK = 200,
 	CREATED = 201,
@@ -12,6 +13,7 @@ export const enum HttpStatus {
 	NO_CONTENT = 204,
 	RESET_CONTENT = 205,
 	PARTIAL_CONTENT = 206,
+
 	// Redirect
 	AMBIGUOUS = 300,
 	MOVED_PERMANENTLY = 301,
@@ -20,6 +22,7 @@ export const enum HttpStatus {
 	NOT_MODIFIED = 304,
 	TEMPORARY_REDIRECT = 307,
 	PERMANENT_REDIRECT = 308,
+
 	// Client Errors
 	BAD_REQUEST = 400,
 	UNAUTHORIZED = 401,
@@ -46,6 +49,7 @@ export const enum HttpStatus {
 	PRECONDITION_REQUIRED = 428,
 	TOO_MANY_REQUESTS = 429,
 	UNAVAILABLE_FOR_LEGAL_REASONS = 451,
+
 	// Server Errors
 	INTERNAL_SERVER_ERROR = 500,
 	NOT_IMPLEMENTED = 501,
@@ -54,3 +58,64 @@ export const enum HttpStatus {
 	GATEWAY_TIMEOUT = 504,
 	HTTP_VERSION_NOT_SUPPORTED = 505,
 }
+
+export const STATUS_MESSAGES: Readonly<Record<HttpStatus, string>> = {
+	// Info
+	[HttpStatus.CONTINUE]: "Continuing...  🔄",
+	[HttpStatus.SWITCHING_PROTOCOLS]: "Switching protocols...  🤝",
+	[HttpStatus.PROCESSING]: "Processing... ⏳",
+	[HttpStatus.EARLYHINTS]: "Early hints... 💡",
+
+	// Success
+	[HttpStatus.OK]: "Success! ✅",
+	[HttpStatus.CREATED]: "Created! 🎉",
+	[HttpStatus.ACCEPTED]: "Accepted 👍",
+	[HttpStatus.NON_AUTHORITATIVE_INFORMATION]: "Non-authoritative information ℹ️",
+	[HttpStatus.NO_CONTENT]: "No content 😶",
+	[HttpStatus.RESET_CONTENT]: "Content reset 🔄",
+	[HttpStatus.PARTIAL_CONTENT]: "Partial content 📦",
+
+	// Redirect
+	[HttpStatus.AMBIGUOUS]: "Multiple choices❓",
+	[HttpStatus.MOVED_PERMANENTLY]: "Moved permanently ➡️",
+	[HttpStatus.FOUND]: "Found 📍",
+	[HttpStatus.SEE_OTHER]: "See other 👁️",
+	[HttpStatus.NOT_MODIFIED]: "Not modified 🔄",
+	[HttpStatus.TEMPORARY_REDIRECT]: "Temporary redirect ⏱️",
+	[HttpStatus.PERMANENT_REDIRECT]: "Permanent redirect ➡️",
+
+	// Client Errors
+	[HttpStatus.BAD_REQUEST]: "⚠️ Bad request ⚠️",
+	[HttpStatus.UNAUTHORIZED]: "🔒 Unauthorized  🔒",
+	[HttpStatus.PAYMENT_REQUIRED]: "💳  Payment required  💳",
+	[HttpStatus.FORBIDDEN]: "🚫 Forbidden 🚫",
+	[HttpStatus.NOT_FOUND]: "Resource not found 🔍",
+	[HttpStatus.METHOD_NOT_ALLOWED]: "Method not allowed ⛔",
+	[HttpStatus.NOT_ACCEPTABLE]: "Not acceptable ❌",
+	[HttpStatus.PROXY_AUTHENTICATION_REQUIRED]: "Proxy authentication required 🔑",
+	[HttpStatus.REQUEST_TIMEOUT]: "Request timeout ⌛",
+	[HttpStatus.CONFLICT]: "Conflict with the current state of the resource 💥",
+	[HttpStatus.GONE]: "Resource deleted 🗑️",
+	[HttpStatus.LENGTH_REQUIRED]: "Length required 📏",
+	[HttpStatus.PRECONDITION_FAILED]: "Precondition failed ❌",
+	[HttpStatus.PAYLOAD_TOO_LARGE]: "Payload too large ➡️",
+	[HttpStatus.URI_TOO_LONG]: "URI too long ➡️",
+	[HttpStatus.UNSUPPORTED_MEDIA_TYPE]: "Unsupported media type ❌",
+	[HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE]: "Requested range not satisfiable ❌",
+	[HttpStatus.EXPECTATION_FAILED]: "Expectation failed 😢",
+	[HttpStatus.I_AM_A_TEAPOT]: "I'm a teapot ☕ (Unusual error)",
+	[HttpStatus.MISDIRECTED]: "Misdirected request 🧭",
+	[HttpStatus.UNPROCESSABLE_ENTITY]: "Unprocessable content, fix request and try again ️ 🛠️",
+	[HttpStatus.FAILED_DEPENDENCY]: "Failed dependency ❌",
+	[HttpStatus.PRECONDITION_REQUIRED]: "Precondition required  🔑",
+	[HttpStatus.TOO_MANY_REQUESTS]: "Too many requests  🚦🛑",
+	[HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS]: "Unavailable for legal reasons ⚖️",
+
+	// Server Errors
+	[HttpStatus.INTERNAL_SERVER_ERROR]: "Internal server error ️ 🖥️💥",
+	[HttpStatus.NOT_IMPLEMENTED]: "Not implemented  🚧",
+	[HttpStatus.BAD_GATEWAY]: "Bad gateway 🚪❌",
+	[HttpStatus.SERVICE_UNAVAILABLE]: "Service unavailable ⏳ Try later",
+	[HttpStatus.GATEWAY_TIMEOUT]: "Gateway timeout ⌛",
+	[HttpStatus.HTTP_VERSION_NOT_SUPPORTED]: "HTTP version not supported ❌",
+} as const;

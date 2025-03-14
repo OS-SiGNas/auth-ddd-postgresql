@@ -36,7 +36,7 @@ export const DomainEvent = class<M extends object> {
 	readonly #logger = new Logger("DomainEvent");
 	constructor(d: Dependeces<M>) {
 		d.id ??= randomUUID();
-		d.createdAt ??= new Date().toISOString();
+		d.createdAt ??= new Date().toUTCString();
 		d.emitter ??= secrets.SERVICE_NAME;
 		this.#event = DomainEvent.validate<M>(d as IEvent<M>);
 	}
@@ -89,7 +89,6 @@ export const DomainEvent = class<M extends object> {
 
 		try {
 			const headers: IEvent<object> = z.object(schemaDefauls).strict().parse(e);
-			console.log("HEADERS LISTOS");
 			const message = actionParseStrategies.parse<M>(headers.action, e.message);
 			return { ...headers, message };
 		} catch (error) {

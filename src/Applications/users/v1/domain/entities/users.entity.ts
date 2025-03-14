@@ -24,7 +24,7 @@ export class User extends BaseEntity implements IUser {
 	@JoinTable()
 	roles: Role[];
 
-	@Column({ name: "created_at", default: new Date() })
+	@Column({ name: "created_at", default: () => "NOW()" })
 	createdAt: Date;
 
 	@Column({ name: "is_active", default: false })

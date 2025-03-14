@@ -74,7 +74,7 @@ class Config {
 
 	readonly #getSecrets = (): Secrets => {
 		const zString = z.string().nonempty();
-		const zPort = z.string().transform(Number).pipe(z.number().positive().min(3000).max(35536));
+		const zPort = z.string().transform(Number).pipe(z.number().positive().min(80).max(65535));
 		const zNumber = z.string().transform(Number).pipe(z.number().positive());
 		const zPassword = z.string().min(8).max(64);
 		const schema = {

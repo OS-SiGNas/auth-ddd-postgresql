@@ -44,24 +44,23 @@ export class AuthController implements IAuthController {
 	public readonly login: ControllerHandler<LoginRequest, UserSessionDTO> = async ({ body, correlationId }) => {
 		try {
 			const userDto = await this.#business.login(body);
-			if (userDto === null) return this.#response({ error: new UnauthorizedException401("Username or password is incorrect") });
+			if (!userDto) return this.#response({ error: new UnauthorizedException401("Username or password is incorrect") });
 			userDto.session = await this.#sessionHandler.generateSession({
 				roles: userDto.roles,
 				userUuid: userDto.uuid,
 			});
 
-			const eSession = new DomainEvent<UserSessionDTO>({
+			void new DomainEvent<UserSessionDTO>({
 				action: Actions.LOGIN,
 				correlationId,
 				moduleEmitter: this.#name,
 				message: userDto.userSessionDTO,
-			});
+			}).publish();
 
-			void eSession.publish();
 			return this.#response({ data: userDto.userSessionDTO });
 		} catch (error) {
 			return this.#response({
-				error: this.#errorHandler.catch({ name: this.#name, ticket: correlationId as string, error }),
+				error: this.#errorHandler.catch({ name: this.#name, ticket: correlationId, error }),
 			});
 		}
 	};

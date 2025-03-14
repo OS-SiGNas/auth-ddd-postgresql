@@ -5,15 +5,17 @@ import type { IEvent } from "./domain-event";
 import type { UserNonSensitiveData } from "#users/v1/domain/IUser";
 import type { UserSessionDTO } from "#users/v1/domain/users.dto";
 
-interface DomainEventMap extends Record<Actions, unknown[]> {
-	[Actions.REBOOT]: [Readonly<IEvent<never>>];
+type E<M extends object> = Readonly<IEvent<M>>;
+
+interface EventMap extends Record<Actions, [IEvent<object>]> {
+	[Actions.REBOOT]: [E<never>];
 
 	// auth
-	[Actions.LOGIN]: [Readonly<IEvent<UserSessionDTO>>];
-	[Actions.ACCOUNT_ACTIVATED]: [Readonly<IEvent<UserNonSensitiveData>>];
+	[Actions.LOGIN]: [E<UserSessionDTO>];
+	[Actions.ACCOUNT_ACTIVATED]: [E<UserNonSensitiveData>];
 
 	// users
-	//[Actions.]: [IEvent<>];
+	//[Actions.]: [IEvent<never>];
 }
 
-export type DomainEventBus = EventEmitter<DomainEventMap>;
+export type DomainEventBus = EventEmitter<EventMap>;

@@ -39,10 +39,10 @@ export class StorageHandler implements ICacheHandler {
 		if (this.#isDebug) this.#logger.info(`Saved in storage: ${key}`);
 	};
 
-	public readonly delete = (key: string): boolean => {
+	public readonly delete = (key: string): Promise<boolean> => {
 		const deleted = this.#storage.delete(key);
 		if (this.#isDebug) this.#logger.debug(`Key '${key}' deleted?: ${deleted}`);
-		return deleted;
+		return Promise.resolve(deleted);
 	};
 
 	readonly #clean = async (): Promise<void> => {

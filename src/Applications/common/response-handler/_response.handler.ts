@@ -1,8 +1,8 @@
 import { ZodError } from "zod";
 import { DEBUG_MODE } from "#Config";
 import { DomainException, InternalServerException500 } from "#Domain/errors/error.factory.js";
+import { STATUS_MESSAGES, type HttpStatus } from "#Domain/response/http-status.enum.js";
 
-import type { HttpStatus } from "#Domain/response/http-status.enum";
 import type { IResponse } from "#Domain/response/IResponse";
 import type { IResponseHandler, HttpResponse } from "#Domain/response/IResponseHandler";
 
@@ -10,40 +10,28 @@ export class _ResponseHandler implements IResponseHandler {
 	static #instance?: _ResponseHandler;
 	static getInstance = (): _ResponseHandler => (this.#instance ??= new _ResponseHandler());
 
-	readonly #getStatusMessage = (code: HttpStatus): string => this.#status.get(code) ?? "Unknown Status";
-	readonly #status: Map<HttpStatus, string> = new Map()
-		.set(200, "Success ok")
-		.set(201, "Created")
-		.set(400, "⚠ Bad request ⚠️")
-		.set(401, "🔒 Unauthorized 🔒")
-		.set(402, "Payment required 💳")
-		.set(403, "🔒 Forbidden 🔒")
-		.set(404, "Resourse not found")
-		.set(409, "Conflict with the current state of the target resource")
-		.set(422, "Unprocessable content, fix request and try again")
-		.set(451, "Unavailable for legal reasons")
-		.set(500, "Internal server error")
-		.set(503, "service unavailable ⏳ try later")
-		.set(504, "Gateway timeout ⌛");
-
 	/**  Responses implements
 	publci readonly socket: SocketResponse
 	public readonly event: EventResponse */
 	public readonly http: HttpResponse = ({ code, metadata, pagination, error, data }) => {
-		if (error !== undefined) return this.#formatError(error);
+		if (error !== undefined) return this.#formatError<never>(error);
 		const status = this.#getStatus(code ?? 200);
 		return { status, metadata, pagination, data };
 	};
+
 	readonly #formatError = <E>(error: unknown): IResponse<E> => {
 		if (error instanceof DomainException) return this.#domainErrors(error);
 		if (error instanceof ZodError) return this.#unprocessableContentErrors(error);
 		return this.#unhandledError();
 	};
 
-	readonly #domainErrors = <E>({ code, name, message, cause, stack, ticket }: DomainException): IResponse<E> => ({
-		status: this.#getStatus(code, ticket),
-		error: { name, message, cause, stack: this.#getStack(stack) },
-	});
+	readonly #domainErrors = ({ code, name, message, cause, stack, ticket }: DomainException): IResponse<never> => {
+		if (code >= 500) return this.#unhandledError();
+		return {
+			status: this.#getStatus(code, ticket),
+			error: { name, message, cause, stack: this.#getStack(stack) },
+		};
+	};
 
 	readonly #unprocessableContentErrors = ({ issues }: ZodError): IResponse<never> => ({
 		status: this.#getStatus(422),
@@ -67,7 +55,7 @@ export class _ResponseHandler implements IResponseHandler {
 	readonly #getStatus = (code: HttpStatus, ticket?: string): IResponse<never>["status"] => ({
 		code,
 		ticket,
-		message: this.#getStatusMessage(code),
+		message: STATUS_MESSAGES[code],
 		success: code < 400,
 		timestamp: Date.now().toString(),
 	});

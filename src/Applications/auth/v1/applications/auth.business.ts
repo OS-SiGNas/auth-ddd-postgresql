@@ -70,7 +70,7 @@ export class AuthBusiness implements IAuthBusiness {
 	};
 
 	readonly #activateAccount = async (email: string): Promise<never> => {
-		this.#storage.delete(email);
+		await this.#storage.delete(email);
 		const token = await this.#activateAccountTokenHandler.generateJWT({ email });
 		this.#storage.set(email, token);
 		void sendActivateAccountEmail({ emailReceiver: email, token });
@@ -92,7 +92,7 @@ export class AuthBusiness implements IAuthBusiness {
 		if (storedToken === null || storedToken !== token) throw new BadRequestException400("Invalid token");
 		user.isActive = true;
 		await this.#repository.save(user);
-		this.#storage.delete(user.email);
+		await this.#storage.delete(user.email);
 		return new UserDTO(user);
 	};
 
@@ -116,7 +116,7 @@ export class AuthBusiness implements IAuthBusiness {
 		if (isMatch === false) return false;
 		const { affected } = await this.#repository.update({ email }, { password: await this.#passwordHandler.encryptPassword(newPassword) });
 		if (affected === undefined || affected !== 1) throw new NotFoundException404(email);
-		this.#storage.delete(email);
+		await this.#storage.delete(email);
 		return true;
 	};
 }
