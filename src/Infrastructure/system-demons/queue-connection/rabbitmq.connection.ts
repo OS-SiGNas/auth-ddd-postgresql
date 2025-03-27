@@ -80,7 +80,7 @@ export class RabbitMQConnection {
 		if (message === null) return;
 		try {
 			const event: IEvent<object> = JSON.parse(message.content.toString());
-			void new DomainEvent(event).emit();
+			new DomainEvent(event).emit();
 			return await Promise.resolve(this.#channel.ack(message));
 		} catch (error) {
 			if (error instanceof SyntaxError) this.#logger.warn("Problem consuming message: " + error.message);

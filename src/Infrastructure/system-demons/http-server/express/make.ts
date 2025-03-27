@@ -4,6 +4,7 @@ import helmet from "helmet";
 
 import { DEBUG_MODE, secrets } from "#Config";
 import { Logger } from "#common/logger-handler/make.js";
+import { getNetworkPort } from "../getNetworkPort.js";
 import { setCorrelationId } from "./middlewares/setCorrelationId.middleware.js";
 import { requestLogger } from "./middlewares/requestLogger.middleware.js";
 import { notFound } from "./middlewares/notFound.middleware.js";
@@ -16,6 +17,7 @@ import { getUsersApp } from "#users/v1/make.js";
 import type { RequestHandler } from "express";
 import type { AuthRouterExpress } from "#auth/v1/infrastructure/auth-express.router";
 import type { UsersRouterExpress } from "#users/v1/infrastructure/users-express.router";
+import { argv } from "node:process";
 
 export const getExpressServer = async (): Promise<ExpressServer> => {
 	const eRouter = Router();
@@ -44,7 +46,7 @@ export const getExpressServer = async (): Promise<ExpressServer> => {
 		logger: new Logger("ExpressServer"),
 		DEBUG_MODE,
 		app: Express(),
-		port: +secrets.PORT,
+		port: getNetworkPort(argv[2] ?? secrets.PORT),
 		globalMiddlewares,
 		apis: [await _v1() /* , await _v2() */],
 		lastMiddlewares,

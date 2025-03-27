@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
 
-import { ITokenPayload } from "#Domain/sessions/ISession.js";
 import { secrets, DEBUG_MODE } from "#Config";
 import { TokenHandler } from "../token.handler.js";
 import { Logger } from "../logger-handler/make.js";
 import { _SessionHandler } from "./_session.handler.js";
+
+import type { ITokenPayload } from "#Domain/sessions/ISession.js";
 
 const { sign, verify } = jwt;
 

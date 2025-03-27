@@ -3,9 +3,9 @@ import { it, describe } from "node:test";
 import { deepEqual, throws } from "node:assert";
 
 import { Actions } from "#Domain/events/actions.enum.js";
-import { DomainEvent, IEvent } from "#Domain/events/domain-event.js";
+import { DomainEvent, type IEvent } from "#Domain/events/domain-event.js";
 import { UnprocessableException422 } from "#Domain/errors/error.factory.js";
-import { UserSessionDTO } from "#users/v1/domain/users.dto.js";
+import type { UserSessionDTO } from "#users/v1/domain/users.dto.js";
 
 describe("DomainEvent validations", () => {
 	it("should throw UnprocessableException422 for invalid action", () => {

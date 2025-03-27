@@ -9,11 +9,11 @@ import { Logger } from "#common/logger-handler/make.js";
 import type { Environment } from "#Config";
 import type { SystemDemon } from "#Domain/SystemDemon";
 
-void new (class {
-	#hasError: boolean = false;
+new (class {
 	readonly #demons: SystemDemon[] = systemDemons;
 	readonly #environment: Environment = NODE_ENV;
 	readonly #logger = new Logger(secrets.SERVICE_NAME);
+	#hasError: boolean = false;
 
 	/** asynn */ constructor() {
 		this.#logger.info("Starting Application");
@@ -24,20 +24,26 @@ void new (class {
 		};
 
 		this.#logger.info(messages[this.#environment]);
-		void this.#boot();
+
+		(async (): Promise<void> => {
+			console.time();
+			try {
+				await Promise.resolve(this.#boot());
+			} catch (error) {
+				this.#hasError = true;
+				this.#logger.error("Application crashed");
+				if (DEBUG_MODE) this.#logger.error("trace: \n", error);
+				await this.#shutdown();
+			} finally {
+				console.timeEnd();
+			}
+		})();
 	}
 
 	readonly #boot = async (): Promise<void> => {
-		try {
-			await Promise.all(this.#demons.map(({ start }) => start()));
-			void this.#subscribers();
-			this.#logger.info(this.#demons.length + ` Servers started successfully`);
-		} catch (error) {
-			this.#hasError = true;
-			this.#logger.error("Application crashed");
-			if (DEBUG_MODE) this.#logger.error("trace: \n", error);
-			await this.#shutdown();
-		}
+		await Promise.all(this.#demons.map(({ start }) => start()));
+		this.#subscribers();
+		this.#logger.info(this.#demons.length + ` System demons started successfully`);
 	};
 
 	readonly #shutdown = async (): Promise<void> => {
@@ -49,12 +55,13 @@ void new (class {
 	readonly #reboot = async (): Promise<void> => {
 		this.#logger.warn("Rebooting demons");
 		await Promise.all(this.#demons.map(({ restart }) => restart()));
+		for (const { restart } of this.#demons) await restart();
 	};
 
 	readonly #subscribers = (): void => {
-		void process.on("SIGINT", this.#shutdown);
-		void process.on("SIGTERM", this.#shutdown);
-		void eventBus.on(Actions.REBOOT, async (event) => {
+		process.on("SIGINT", this.#shutdown);
+		process.on("SIGTERM", this.#shutdown);
+		eventBus.on(Actions.REBOOT, async (event) => {
 			this.#logger.warn(`ACTION: ${event.action} - ID: ${event.id}`);
 			return await Promise.resolve(this.#reboot());
 		});

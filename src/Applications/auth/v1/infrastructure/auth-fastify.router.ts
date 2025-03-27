@@ -1,7 +1,7 @@
 import { endpoints } from "../domain/endpoints.enum.js";
 import type { FastifyPluginCallback, RouteHandler, RouteOptions } from "fastify";
 import type { IAuthController } from "../domain/IAuthController";
-import { IAuthRequestDTO } from "../domain/IAuthRequestDTO.js";
+import type { IAuthRequestDTO } from "../domain/IAuthRequestDTO.js";
 
 interface Dependences {
 	controller: IAuthController;
@@ -16,13 +16,13 @@ export class AuthRouterFastify {
 		this.#dto = d.dto;
 	}
 
-	public readonly plugin: FastifyPluginCallback = (instance, _, done) => {
-		instance.post(endpoints.LOGIN, this.#login);
-		instance.post(endpoints.REFRESH_TOKEN, this.#refreshToken);
-		instance.post(endpoints.REGISTER, this.#register);
-		instance.get(endpoints.ACTIVATE_ACCOUNT, this.#activateAccount);
-		instance.post(endpoints.FORGOT_PASSWORD, this.#forgotPassword);
-		instance.patch(endpoints.CHANGE_PASSWORD, this.#changePassword);
+	public readonly plugin: FastifyPluginCallback = (i, _, done) => {
+		i.post(endpoints.LOGIN, this.#login);
+		i.post(endpoints.REFRESH_TOKEN, this.#refreshToken);
+		i.post(endpoints.REGISTER, this.#register);
+		i.get(endpoints.ACTIVATE_ACCOUNT, this.#activateAccount);
+		i.post(endpoints.FORGOT_PASSWORD, this.#forgotPassword);
+		i.patch(endpoints.CHANGE_PASSWORD, this.#changePassword);
 
 		done();
 	};

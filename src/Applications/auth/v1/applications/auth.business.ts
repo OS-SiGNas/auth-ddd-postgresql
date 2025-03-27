@@ -114,7 +114,10 @@ export class AuthBusiness implements IAuthBusiness {
 		if (storage === null) return false;
 		const isMatch = await this.#passwordHandler.comparePassword(verificationString, storage.verificationString);
 		if (isMatch === false) return false;
-		const { affected } = await this.#repository.update({ email }, { password: await this.#passwordHandler.encryptPassword(newPassword) });
+		const { affected } = await this.#repository.update(
+			{ email },
+			{ password: await this.#passwordHandler.encryptPassword(newPassword) }
+		);
 		if (affected === undefined || affected !== 1) throw new NotFoundException404(email);
 		await this.#storage.delete(email);
 		return true;

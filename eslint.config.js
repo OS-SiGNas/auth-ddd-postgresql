@@ -4,11 +4,11 @@ import pluginSecurity from "eslint-plugin-security";
 import tseslint from "typescript-eslint";
 
 export default [
-	// { files: ["**/*.{js,mts,cts,ts}"] },
 	{ ignores: ["dist", "node_modules"] },
 	{ files: ["src/**/*.{js,mts,cts,ts}"] },
 	{
 		rules: {
+			"@typescript-eslint/consistent-type-imports": "error",
 			"@typescript-eslint/interface-name-prefix": "off",
 			"@typescript-eslint/explicit-function-return-type": "error",
 			"@typescript-eslint/explicit-module-boundary-types": "warn",

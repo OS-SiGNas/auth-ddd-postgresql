@@ -11,8 +11,7 @@
 		"start": "NODE_ENV=production node dist/index.js",
 		"dev": "NODE_ENV=development nodemon --watch 'src/**/*.ts' --exec 'ts-node --transpile-only src/index.ts'",
 		"dev:node": "NODE_ENV=development node --experimental-strip-types --watch src/index.ts",
-		"dev:concurrently": "NODE_ENV=development concurrently 'sh ./dev-mode.sh' 'sh ./dev-swc.sh' ",
-		"dev:concurrently2": "NODE_ENV=development concurrently 'sh ./dev-swc.sh' 'sh ./dev-mode.sh'",
+		"dev:concurrently": "NODE_ENV=development concurrently 'sh ./dev-mode.sh' 'sh ./dev-swc.sh'",
 		"typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
 		"migration:generate": "typeorm migration:generate ./migrations/PostRefactoring",
 		"migration:run": "typeorm migration:run -- -d path-to-datasource-config",
@@ -36,26 +35,26 @@
 		"#users/*": "./dist/Applications/users/*"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.21.0",
+		"@eslint/js": "^9.22.0",
 		"@swc/cli": "^0.4.0",
-		"@swc/core": "^1.11.7",
+		"@swc/core": "^1.11.11",
 		"@types/amqplib": "^0.10.7",
 		"@types/bcryptjs": "^2.4.6",
 		"@types/cors": "^2.8.17",
 		"@types/eslint-plugin-security": "^3.0.0",
 		"@types/express": "^4.17.21",
 		"@types/jsonwebtoken": "^9.0.9",
-		"@types/node": "^20.17.23",
+		"@types/node": "^20.17.24",
 		"@types/nodemailer": "^6.4.17",
 		"concurrently": "^9.1.2",
-		"eslint": "^9.21.0",
+		"eslint": "^9.22.0",
 		"eslint-plugin-security": "^3.0.1",
 		"globals": "^15.15.0",
 		"nodemon": "^3.1.9",
 		"prettier": "^3.5.3",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.2",
-		"typescript-eslint": "^8.26.0"
+		"typescript-eslint": "^8.26.1"
 	},
 	"dependencies": {
 		"@fastify/cors": "^10.1.0",
@@ -68,16 +67,11 @@
 		"helmet": "^7.2.0",
 		"jsonwebtoken": "^9.0.2",
 		"nodemailer": "^6.10.0",
-		"pg": "^8.13.3",
+		"pg": "^8.14.1",
 		"reflect-metadata": "^0.2.2",
 		"tsx": "^4.19.3",
 		"typeorm": "^0.3.21",
 		"winston": "^3.17.0",
 		"zod": "^3.24.2"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@swc/core"
-		]
 	}
 }

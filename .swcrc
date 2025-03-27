@@ -1,17 +1,19 @@
 {
-	"$schema": "https://swc.rs/schema.json",
 	"sourceMaps": true,
 	"exclude": [".test.ts$"],
+	"module": { "type": "es6" },
+	"minify": false,
+	"isModule": true,
 	"jsc": {
+		"target": "es2024",
+		"loose": false,
+		"baseUrl": "./",
 		"parser": {
 			"syntax": "typescript",
 			"tsx": false,
 			"decorators": true,
 			"dynamicImport": true
 		},
-		"target": "es2022",
-		"loose": false,
-		"baseUrl": "./",
 		"minify": {
 			"compress": false,
 			"mangle": false
@@ -20,8 +22,5 @@
 			"legacyDecorator": true,
 			"decoratorMetadata": true
 		}
-	},
-	"module": { "type": "es6" },
-	"minify": false,
-	"isModule": true
+	}
 }

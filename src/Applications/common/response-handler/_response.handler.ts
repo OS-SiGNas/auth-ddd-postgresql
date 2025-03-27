@@ -1,14 +1,24 @@
 import { ZodError } from "zod";
 import { DEBUG_MODE } from "#Config";
 import { DomainException, InternalServerException500 } from "#Domain/errors/error.factory.js";
-import { STATUS_MESSAGES, type HttpStatus } from "#Domain/response/http-status.enum.js";
 
+import type { GetHttpMessage } from "#Domain/response/http-status.messages.js";
+import type { HttpStatus } from "#Domain/response/http-status.enum.js";
 import type { IResponse } from "#Domain/response/IResponse";
 import type { IResponseHandler, HttpResponse } from "#Domain/response/IResponseHandler";
 
+interface Dependences {
+	getHttpMessage: GetHttpMessage;
+}
+
 export class _ResponseHandler implements IResponseHandler {
 	static #instance?: _ResponseHandler;
-	static getInstance = (): _ResponseHandler => (this.#instance ??= new _ResponseHandler());
+	static getInstance = (d: Dependences): _ResponseHandler => (this.#instance ??= new _ResponseHandler(d));
+
+	readonly #getHttpMessage: GetHttpMessage;
+	private constructor(d: Dependences) {
+		this.#getHttpMessage = d.getHttpMessage;
+	}
 
 	/**  Responses implements
 	publci readonly socket: SocketResponse
@@ -55,7 +65,7 @@ export class _ResponseHandler implements IResponseHandler {
 	readonly #getStatus = (code: HttpStatus, ticket?: string): IResponse<never>["status"] => ({
 		code,
 		ticket,
-		message: STATUS_MESSAGES[code],
+		message: this.#getHttpMessage(code),
 		success: code < 400,
 		timestamp: Date.now().toString(),
 	});

@@ -1,0 +1,4 @@
+{
+	"name": "domain",
+	"main": "index.{js,ts}"
+}
