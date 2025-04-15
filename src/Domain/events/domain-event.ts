@@ -70,13 +70,7 @@ export const DomainEvent = class<M extends object> {
 	}
 
 	public static validate = <M extends object>(e: IEvent<M>): Readonly<IEvent<M>> => {
-		const zAction = z.enum([
-			Actions.REBOOT,
-			Actions.LOGIN,
-			Actions.ACCOUNT_ACTIVATED,
-			Actions.NEW_ACCOUNT_REGISTERED,
-			Actions.USER_PASSWORD_CHANGED,
-		]);
+		const zAction = z.enum([Actions.REBOOT, Actions.LOGIN, Actions.ACCOUNT_ACTIVATED, Actions.NEW_ACCOUNT_REGISTERED, Actions.USER_PASSWORD_CHANGED]);
 		const zUUUID = z.string().uuid();
 		const zString = z.string();
 		// const zDate = z.date();

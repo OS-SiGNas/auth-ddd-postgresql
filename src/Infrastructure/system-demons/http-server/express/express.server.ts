@@ -1,10 +1,11 @@
+import { NODE_ENV } from "#Config";
 import type { Server } from "http";
 import type { Application, ErrorRequestHandler, RequestHandler } from "express";
 import type { Core } from "#Domain/core/Core";
 import type { SystemDemon } from "#Domain/SystemDemon";
 import type { ILogger } from "#Domain/core/ILogger";
 
-interface Dependences extends Core {
+interface Dependencies extends Core {
 	app: Application;
 	globalMiddlewares: RequestHandler[];
 	apis: RequestHandler[][];
@@ -19,7 +20,7 @@ export class ExpressServer implements SystemDemon {
 	#httpServer?: Server;
 	#isRunning: boolean;
 
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#isRunning = false;
 		this.#app = d.app;
 		this.#port = d.port;
@@ -33,6 +34,11 @@ export class ExpressServer implements SystemDemon {
 
 		// 3: finally last position middlewares
 		this.#app.use(d.lastMiddlewares);
+	}
+
+	get app(): Application | undefined {
+		if (NODE_ENV !== "testing") return;
+		return this.#app;
 	}
 
 	public readonly start = async (): Promise<void> => {

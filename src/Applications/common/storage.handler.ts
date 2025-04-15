@@ -4,7 +4,7 @@ import type { Core } from "#Domain/core/Core";
 import type { ILogger } from "#Domain/core/ILogger";
 import type { ICacheHandler } from "#Domain/tools/ICacheHandler";
 
-interface Dependences extends Core {
+interface Dependencies extends Core {
 	keyExpiredTime: number;
 	cacheExpiredTime: number;
 }
@@ -15,12 +15,13 @@ export class StorageHandler implements ICacheHandler {
 	readonly #storage: Map<string, { createdAt: number; value: unknown }>;
 	readonly #keyExpiredTime: number;
 
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#isDebug = d.DEBUG_MODE;
 		this.#storage = new Map();
 		this.#logger = d.logger;
 		this.#keyExpiredTime = d.keyExpiredTime;
 		const interval = setInterval(this.#clean, d.cacheExpiredTime);
+
 		process.on("exit", () => {
 			clearInterval(interval);
 			if (this.#isDebug) this.#logger.debug("Interval cleaned");
@@ -48,9 +49,11 @@ export class StorageHandler implements ICacheHandler {
 	readonly #clean = async (): Promise<void> => {
 		this.#logger.info(`Cleaning storage with ${this.#storage.size} elements`);
 		const now = Date.now();
+
 		/* for (const [key, element] of this.#storage) {
 			if (now - element.createdAt > this.#keyExpiredTime) this.#storage.delete(key);
 		} */
+
 		this.#storage.forEach((element, key) => {
 			if (now - element.createdAt > this.#keyExpiredTime) this.#storage.delete(key);
 		});

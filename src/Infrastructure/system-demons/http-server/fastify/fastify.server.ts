@@ -3,7 +3,7 @@ import type { Core } from "#Domain/core/Core";
 import type { SystemDemon } from "#Domain/SystemDemon";
 import type { ILogger } from "#Domain/core/ILogger";
 
-interface Dependences extends Core {
+interface Dependencies extends Core {
 	app: FastifyInstance;
 	globalMiddlewares: FastifyPluginCallback[];
 	apis: FastifyPluginCallback[][];
@@ -15,7 +15,7 @@ export class FastifyServer implements SystemDemon {
 	readonly #port: number;
 	readonly #logger: ILogger;
 	#isRunning: boolean;
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#isRunning = false;
 		this.#app = d.app;
 		this.#port = d.port;

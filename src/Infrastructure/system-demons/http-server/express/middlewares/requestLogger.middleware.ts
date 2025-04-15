@@ -3,7 +3,7 @@ import { bgWhite } from "#common/logger-handler/colors.utils.js";
 
 import type { RequestHandler, Request } from "express";
 
-export const requestLogger = ((): RequestHandler => {
+export const requestLogger = (): RequestHandler => {
 	const _httpLogger = new Logger("RequestLogger");
 
 	return (req, res, next) => {
@@ -17,4 +17,4 @@ export const requestLogger = ((): RequestHandler => {
 
 		return next();
 	};
-})();
+};

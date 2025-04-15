@@ -3,7 +3,7 @@ import type { FastifyPluginCallback, RouteHandler, RouteOptions } from "fastify"
 import type { IUsersController } from "../domain/IUsersController";
 import type { IUsersRequestDTO } from "../domain/IUsersRequestDTO.js";
 
-interface Dependences {
+interface Dependencies {
 	controller: IUsersController;
 	dto: IUsersRequestDTO;
 }
@@ -11,7 +11,7 @@ interface Dependences {
 export class UsersRouterFastify {
 	readonly #controller: IUsersController;
 	readonly #dto: IUsersRequestDTO;
-	constructor(d: Dependences) {
+	constructor(d: Dependencies) {
 		this.#controller = d.controller;
 		this.#dto = d.dto;
 	}

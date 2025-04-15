@@ -45,8 +45,8 @@ export const getAuthApp = async <T extends AuthRouterExpress | AuthRouterFastify
 		activateAccountTokenHandler,
 		repository: User,
 		passwordHandler,
-		storage,
 		DEBUG_MODE,
+		storage,
 	});
 
 	const controller = new AuthController({
@@ -54,20 +54,22 @@ export const getAuthApp = async <T extends AuthRouterExpress | AuthRouterFastify
 		responseHandler,
 		sessionHandler,
 		errorHandler,
-		business,
 		DEBUG_MODE,
+		business,
 	});
 
 	const dto = new AuthRequestDTO();
 
+	const dependencies = { dto, controller };
+
 	if (secrets.HTTP_SERVICE === "express") {
 		const { AuthRouterExpress } = await import("./infrastructure/auth-express.router.js");
-		return new AuthRouterExpress({ controller, dto }) as T;
+		return new AuthRouterExpress(dependencies) as T;
 	}
 
 	if (secrets.HTTP_SERVICE === "fastify") {
 		const { AuthRouterFastify } = await import("./infrastructure/auth-fastify.router.js");
-		return new AuthRouterFastify({ controller, dto }) as T;
+		return new AuthRouterFastify(dependencies) as T;
 	}
 
 	throw new ModuleException("Auth module");

@@ -3,7 +3,7 @@ import type { RequestHandler, Router } from "express";
 import type { IAuthController } from "../domain/IAuthController";
 import type { IAuthRequestDTO } from "../domain/IAuthRequestDTO.js";
 
-interface Dependences {
+interface Dependencies {
 	controller: IAuthController;
 	dto: IAuthRequestDTO;
 }
@@ -11,7 +11,7 @@ interface Dependences {
 export class AuthRouterExpress {
 	readonly #controller: IAuthController;
 	readonly #dto: IAuthRequestDTO;
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#controller = d.controller;
 		this.#dto = d.dto;
 	}

@@ -3,7 +3,7 @@ import { BadRequestException400, NotFoundException404 } from "#Domain/errors/err
 import { RoleName } from "../domain/role-name.enum.js";
 
 import type { ILogger } from "#Domain/core/ILogger";
-import type { ControllerHandler, ControllersDependences } from "#Domain/Business";
+import type { Controller, ControllersDependencies } from "#Domain/Business";
 import type { IErrorHandler } from "#Domain/errors/IErrorHandler";
 import type { HttpResponse } from "#Domain/response/IResponseHandler.js";
 import type { ISessionHandler } from "#Domain/sessions/ISessionHandler.js";
@@ -20,7 +20,7 @@ import type {
 	UpdateUserRequest,
 } from "../domain/Request.js";
 
-interface Dependences extends ControllersDependences {
+interface Dependencies extends ControllersDependencies {
 	business: IUsersBusiness;
 }
 
@@ -32,7 +32,7 @@ export class UsersController implements IUsersController {
 	readonly #sessionHandler: ISessionHandler;
 	readonly #errorHandler: IErrorHandler;
 
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#logger = d.logger;
 		this.#response = d.responseHandler.http;
 		this.#business = d.business;
@@ -40,7 +40,7 @@ export class UsersController implements IUsersController {
 		this.#errorHandler = d.errorHandler;
 	}
 
-	public readonly postUser: ControllerHandler<CreateUserRequest, UserNonSensitiveData> = async ({ headers, correlationId, body }) => {
+	public readonly postUser: Controller<CreateUserRequest, UserNonSensitiveData> = async ({ headers, correlationId, body }) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, headers.authorization);
 			const newUser = await this.#business.createUser(body);
@@ -53,7 +53,7 @@ export class UsersController implements IUsersController {
 		}
 	};
 
-	public readonly getOneUser: ControllerHandler<GetOneUserRequest, UserNonSensitiveData> = async (p) => {
+	public readonly getOneUser: Controller<GetOneUserRequest, UserNonSensitiveData> = async (p) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, p.headers.authorization);
 			const user = await this.#business.getOneUser(p.params);
@@ -65,7 +65,7 @@ export class UsersController implements IUsersController {
 		}
 	};
 
-	public readonly getAllUsers: ControllerHandler<GetAllUsersRequest, UserNonSensitiveData[]> = async (p) => {
+	public readonly getAllUsers: Controller<GetAllUsersRequest, UserNonSensitiveData[]> = async (p) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, p.headers.authorization);
 			const users = await this.#business.getAllUsers(p);
@@ -77,14 +77,12 @@ export class UsersController implements IUsersController {
 		}
 	};
 
-	public readonly patchUser: ControllerHandler<UpdateUserRequest, string> = async (p) => {
+	public readonly patchUser: Controller<UpdateUserRequest, string> = async (p) => {
 		try {
 			const { roles, userUuid } = await this.#sessionHandler.validateSession(RoleName.STANDARD, p.headers.authorization);
 			if (userUuid !== p.params.uuid && !roles.includes(RoleName.ADMIN)) throw new NotFoundException404(p.params.uuid);
 			const user = await this.#business.updateUser(p);
-			return user
-				? this.#response({ data: `User ${p.params.uuid} is updated` })
-				: this.#response({ error: new NotFoundException404(p.params.uuid) });
+			return user ? this.#response({ data: `User ${p.params.uuid} is updated` }) : this.#response({ error: new NotFoundException404(p.params.uuid) });
 		} catch (error) {
 			return this.#response({
 				error: this.#errorHandler.catch({ name: this.#name, ticket: p.correlationId, error }),
@@ -92,7 +90,7 @@ export class UsersController implements IUsersController {
 		}
 	};
 
-	public readonly deleteUser: ControllerHandler<DeleteUserRequest, string> = async (p) => {
+	public readonly deleteUser: Controller<DeleteUserRequest, string> = async (p) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, p.headers.authorization);
 			const deleted = await this.#business.deleteUser(p.params);
@@ -106,7 +104,7 @@ export class UsersController implements IUsersController {
 		}
 	};
 
-	public readonly createRole: ControllerHandler<CreateUserRoleRequest, string> = async (p) => {
+	public readonly createRole: Controller<CreateUserRoleRequest, string> = async (p) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, p.headers.authorization);
 			await this.#business.createRole(p.body);
@@ -118,7 +116,7 @@ export class UsersController implements IUsersController {
 		}
 	};
 
-	public readonly rolesToUser: ControllerHandler<AddUserRolesRequest, UserNonSensitiveData> = async (p) => {
+	public readonly rolesToUser: Controller<AddUserRolesRequest, UserNonSensitiveData> = async (p) => {
 		try {
 			await this.#sessionHandler.validateSession(RoleName.ADMIN, p.headers.authorization);
 			const user = await this.#business.rolesToUser(p);

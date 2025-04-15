@@ -4,14 +4,7 @@ import { UsersRequestDTO } from "#users/v1/domain/users-request.dto.js";
 
 import type { AsyncParser } from "#Domain/Business";
 import type { IAuthRequestDTO } from "./IAuthRequestDTO";
-import type {
-	ActivateAccountRequest,
-	ChangePasswordRequest,
-	ForgotPasswordRequest,
-	LoginRequest,
-	RefreshTokenRequest,
-	RegisterRequest,
-} from "./Request.js";
+import type { ActivateAccountRequest, ChangePasswordRequest, ForgotPasswordRequest, LoginRequest, RefreshTokenRequest, RegisterRequest } from "./Request.js";
 
 export class AuthRequestDTO implements IAuthRequestDTO {
 	readonly #defaults = UsersRequestDTO.defaults;

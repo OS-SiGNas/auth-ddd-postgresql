@@ -1,30 +1,19 @@
 import { randomBytes } from "node:crypto";
-import {
-	BadRequestException400,
-	DuplicateAccountException409,
-	ForbiddenException403,
-	NotFoundException404,
-} from "#Domain/errors/error.factory.js";
+import { BadRequestException400, DuplicateAccountException409, ForbiddenException403, NotFoundException404 } from "#Domain/errors/error.factory.js";
 import { UserDTO } from "#users/v1/domain/users.dto.js";
 import { sendActivateAccountEmail } from "./notifications/email.notification.js";
 
 import type { Core } from "#Domain/core/Core.js";
 import type { ILogger } from "#Domain/core/ILogger";
-import type { BusinessHandler } from "#Domain/Business.js";
+import type { Business } from "#Domain/Business.js";
 import type { ICacheHandler } from "#Domain/tools/ICacheHandler.js";
 import type { ITokenHandler } from "#Domain/tools/ITokenHandler.js";
 import type { IPasswordHandler } from "#Domain/tools/IPasswordHandler.js";
 import type { User } from "#users/v1/domain/entities/users.entity";
 import type { IAuthBusiness } from "../domain/IAuthBusiness.js";
-import type {
-	LoginRequest,
-	RegisterRequest,
-	ActivateAccountRequest,
-	ForgotPasswordRequest,
-	ChangePasswordRequest,
-} from "../domain/Request";
+import type { LoginRequest, RegisterRequest, ActivateAccountRequest, ForgotPasswordRequest, ChangePasswordRequest } from "../domain/Request";
 
-interface Dependences extends Core {
+interface Dependencies extends Core {
 	repository: typeof User;
 	logger: ILogger;
 	passwordHandler: IPasswordHandler;
@@ -39,7 +28,7 @@ export class AuthBusiness implements IAuthBusiness {
 	readonly #activateAccountTokenHandler: ITokenHandler<{ email: string }>;
 	readonly #storage: ICacheHandler;
 
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#repository = d.repository;
 		this.#logger = d.logger;
 		this.#passwordHandler = d.passwordHandler;
@@ -47,20 +36,7 @@ export class AuthBusiness implements IAuthBusiness {
 		this.#storage = d.storage;
 	}
 
-	public readonly login: BusinessHandler<LoginRequest["body"], UserDTO | null> = async ({ email, password }) => {
-		const [user] = await this.#repository.find({
-			where: { email },
-			relations: ["roles"],
-			select: { roles: { name: true } },
-		});
-		if (user === undefined) return null;
-		const isMatch = await this.#passwordHandler.comparePassword(password, user.password);
-		if (!isMatch) return null;
-		if (!user.isActive) return this.#activateAccount(email);
-		return new UserDTO(user);
-	};
-
-	public readonly register: BusinessHandler<RegisterRequest["body"], UserDTO> = async ({ email, name, password }) => {
+	public readonly register: Business<RegisterRequest["body"], UserDTO> = async ({ email, name, password }) => {
 		const exists = await this.#repository.exists({ where: { email } });
 		if (exists) throw new DuplicateAccountException409(email);
 		const encryptedPassword = await this.#passwordHandler.encryptPassword(password);
@@ -69,7 +45,20 @@ export class AuthBusiness implements IAuthBusiness {
 		return new UserDTO(user);
 	};
 
-	readonly #activateAccount = async (email: string): Promise<never> => {
+	public readonly login: Business<LoginRequest["body"], UserDTO | null> = async ({ email, password }) => {
+		const [user] = await this.#repository.find({
+			where: { email },
+			relations: ["roles"],
+			select: { roles: { name: true } },
+		});
+		if (user === undefined) return null;
+		const isMatch = await this.#passwordHandler.comparePassword(password, user.password);
+		if (!isMatch) return null;
+		if (!user.isActive) return this.#inactiveAccountFlow(email);
+		return new UserDTO(user);
+	};
+
+	readonly #inactiveAccountFlow = async (email: string): Promise<never> => {
 		await this.#storage.delete(email);
 		const token = await this.#activateAccountTokenHandler.generateJWT({ email });
 		this.#storage.set(email, token);
@@ -77,13 +66,13 @@ export class AuthBusiness implements IAuthBusiness {
 		throw new ForbiddenException403("Inactive account, Please check your email for the activation link");
 	};
 
-	public readonly getUserByUuid: BusinessHandler<string, UserDTO> = async (uuid: string) => {
+	public readonly getUserByUuid: Business<string, UserDTO> = async (uuid: string) => {
 		const user = await this.#repository.findOne({ where: { uuid }, select: { roles: true } });
 		if (user === null) throw new NotFoundException404(uuid);
 		return new UserDTO(user);
 	};
 
-	public readonly activateAccount: BusinessHandler<ActivateAccountRequest["params"], UserDTO> = async ({ token }) => {
+	public readonly activateAccount: Business<ActivateAccountRequest["params"], UserDTO> = async ({ token }) => {
 		const { email } = await this.#activateAccountTokenHandler.verifyJWT(token);
 		this.#logger.info("Account activation attempt");
 		const user = await this.#repository.findOneBy({ email });
@@ -96,7 +85,7 @@ export class AuthBusiness implements IAuthBusiness {
 		return new UserDTO(user);
 	};
 
-	public readonly forgotPassword: BusinessHandler<ForgotPasswordRequest["body"], boolean> = async ({ email }) => {
+	public readonly forgotPassword: Business<ForgotPasswordRequest["body"], boolean> = async ({ email }) => {
 		const user = await this.#repository.exists({ where: { email } });
 		if (user === false) throw new NotFoundException404(email);
 		const verificationString = randomBytes(4).toString("hex");
@@ -105,19 +94,12 @@ export class AuthBusiness implements IAuthBusiness {
 		return true;
 	};
 
-	public readonly changePassword: BusinessHandler<ChangePasswordRequest["body"], boolean> = async ({
-		email,
-		newPassword,
-		verificationString,
-	}) => {
+	public readonly changePassword: Business<ChangePasswordRequest["body"], boolean> = async ({ email, newPassword, verificationString }) => {
 		const storage = await this.#storage.get<{ verificationString: string }>(email);
 		if (storage === null) return false;
 		const isMatch = await this.#passwordHandler.comparePassword(verificationString, storage.verificationString);
 		if (isMatch === false) return false;
-		const { affected } = await this.#repository.update(
-			{ email },
-			{ password: await this.#passwordHandler.encryptPassword(newPassword) }
-		);
+		const { affected } = await this.#repository.update({ email }, { password: await this.#passwordHandler.encryptPassword(newPassword) });
 		if (affected === undefined || affected !== 1) throw new NotFoundException404(email);
 		await this.#storage.delete(email);
 		return true;

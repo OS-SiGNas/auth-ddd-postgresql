@@ -3,7 +3,7 @@ import type { FastifyPluginCallback, RouteHandler, RouteOptions } from "fastify"
 import type { IAuthController } from "../domain/IAuthController";
 import type { IAuthRequestDTO } from "../domain/IAuthRequestDTO.js";
 
-interface Dependences {
+interface Dependencies {
 	controller: IAuthController;
 	dto: IAuthRequestDTO;
 }
@@ -11,7 +11,7 @@ interface Dependences {
 export class AuthRouterFastify {
 	readonly #controller: IAuthController;
 	readonly #dto: IAuthRequestDTO;
-	constructor(d: Dependences) {
+	constructor(d: Dependencies) {
 		this.#controller = d.controller;
 		this.#dto = d.dto;
 	}

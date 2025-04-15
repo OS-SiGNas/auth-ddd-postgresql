@@ -1,25 +1,20 @@
 import { ZodError } from "zod";
-import {
-	DomainException,
-	GatewayTimeoutException504,
-	InternalServerException500,
-	UnprocessableException422,
-} from "#Domain/errors/error.factory.js";
+import { DomainException, GatewayTimeoutException504, InternalServerException500, UnprocessableException422 } from "#Domain/errors/error.factory.js";
 
 import type { ILogger } from "#Domain/core/ILogger";
 import type { Ticket } from "#Domain/errors/error.factory.js";
 import type { Catch, IErrorHandler } from "#Domain/errors/IErrorHandler";
 
-interface Dependences {
+interface Dependencies {
 	logger: ILogger;
 }
 
 export class _ErrorHandler implements IErrorHandler {
 	static #instance?: _ErrorHandler;
-	static getInstance = (d: Dependences): Readonly<_ErrorHandler> => (this.#instance ??= new _ErrorHandler(d));
+	static getInstance = (d: Dependencies): Readonly<_ErrorHandler> => (this.#instance ??= new _ErrorHandler(d));
 
 	readonly #logger: ILogger;
-	constructor(d: Dependences) {
+	constructor(d: Dependencies) {
 		this.#logger = d.logger;
 	}
 
@@ -55,8 +50,7 @@ export class _ErrorHandler implements IErrorHandler {
 	};
 
 	readonly #errorHandler = (error: Error, ticket: Ticket): DomainException => {
-		if (error.message.includes("DataSource is not set for this entit"))
-			return new GatewayTimeoutException504("External resource unavailable", { ticket });
+		if (error.message.includes("DataSource is not set for this entit")) return new GatewayTimeoutException504("External resource unavailable", { ticket });
 
 		this.#logger.warn(`💀 Unhandled Error ${error.name} 💀 - ${ticket}`, error);
 		return this.#getInternalServerException(ticket);

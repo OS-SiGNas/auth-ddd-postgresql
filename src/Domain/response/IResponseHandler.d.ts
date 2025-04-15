@@ -5,9 +5,9 @@ export interface IResponseHandler {
 }
 
 export type HttpResponse = <Data>(args: {
-	code?: IResponse<never>["status"]["code"];
-	metadata?: IResponse<never>["metadata"];
-	pagination?: IResponse<never>["pagination"];
-	error?: IResponse<never>["error"];
+	code?: IResponse<void>["status"]["code"];
+	metadata?: IResponse<void>["metadata"];
+	pagination?: IResponse<void>["pagination"];
+	error?: IResponse<void>["error"];
 	data?: Data;
 }) => IResponse<Data>;

@@ -5,18 +5,18 @@ import type { ISessionHandler } from "#Domain/sessions/ISessionHandler";
 import type { ITokenHandler } from "#Domain/tools/ITokenHandler";
 import type { RoleName } from "#users/v1/domain/role-name.enum.js";
 
-interface Dependences {
+interface Dependencies {
 	accessTokenHandler: ITokenHandler<ITokenPayload>;
 	refreshTokenHandler: ITokenHandler<ITokenPayload>;
 }
 
 export class _SessionHandler implements ISessionHandler {
 	static #instance?: _SessionHandler;
-	static readonly getInstance = (d: Readonly<Dependences>): _SessionHandler => (this.#instance ??= new _SessionHandler(d));
+	static readonly getInstance = (d: Readonly<Dependencies>): _SessionHandler => (this.#instance ??= new _SessionHandler(d));
 
 	readonly #accessTokenHandler: ITokenHandler<ITokenPayload>;
 	readonly #refreshTokenHandler: ITokenHandler<ITokenPayload>;
-	private constructor(d: Readonly<Dependences>) {
+	private constructor(d: Readonly<Dependencies>) {
 		this.#accessTokenHandler = d.accessTokenHandler;
 		this.#refreshTokenHandler = d.refreshTokenHandler;
 	}
@@ -26,10 +26,7 @@ export class _SessionHandler implements ISessionHandler {
 	};
 
 	public readonly generateSession = async (payload: ITokenPayload): Promise<ISession> => {
-		const [accessToken, refreshToken] = await Promise.all([
-			this.#accessTokenHandler.generateJWT(payload),
-			this.#refreshTokenHandler.generateJWT(payload),
-		]);
+		const [accessToken, refreshToken] = await Promise.all([this.#accessTokenHandler.generateJWT(payload), this.#refreshTokenHandler.generateJWT(payload)]);
 		return { accessToken, refreshToken };
 	};
 

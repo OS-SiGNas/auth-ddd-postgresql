@@ -3,7 +3,7 @@ import type { DataSource } from "typeorm";
 import type { SystemDemon } from "#Domain/SystemDemon";
 import type { ILogger } from "#Domain/core/ILogger";
 
-interface Dependences {
+interface Dependencies {
 	dataSource: DataSource;
 	retryTime: number;
 	logger: ILogger;
@@ -11,7 +11,7 @@ interface Dependences {
 
 export class _PostgreServer implements SystemDemon {
 	static #instance?: _PostgreServer;
-	static getInstance = (d: Dependences): Readonly<_PostgreServer> => (this.#instance ??= new _PostgreServer(d));
+	static getInstance = (d: Dependencies): Readonly<_PostgreServer> => (this.#instance ??= new _PostgreServer(d));
 
 	#isRunning: boolean;
 	#connection?: DataSource;
@@ -21,7 +21,7 @@ export class _PostgreServer implements SystemDemon {
 	#timeOutRetrying?: NodeJS.Timeout;
 	#nextTry = 60000;
 
-	private constructor(d: Readonly<Dependences>) {
+	private constructor(d: Readonly<Dependencies>) {
 		this.#isRunning = false;
 		this.#dataSource = d.dataSource;
 		this.#logger = d.logger;

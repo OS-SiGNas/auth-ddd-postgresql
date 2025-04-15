@@ -50,11 +50,10 @@ describe("DomainEvent validations", () => {
 	});
 
 	it("should validate a valid event", () => {
-		const date = new Date();
 		const validEvent: IEvent<UserSessionDTO> = {
 			action: Actions.LOGIN,
 			id: "123e4567-e89b-12d3-a456-426614174000",
-			createdAt: date,
+			createdAt: new Date().toUTCString(),
 			emitter: "test-emitter",
 			moduleEmitter: "test-module",
 			correlationId: "123e4567-e89b-12d3-a456-426614174001",
@@ -66,7 +65,7 @@ describe("DomainEvent validations", () => {
 				user: {
 					uuid: "123e4567-e89b-12d3-a456-426614174000",
 					name: "test",
-					createdAt: date,
+					createdAt: new Date(),
 					email: "a@a.com",
 					roles: [],
 				},

@@ -10,11 +10,11 @@ interface EmailMessage {
 	html?: string;
 }
 
-interface Dependences extends Core {
+interface Dependencies extends Core {
 	transporter: Transporter;
 }
 
-type GetInstance = (d: Dependences) => Readonly<_EmailSenderProxy>;
+type GetInstance = (d: Dependencies) => Readonly<_EmailSenderProxy>;
 
 export class _EmailSenderProxy {
 	static #instance: _EmailSenderProxy;
@@ -23,7 +23,7 @@ export class _EmailSenderProxy {
 	readonly #isDebug: boolean;
 	readonly #logger: ILogger;
 	readonly #transporter: Transporter;
-	private constructor(d: Dependences) {
+	private constructor(d: Dependencies) {
 		this.#transporter = d.transporter;
 		this.#logger = d.logger;
 		this.#isDebug = d.DEBUG_MODE;

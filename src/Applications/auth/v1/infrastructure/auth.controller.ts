@@ -4,7 +4,7 @@ import { DomainEvent } from "#Domain/events/domain-event.js";
 // Errors
 import { BadRequestException400, ForbiddenException403, UnauthorizedException401 } from "#Domain/errors/error.factory.js";
 
-import type { ControllerHandler, ControllersDependences } from "#Domain/Business.js";
+import type { Controller, ControllersDependencies } from "#Domain/Business.js";
 import type { ILogger } from "#Domain/core/ILogger";
 import type { IErrorHandler } from "#Domain/errors/IErrorHandler";
 import type { HttpResponse } from "#Domain/response/IResponseHandler.js";
@@ -22,7 +22,7 @@ import type {
 	RegisterRequest,
 } from "../domain/Request.js";
 
-interface Dependences extends ControllersDependences {
+interface Dependencies extends ControllersDependencies {
 	business: IAuthBusiness;
 }
 
@@ -33,7 +33,7 @@ export class AuthController implements IAuthController {
 	readonly #response: HttpResponse;
 	readonly #sessionHandler: ISessionHandler;
 	readonly #business: IAuthBusiness;
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#logger = d.logger;
 		this.#errorHandler = d.errorHandler;
 		this.#response = d.responseHandler.http;
@@ -41,7 +41,7 @@ export class AuthController implements IAuthController {
 		this.#business = d.business;
 	}
 
-	public readonly login: ControllerHandler<LoginRequest, UserSessionDTO> = async ({ body, correlationId }) => {
+	public readonly login: Controller<LoginRequest, UserSessionDTO> = async ({ body, correlationId }) => {
 		try {
 			const userDto = await this.#business.login(body);
 			if (!userDto) return this.#response({ error: new UnauthorizedException401("Username or password is incorrect") });
@@ -50,7 +50,7 @@ export class AuthController implements IAuthController {
 				userUuid: userDto.uuid,
 			});
 
-			void new DomainEvent<UserSessionDTO>({
+			new DomainEvent<UserSessionDTO>({
 				action: Actions.LOGIN,
 				correlationId,
 				moduleEmitter: this.#name,
@@ -65,7 +65,7 @@ export class AuthController implements IAuthController {
 		}
 	};
 
-	public readonly refreshToken: ControllerHandler<RefreshTokenRequest, string> = async ({ body, correlationId }) => {
+	public readonly refreshToken: Controller<RefreshTokenRequest, string> = async ({ body, correlationId }) => {
 		try {
 			const { userUuid } = await this.#sessionHandler.validateRefreshToken(body.refreshToken);
 			const user = await this.#business.getUserByUuid(userUuid);
@@ -78,10 +78,13 @@ export class AuthController implements IAuthController {
 		}
 	};
 
-	public readonly register: ControllerHandler<RegisterRequest, UserNonSensitiveData> = async ({ body, correlationId }) => {
+	public readonly register: Controller<RegisterRequest, UserNonSensitiveData> = async ({ body, correlationId }) => {
 		try {
 			const userDto = await this.#business.register(body);
-			return this.#response({ code: HttpStatus.CREATED, data: userDto.userNonSensitiveDTO });
+			return this.#response({
+				code: HttpStatus.CREATED,
+				data: userDto.userNonSensitiveDTO,
+			});
 		} catch (error) {
 			return this.#response({
 				error: this.#errorHandler.catch({ name: this.#name, ticket: correlationId, error }),
@@ -89,19 +92,19 @@ export class AuthController implements IAuthController {
 		}
 	};
 
-	public readonly activateAccount: ControllerHandler<ActivateAccountRequest, string> = async ({ params, correlationId }) => {
+	public readonly activateAccount: Controller<ActivateAccountRequest, string> = async ({ params, correlationId }) => {
 		try {
 			const user = await this.#business.activateAccount(params);
 			if (user === undefined) return this.#response({ error: new BadRequestException400("Invalid activation request") });
 			this.#logger.debug(`Account activated ${user.uuid}`);
 
-			void new DomainEvent<UserNonSensitiveData>({
+			new DomainEvent<UserNonSensitiveData>({
 				action: Actions.ACCOUNT_ACTIVATED,
 				correlationId,
 				moduleEmitter: this.constructor.name,
 				context: {},
 				message: user.userNonSensitiveDTO,
-			});
+			}).publish();
 
 			return this.#response({ data: "Account activated" });
 		} catch (error) {
@@ -117,7 +120,7 @@ export class AuthController implements IAuthController {
 		}
 	};
 
-	public readonly forgotPassword: ControllerHandler<ForgotPasswordRequest, string> = async ({ body, correlationId }) => {
+	public readonly forgotPassword: Controller<ForgotPasswordRequest, string> = async ({ body, correlationId }) => {
 		try {
 			const result = await this.#business.forgotPassword(body);
 			return this.#response({ data: result ? "Verification string sended" : "" });
@@ -128,12 +131,10 @@ export class AuthController implements IAuthController {
 		}
 	};
 
-	public readonly changePassword: ControllerHandler<ChangePasswordRequest, string> = async ({ body, correlationId }) => {
+	public readonly changePassword: Controller<ChangePasswordRequest, string> = async ({ body, correlationId }) => {
 		try {
 			const result = await this.#business.changePassword(body);
-			return result
-				? this.#response({ data: "Password updated" })
-				: this.#response({ error: new BadRequestException400("Invalid password change") });
+			return result ? this.#response({ data: "Password updated" }) : this.#response({ error: new BadRequestException400("Invalid password change") });
 		} catch (error) {
 			return this.#response({
 				error: this.#errorHandler.catch({ name: this.#name, ticket: correlationId, error }),

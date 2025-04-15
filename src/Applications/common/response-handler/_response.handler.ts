@@ -7,29 +7,32 @@ import type { HttpStatus } from "#Domain/response/http-status.enum.js";
 import type { IResponse } from "#Domain/response/IResponse";
 import type { IResponseHandler, HttpResponse } from "#Domain/response/IResponseHandler";
 
-interface Dependences {
+interface Dependencies {
 	getHttpMessage: GetHttpMessage;
 }
 
 export class _ResponseHandler implements IResponseHandler {
 	static #instance?: _ResponseHandler;
-	static getInstance = (d: Dependences): _ResponseHandler => (this.#instance ??= new _ResponseHandler(d));
+	static getInstance = (d: Dependencies): _ResponseHandler => (this.#instance ??= new _ResponseHandler(d));
 
 	readonly #getHttpMessage: GetHttpMessage;
-	private constructor(d: Dependences) {
+	private constructor(d: Dependencies) {
 		this.#getHttpMessage = d.getHttpMessage;
 	}
 
-	/**  Responses implements
-	publci readonly socket: SocketResponse
+	/** 
+	 * Responses implements
+	 * In case of scaling, create a strategy pattern
+	 
+	public readonly socket: SocketResponse
 	public readonly event: EventResponse */
 	public readonly http: HttpResponse = ({ code, metadata, pagination, error, data }) => {
-		if (error !== undefined) return this.#formatError<never>(error);
+		if (error !== undefined) return this.#formatError(error);
 		const status = this.#getStatus(code ?? 200);
 		return { status, metadata, pagination, data };
 	};
 
-	readonly #formatError = <E>(error: unknown): IResponse<E> => {
+	readonly #formatError = (error: unknown): IResponse<never> => {
 		if (error instanceof DomainException) return this.#domainErrors(error);
 		if (error instanceof ZodError) return this.#unprocessableContentErrors(error);
 		return this.#unhandledError();
@@ -54,20 +57,20 @@ export class _ResponseHandler implements IResponseHandler {
 
 	readonly #unhandledError = (): IResponse<never> => {
 		const message = "Ups!. Something went wrong, please try latter";
-		const cause = "Unhandled error response";
+		const cause = DEBUG_MODE ? "Unhandled error response" : undefined;
 		const { code, name, stack, ticket } = new InternalServerException500(message, { cause });
 		return {
 			status: this.#getStatus(code, ticket),
-			error: { name, message, cause: DEBUG_MODE ? cause : undefined, stack: this.#getStack(stack) },
+			error: { name, message, cause, stack: this.#getStack(stack) },
 		};
 	};
 
-	readonly #getStatus = (code: HttpStatus, ticket?: string): IResponse<never>["status"] => ({
+	readonly #getStatus = (code: HttpStatus, ticket?: string): IResponse<void>["status"] => ({
+		success: code < 400,
 		code,
 		ticket,
-		message: this.#getHttpMessage(code),
-		success: code < 400,
 		timestamp: Date.now().toString(),
+		message: this.#getHttpMessage(code),
 	});
 
 	readonly #getStack = (stack?: string): string[] | undefined => {

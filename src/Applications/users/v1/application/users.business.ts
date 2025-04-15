@@ -5,7 +5,7 @@ import { BadRequestException400, DuplicateAccountException409, NotFoundException
 import type { Core } from "#Domain/core/Core";
 import type { ILogger } from "#Domain/core/ILogger";
 import type { IPasswordHandler } from "#Domain/tools/IPasswordHandler";
-import type { BusinessHandler } from "#Domain/Business";
+import type { Business } from "#Domain/Business";
 import type { User } from "../domain/entities/users.entity.js";
 import type { Role } from "../domain/entities/roles.entity";
 import type { UserNonSensitiveData } from "../domain/IUser";
@@ -20,7 +20,7 @@ import type {
 	DeleteUserRequest,
 } from "../domain/Request";
 
-interface Dependences extends Core {
+interface Dependencies extends Core {
 	usersRepository: typeof User;
 	rolesRepository: typeof Role;
 	passwordHandler: IPasswordHandler;
@@ -33,20 +33,20 @@ export class UsersBusiness implements IUsersBusiness {
 	readonly #passwordHandler: IPasswordHandler;
 	readonly #logger: ILogger;
 
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#usersRepository = d.usersRepository;
 		this.#rolesRepository = d.rolesRepository;
 		this.#passwordHandler = d.passwordHandler;
 		this.#logger = d.logger;
 	}
 
-	public readonly createRole: BusinessHandler<CreateUserRoleRequest["body"], boolean> = async ({ name }) => {
+	public readonly createRole: Business<CreateUserRoleRequest["body"], boolean> = async ({ name }) => {
 		const schema = this.#rolesRepository.create({ name });
 		const role = await this.#rolesRepository.save(schema);
 		return role !== undefined;
 	};
 
-	public readonly createUser: BusinessHandler<CreateUserRequest["body"], UserDTO> = async (user) => {
+	public readonly createUser: Business<CreateUserRequest["body"], UserDTO> = async (user) => {
 		const exist = await this.#usersRepository.exists({ where: { email: user.email } });
 		this.#logger.warn(`User ${user.email} exists?: ${exist}`);
 		if (exist) throw new DuplicateAccountException409(user.email);
@@ -59,7 +59,7 @@ export class UsersBusiness implements IUsersBusiness {
 		return new UserDTO(newUser);
 	};
 
-	public readonly rolesToUser: BusinessHandler<AddUserRolesRequest, UserDTO> = async ({ params, body }) => {
+	public readonly rolesToUser: Business<AddUserRolesRequest, UserDTO> = async ({ params, body }) => {
 		const roles = await this.#rolesRepository.find({ where: { id: In(body.roles) } });
 		const user = await this.#usersRepository.findOneBy({ uuid: params.uuid });
 		if (user === null) throw new NotFoundException404(`User ${params.uuid} not found`);
@@ -68,7 +68,7 @@ export class UsersBusiness implements IUsersBusiness {
 		return new UserDTO(userUpdated);
 	};
 
-	public readonly getOneUser: BusinessHandler<GetOneUserRequest["params"], UserDTO> = async ({ uuid }) => {
+	public readonly getOneUser: Business<GetOneUserRequest["params"], UserDTO> = async ({ uuid }) => {
 		const [user] = await this.#usersRepository.find({
 			select: { uuid: true, name: true, email: true, createdAt: true },
 			relations: ["roles"],
@@ -79,7 +79,7 @@ export class UsersBusiness implements IUsersBusiness {
 		return new UserDTO(user);
 	};
 
-	public readonly getAllUsers: BusinessHandler<GetAllUsersRequest["query"], UserNonSensitiveData[]> = async () => {
+	public readonly getAllUsers: Business<GetAllUsersRequest["query"], UserNonSensitiveData[]> = async () => {
 		const users = await this.#usersRepository.find({
 			select: { uuid: true, name: true, email: true, createdAt: true, roles: { name: true } },
 			relations: { roles: true },
@@ -89,7 +89,7 @@ export class UsersBusiness implements IUsersBusiness {
 		return users.map((user) => new UserDTO(user).userNonSensitiveDTO);
 	};
 
-	public readonly updateUser: BusinessHandler<UpdateUserRequest, boolean> = async ({ params, body }) => {
+	public readonly updateUser: Business<UpdateUserRequest, boolean> = async ({ params, body }) => {
 		const updated = await this.#usersRepository.update({ uuid: params.uuid }, { ...body });
 		return updated.affected !== undefined;
 	};

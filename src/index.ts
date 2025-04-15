@@ -16,26 +16,23 @@ new (class {
 	#hasError: boolean = false;
 
 	/** asynn */ constructor() {
-		this.#logger.info("Starting Application");
 		const messages: Record<Environment, string> = {
 			development: "👽 DEV MODE 👽",
 			testing: "🪲 TEST MODE 🪲",
 			production: "🔥 ON 🔥",
 		};
 
+		this.#logger.info("Starting Application");
 		this.#logger.info(messages[this.#environment]);
 
 		(async (): Promise<void> => {
-			console.time();
 			try {
-				await Promise.resolve(this.#boot());
+				await this.#boot();
 			} catch (error) {
 				this.#hasError = true;
 				this.#logger.error("Application crashed");
 				if (DEBUG_MODE) this.#logger.error("trace: \n", error);
 				await this.#shutdown();
-			} finally {
-				console.timeEnd();
 			}
 		})();
 	}

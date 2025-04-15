@@ -10,7 +10,7 @@ declare module "express" {
 	}
 }
 
-export const setCorrelationId: RequestHandler = (() => {
+export const setCorrelationId = (): RequestHandler => {
 	const _logger = new Logger("SetCorrelationId-Middleware");
 	const _getUUID = (): string => {
 		const uuid = randomUUID();
@@ -25,4 +25,4 @@ export const setCorrelationId: RequestHandler = (() => {
 		res.setHeader(headerName, correlationId);
 		return next();
 	};
-})();
+};

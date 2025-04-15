@@ -16,7 +16,7 @@ import type { DomainEventBus } from "#Domain/events/DomainEventBus";
 import type { IErrorHandler } from "#Domain/errors/IErrorHandler";
 import type { ILogger } from "#Domain/core/ILogger";
 
-interface Dependences {
+interface Dependencies {
 	connect: typeof connect;
 	queue: string;
 	options: Options.Connect;
@@ -35,7 +35,7 @@ export class RabbitMQConnection {
 	#conn: ChannelModel;
 	#channel: Channel;
 
-	constructor(d: Dependences) {
+	constructor(d: Dependencies) {
 		this.#isRunning = false;
 		this.#connect = d.connect;
 		this.#queue = d.queue;

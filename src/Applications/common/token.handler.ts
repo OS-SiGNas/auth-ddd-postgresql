@@ -6,7 +6,7 @@ import type { ILogger } from "#Domain/core/ILogger";
 import type { ITokenHandler } from "#Domain/tools/ITokenHandler";
 import type { Core } from "#Domain/core/Core.js";
 
-interface Dependences extends Core {
+interface Dependencies extends Core {
 	sign: typeof sign;
 	verify: typeof verify;
 	jwtSecretKey: string;
@@ -20,7 +20,7 @@ export class TokenHandler<Payload extends object> implements ITokenHandler<Paylo
 	readonly #jwtSecretKey: string;
 	readonly #signOptions: SignOptions;
 
-	constructor(d: Readonly<Dependences>) {
+	constructor(d: Readonly<Dependencies>) {
 		this.#logger = d.logger;
 		this.#sign = d.sign;
 		this.#verify = d.verify;
