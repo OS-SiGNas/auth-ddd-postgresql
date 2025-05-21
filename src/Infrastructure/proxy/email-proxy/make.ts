@@ -1,10 +1,10 @@
 import { createTransport } from "nodemailer";
-import { DEBUG_MODE } from "#Config";
+import { DEBUG } from "#Config";
 import { _EmailSenderProxy } from "./email-sender.proxy.js";
 import { Logger } from "#common/logger-handler/make.js";
 
 export const emailSender = _EmailSenderProxy.getInstance({
-	DEBUG_MODE,
+	DEBUG,
 	logger: new Logger("EmailSenderProxy"),
 	transporter: createTransport({
 		host: "smtp.ethereal.email",

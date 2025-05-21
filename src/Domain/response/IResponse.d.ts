@@ -1,4 +1,4 @@
-import type { DomainException } from "#Domain/errors/error.factory";
+import type { DomainException } from "#Domain";
 import type { HttpStatus } from "./http-status.enum";
 
 export interface IResponse<R> {

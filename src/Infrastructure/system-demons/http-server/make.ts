@@ -1,7 +1,7 @@
 import { secrets } from "#Config";
-import { ModuleException } from "#Domain/errors/error.factory.js";
+import { ModuleException } from "#Domain";
 
-import type { SystemDemon } from "#Domain/SystemDemon.js";
+import type { SystemDemon } from "#Domain";
 
 const getHttpServerInstance = async (): Promise<SystemDemon> => {
 	let _instance: SystemDemon | undefined;

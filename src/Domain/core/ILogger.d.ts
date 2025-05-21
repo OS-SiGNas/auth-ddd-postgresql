@@ -6,4 +6,4 @@ export interface ILogger {
 	readonly error: Log;
 }
 
-type LoggerConstructor = new (name: string) => ILogger;
+export type LoggerConstructor = new (name: string) => ILogger;

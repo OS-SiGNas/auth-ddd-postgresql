@@ -3,8 +3,10 @@ import type { IErrorHandler } from "./errors/IErrorHandler";
 import type { IResponseHandler } from "./response/IResponseHandler";
 import type { ISessionHandler } from "./sessions/ISessionHandler";
 import type { IResponse } from "./response/IResponse";
+import type { DomainEventBus } from "./events/DomainEventBus";
 
 export interface ControllersDependencies extends Readonly<Core> {
+	readonly bus: DomainEventBus;
 	readonly sessionHandler: ISessionHandler;
 	readonly responseHandler: IResponseHandler;
 	readonly errorHandler: IErrorHandler;

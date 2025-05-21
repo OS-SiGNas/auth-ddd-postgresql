@@ -1,7 +1,5 @@
 import type { FastifyInstance, FastifyPluginCallback } from "fastify";
-import type { Core } from "#Domain/core/Core";
-import type { SystemDemon } from "#Domain/SystemDemon";
-import type { ILogger } from "#Domain/core/ILogger";
+import type { Core, ILogger, SystemDemon } from "#Domain";
 
 interface Dependencies extends Core {
 	app: FastifyInstance;

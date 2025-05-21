@@ -33,12 +33,12 @@
 		// "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
 		"paths": {
 			"#Config": ["./src/config"],
-			"#Domain/*": ["./src/Domain/*"],
+			"#Domain": ["./src/Domain/index"],
 			"#Infrastructure/*": ["./src/Infrastructure/*"],
-			"#auth/*": ["./src/Applications/auth/*"],
-			"#users/*": ["./src/Applications/users/*"],
-			"#common/*": ["./src/Applications/common/*"],
-			"#subscribers/*": ["./src/Applications/subscribers/*"]
+			"#auth/*": ["./src/Application/auth/*"],
+			"#users/*": ["./src/Application/users/*"],
+			"#common/*": ["./src/Application/common/*"],
+			"#subscribers/*": ["./src/Application/subscribers/*"]
 		} /* Specify a set of entries that re-map imports to additional lookup locations. */,
 		// "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
 		// "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

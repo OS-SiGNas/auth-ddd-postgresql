@@ -7,21 +7,16 @@
     - security.update_last_activity_on_user_updated
 */
 
-import { DomainEvent } from "#Domain/events/domain-event.js";
-
+import { ACTIONS } from "#Domain";
 import type { connect, Channel, Options, ConsumeMessage, ChannelModel } from "amqplib";
-import type { IEvent } from "#Domain/events/domain-event";
-import type { SystemDemon } from "#Domain/SystemDemon";
-import type { DomainEventBus } from "#Domain/events/DomainEventBus";
-import type { IErrorHandler } from "#Domain/errors/IErrorHandler";
-import type { ILogger } from "#Domain/core/ILogger";
+import type { DomainEventBus, IErrorHandler, IEvent, ILogger, SystemDemon } from "#Domain";
 
 interface Dependencies {
 	connect: typeof connect;
 	queue: string;
 	options: Options.Connect;
 	logger: ILogger;
-	eventBus: DomainEventBus;
+	bus: DomainEventBus;
 	errorHandler: IErrorHandler;
 }
 
@@ -30,6 +25,7 @@ export class RabbitMQConnection {
 	readonly #connect: typeof connect;
 	readonly #queue: string;
 	readonly #options: Options.Connect;
+	readonly #bus: DomainEventBus;
 	readonly #errorHandler: IErrorHandler;
 	readonly #logger: ILogger;
 	#conn: ChannelModel;
@@ -40,6 +36,7 @@ export class RabbitMQConnection {
 		this.#connect = d.connect;
 		this.#queue = d.queue;
 		this.#options = d.options;
+		this.#bus = d.bus.on(ACTIONS.QUEUE_PUBLISH, this.#publish);
 		this.#errorHandler = d.errorHandler;
 		this.#logger = d.logger;
 	}
@@ -80,7 +77,7 @@ export class RabbitMQConnection {
 		if (message === null) return;
 		try {
 			const event: IEvent<object> = JSON.parse(message.content.toString());
-			new DomainEvent(event).emit();
+			this.#bus.emit(ACTIONS.QUEUE_CONSUME, event);
 			return await Promise.resolve(this.#channel.ack(message));
 		} catch (error) {
 			if (error instanceof SyntaxError) this.#logger.warn("Problem consuming message: " + error.message);
@@ -89,7 +86,7 @@ export class RabbitMQConnection {
 		}
 	};
 
-	public readonly publish = async <M extends object>(event: IEvent<M>): Promise<void> => {
+	readonly #publish = async <M extends object>(event: IEvent<M>): Promise<void> => {
 		const buffer = Buffer.from(JSON.stringify(event));
 		// this.channel.publish(exchange, routingKey, content);
 		return this.#channel.sendToQueue(this.#queue, buffer /*, { persistent: true } */)

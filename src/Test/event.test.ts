@@ -2,9 +2,9 @@
 import { it, describe } from "node:test";
 import { deepEqual, throws } from "node:assert";
 
-import { Actions } from "#Domain/events/actions.enum.js";
-import { DomainEvent, type IEvent } from "#Domain/events/domain-event.js";
-import { UnprocessableException422 } from "#Domain/errors/error.factory.js";
+import { ACTIONS, DomainEvent, UnprocessableException422 } from "#Domain";
+
+import type { IEvent } from "#Domain";
 import type { UserSessionDTO } from "#users/v1/domain/users.dto.js";
 
 describe("DomainEvent validations", () => {
@@ -24,7 +24,7 @@ describe("DomainEvent validations", () => {
 
 	it("should throw UnprocessableException422 for invalid UUID", () => {
 		const invalidEvent = {
-			action: Actions.LOGIN,
+			action: ACTIONS.LOGIN,
 			id: "invalid-uuid",
 			createdAt: new Date(),
 			emitter: "test-emitter",
@@ -38,7 +38,7 @@ describe("DomainEvent validations", () => {
 
 	it("should throw UnprocessableException422 for missing required field", () => {
 		const invalidEvent = {
-			action: Actions.LOGIN,
+			action: ACTIONS.LOGIN,
 			id: "123e4567-e89b-12d3-a456-426614174000",
 			createdAt: new Date(),
 			emitter: "test-emitter",
@@ -51,7 +51,7 @@ describe("DomainEvent validations", () => {
 
 	it("should validate a valid event", () => {
 		const validEvent: IEvent<UserSessionDTO> = {
-			action: Actions.LOGIN,
+			action: ACTIONS.LOGIN,
 			id: "123e4567-e89b-12d3-a456-426614174000",
 			createdAt: new Date().toUTCString(),
 			emitter: "test-emitter",

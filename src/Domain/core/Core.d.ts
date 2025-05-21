@@ -1,6 +1,6 @@
 import type { ILogger } from "./ILogger";
 
 export interface Core {
-	readonly DEBUG_MODE: boolean;
+	readonly DEBUG: boolean;
 	readonly logger: ILogger;
 }

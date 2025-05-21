@@ -2,7 +2,7 @@ import Express, { Router, json } from "express";
 import cors from "cors";
 import helmet from "helmet";
 
-import { DEBUG_MODE, secrets } from "#Config";
+import { DEBUG, secrets } from "#Config";
 import { Logger } from "#common/logger-handler/make.js";
 import { setCorrelationId } from "./middlewares/setCorrelationId.middleware.js";
 import { requestLogger } from "./middlewares/requestLogger.middleware.js";
@@ -42,7 +42,7 @@ export const getExpressServer = async (): Promise<ExpressServer> => {
 
 	return new ExpressServer({
 		logger: new Logger("ExpressServer"),
-		DEBUG_MODE,
+		DEBUG,
 		app: Express(),
 		port: secrets.PORT,
 		globalMiddlewares,

@@ -1,13 +1,15 @@
 import { EventEmitter } from "node:events";
-import { Actions as a } from "#Domain/index.js";
+import { ACTIONS } from "#Domain";
+
 import { getLoginSubscriber } from "#subscribers/applications/login.subscriber.js";
 import { getAccountAcctivatedSubscriber } from "#subscribers/applications/account-activated.subscriber.js";
+import { QueueConsumeSubscriber } from "#subscribers/applications/queue-consume.subscriber.js";
 
-import type { DomainEventBus } from "#Domain/events/DomainEventBus";
+import type { DomainEventBus } from "#Domain";
 
-export const eventBus: DomainEventBus = new EventEmitter();
+export const bus: DomainEventBus = new EventEmitter();
 
-eventBus.on(a.LOGIN, getLoginSubscriber());
-eventBus.on(a.ACCOUNT_ACTIVATED, getAccountAcctivatedSubscriber());
-// eventBus.on(a.NEW_ACCOUNT_REGISTERED, getNewAccountRegisteredSubscriber());
-// eventBus.on(a.USER_PASSWORD_CHANGED, getUserPasswordChangedSubscriber());
+bus.on(ACTIONS.AUTH_LOGIN, getLoginSubscriber());
+bus.on(ACTIONS.AUTH_ACCOUNT_ACTIVATED, getAccountAcctivatedSubscriber());
+
+new QueueConsumeSubscriber(bus);
