@@ -8,7 +8,7 @@
 	"license": "MIT",
 	"description": "Implement Auth using typescript/POO with EDD and DDD architecture",
 	"scripts": {
-		"start": "NODE_ENV=production node dist/index.js",
+		"start": "NODE_ENV=production node dist/backend/index.js",
 		"dev": "NODE_ENV=development nodemon --watch 'src/**/*.ts' --exec 'ts-node --transpile-only src/index.ts'",
 		"dev:node": "NODE_ENV=development node --experimental-strip-types --watch src/index.ts",
 		"dev:concurrently": "NODE_ENV=development concurrently 'sh ./dev-mode.sh' 'sh ./dev-swc.sh'",
@@ -16,6 +16,7 @@
 		"migration:generate": "typeorm migration:generate ./migrations/PostRefactoring",
 		"migration:run": "typeorm migration:run -- -d path-to-datasource-config",
 		"build": "tsc",
+		"build:cli": "swc src/cli/ -d ./dist/ --strip-leading-paths",
 		"swc": "swc src -d ./dist --strip-leading-paths",
 		"swc:watch": "swc src -wd ./dist --strip-leading-paths",
 		"prettier": "prettier --write src",
@@ -26,25 +27,25 @@
 		"test:all": ""
 	},
 	"imports": {
-		"#Config": "./dist/config.js",
-		"#Domain": "./dist/Domain/index.js",
-		"#Infrastructure/*": "./dist/Infrastructure/*",
-		"#common/*": "./dist/Application/common/*",
-		"#subscribers/*": "./dist/Application/subscribers/*",
-		"#auth/*": "./dist/Application/auth/*",
-		"#users/*": "./dist/Application/users/*"
+		"#Config": "./dist/backend/config.js",
+		"#Domain": "./dist/backend/Domain/index.js",
+		"#Infrastructure/*": "./dist/backend/Infrastructure/*",
+		"#common/*": "./dist/backend/Application/common/*",
+		"#subscribers/*": "./dist/backend/Application/subscribers/*",
+		"#auth/*": "./dist/backend/Application/auth/*",
+		"#users/*": "./dist/backend/Application/users/*"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.27.0",
 		"@swc/cli": "^0.4.0",
-		"@swc/core": "^1.11.24",
+		"@swc/core": "^1.11.29",
 		"@types/amqplib": "^0.10.7",
 		"@types/bcryptjs": "^2.4.6",
 		"@types/cors": "^2.8.18",
 		"@types/eslint-plugin-security": "^3.0.0",
 		"@types/express": "^4.17.22",
 		"@types/jsonwebtoken": "^9.0.9",
-		"@types/node": "^20.17.48",
+		"@types/node": "^20.17.52",
 		"@types/nodemailer": "^6.4.17",
 		"concurrently": "^9.1.2",
 		"eslint": "^9.27.0",
@@ -54,7 +55,7 @@
 		"prettier": "^3.5.3",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3",
-		"typescript-eslint": "^8.32.1"
+		"typescript-eslint": "^8.33.0"
 	},
 	"dependencies": {
 		"@fastify/cors": "^10.1.0",
@@ -72,6 +73,6 @@
 		"tsx": "^4.19.4",
 		"typeorm": "^0.3.24",
 		"winston": "^3.17.0",
-		"zod": "^3.25.7"
+		"zod": "^3.25.36"
 	}
 }
