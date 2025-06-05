@@ -9,7 +9,7 @@
 
 import { ACTIONS } from "#Domain";
 import type { connect, Channel, Options, ConsumeMessage, ChannelModel } from "amqplib";
-import type { DomainEventBus, IErrorHandler, IEvent, ILogger, SystemDemon } from "#Domain";
+import type { DomainEventBus, IErrorHandler, IEvent, ILogger, SystemDaemon } from "#Domain";
 
 interface Dependencies {
 	connect: typeof connect;
@@ -20,7 +20,7 @@ interface Dependencies {
 	errorHandler: IErrorHandler;
 }
 
-export class RabbitMQConnection implements SystemDemon {
+export class RabbitMQConnection implements SystemDaemon {
 	#isRunning: boolean;
 	readonly #connect: typeof connect;
 	readonly #queue: string;
@@ -52,7 +52,7 @@ export class RabbitMQConnection implements SystemDemon {
 			if (assertQueue === undefined) throw new Error("Problem in assertQueue");
 			this.#channel.consume(this.#queue, this.#consume);
 			this.#isRunning = true;
-			return await Promise.resolve(this.#logger.info("Demon started"));
+			return await Promise.resolve(this.#logger.info("Daemon started"));
 		} catch (error) {
 			// TODO: Retry logic
 			this.#logger.error("Error", error);

@@ -1,4 +1,4 @@
-export interface SystemDemon {
+export interface SystemDaemon {
 	/** Main method to start listening servers*/
 	readonly start: () => Promise<void>;
 

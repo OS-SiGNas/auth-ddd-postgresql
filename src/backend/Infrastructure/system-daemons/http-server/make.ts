@@ -1,10 +1,10 @@
 import { secrets } from "#Config";
 import { ModuleException } from "#Domain";
 
-import type { SystemDemon } from "#Domain";
+import type { SystemDaemon } from "#Domain";
 
-const getHttpServerInstance = async (): Promise<SystemDemon> => {
-	let _instance: SystemDemon | undefined;
+const getHttpServerInstance = async (): Promise<SystemDaemon> => {
+	let _instance: SystemDaemon | undefined;
 
 	if (secrets.HTTP_SERVICE === "express") {
 		const { getExpressServer } = await import("./express/make.js");

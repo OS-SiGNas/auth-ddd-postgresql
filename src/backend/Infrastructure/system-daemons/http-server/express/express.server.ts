@@ -1,7 +1,7 @@
 import { NODE_ENV } from "#Config";
 import type { Server } from "http";
 import type { Application, ErrorRequestHandler, RequestHandler } from "express";
-import type { Core, ILogger, SystemDemon } from "#Domain";
+import type { Core, ILogger, SystemDaemon } from "#Domain";
 
 interface Dependencies extends Core {
 	app: Application;
@@ -11,7 +11,7 @@ interface Dependencies extends Core {
 	port: number;
 }
 
-export class ExpressServer implements SystemDemon {
+export class ExpressServer implements SystemDaemon {
 	readonly #app: Application;
 	readonly #port: number;
 	readonly #logger: ILogger;
@@ -45,7 +45,7 @@ export class ExpressServer implements SystemDemon {
 		this.#httpServer = this.#app.listen(this.#port, () => {
 			this.#logger.info(`Running in: http://127.0.0.1:${this.#port}`);
 			this.#isRunning = true;
-			this.#logger.info("Demon started");
+			this.#logger.info("Daemon started");
 		});
 	};
 

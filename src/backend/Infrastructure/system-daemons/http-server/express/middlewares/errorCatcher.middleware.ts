@@ -8,12 +8,12 @@ import type { ILogger } from "#Domain";
 
 export const errorsCatcher = (): ErrorRequestHandler => {
 	const name = "ErrorCatcherMiddleware";
-	const logger: ILogger = new Logger(name);
+	const _logger: ILogger = new Logger(name);
 
 	return (error, req, res, next) => {
 		const ticket = (res.getHeader(HeadersEnum.CORRELATION_ID) as string) ?? (req as Request).correlationId;
 
-		logger.info(`Catched error in ${req.url} id: ${ticket}`);
+		_logger.info(`Catched error in ${req.url} id: ${ticket}`);
 
 		if (error instanceof TypeError) {
 			const response = responseHandler.http<undefined>({ error: new BadRequestException400(error.message, { ticket }) });

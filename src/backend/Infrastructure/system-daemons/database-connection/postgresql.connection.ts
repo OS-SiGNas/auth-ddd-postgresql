@@ -1,6 +1,6 @@
 import type { DataSource } from "typeorm";
 
-import type { SystemDemon, ILogger } from "#Domain";
+import type { SystemDaemon, ILogger } from "#Domain";
 
 interface Dependencies {
 	dataSource: DataSource;
@@ -10,7 +10,7 @@ interface Dependencies {
 
 type GetSingleton = (d: Dependencies) => Readonly<_PostgreConnection>;
 
-export class _PostgreConnection implements SystemDemon {
+export class _PostgreConnection implements SystemDaemon {
 	static #instance?: _PostgreConnection;
 	static getInstance: GetSingleton = (d) => (this.#instance ??= new _PostgreConnection(d));
 
@@ -44,7 +44,7 @@ export class _PostgreConnection implements SystemDemon {
 		} finally {
 			if (this.#connection !== undefined) {
 				this.#isRunning = true;
-				this.#logger.info("Demon started");
+				this.#logger.info("Daemon started");
 			}
 		}
 	};

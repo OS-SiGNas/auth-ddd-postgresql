@@ -53,6 +53,6 @@ export const secretsParser: SecretsParser = (origin) => {
 	} catch (error) {
 		if (!(error instanceof ZodError)) throw error;
 		const cause: string[] = error.issues.map(({ path, message }) => `${path}: ${message}`);
-		throw new UnprocessableException422("*Config* Dotenv file incompatible 💩", { cause });
+		throw new UnprocessableException422("Dotenv file incompatible 💩", { cause });
 	}
 };

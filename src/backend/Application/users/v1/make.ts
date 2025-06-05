@@ -1,6 +1,7 @@
 import { DEBUG, secrets } from "#Config";
 import { eventFactory, ModuleException } from "#Domain";
 import { bus } from "#Infrastructure/event-bus.js";
+import { modelRepository } from "#Infrastructure/model.respository.js";
 
 import { passwordHandler } from "#common/password-handler/make.js";
 import { Logger } from "#common/logger-handler/make.js";
@@ -14,7 +15,6 @@ import { UsersController } from "./application/users.controller.js";
 
 import type { UsersRouterExpress } from "./infrastructure/users-express.router.js";
 import type { UsersRouterFastify } from "./infrastructure/users-fastify.router.js";
-import { modelRepository } from "#Infrastructure/model.respository.js";
 
 export const getUsersApp = async <T extends UsersRouterExpress | UsersRouterFastify>(): Promise<T> => {
 	const business = new UsersBusiness({

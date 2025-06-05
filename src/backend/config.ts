@@ -1,4 +1,5 @@
 import { env, loadEnvFile } from "node:process";
+import { styleText } from "node:util";
 import { secretsParser } from "./Application/config/secrets.parser.js";
 
 export interface RabbitMQSecrets {
@@ -50,22 +51,30 @@ export interface Secrets extends JsonWebTokenSecrets, PostgreSQLSecrets, RabbitM
 		if (_Config.#instance !== undefined) return _Config.#instance;
 		else _Config.#instance = this;
 
-		this.#NODE_ENV = this.#getEnvironment(env.NODE_ENV);
-		this.#secrets = secretsParser(env);
+		try {
+			this.#NODE_ENV = this.#getEnvironment(env.NODE_ENV);
+			this.#secrets = secretsParser(env);
+		} catch (error) {
+			const output = (msg: string): void => console.log("\n", styleText(["red", "bold", "bgBlack"], msg), "\n");
+			output("██████ CRITICAL ERROR ██████");
+			output("The application cannot start due to a critical configuration error, please fix it and try again.");
+			console.error(error instanceof Error ? error : new Error(String(error)));
+			process.exit(1);
+		}
 	}
 
 	readonly #getEnvironment = (NODE_ENV?: string): Environment => {
-		if (NODE_ENV === undefined) throw this.#envError("is undefined");
+		if (NODE_ENV === undefined) throw this.#envError("is not defined");
 		const environments: Environment[] = ["production", "testing", "development"];
-		if (!environments.includes(NODE_ENV as Environment)) throw this.#envError("is incompatible", environments);
+		if (!environments.includes(NODE_ENV as Environment)) throw this.#envError(`= '${NODE_ENV}' is incompatible`, environments);
 		if (NODE_ENV === "development") loadEnvFile(".env.dev");
 		if (NODE_ENV === "testing") loadEnvFile(".env.test");
 		if (NODE_ENV === "production") loadEnvFile(".env");
 		return NODE_ENV as Environment;
 	};
 
-	readonly #envError = (msg: string, cause?: unknown): Error => new this.#error(`Variable 'NODE_ENV' ${msg}`, cause);
-	readonly #error = class EnvironmentError extends Error {
+	readonly #envError = (msg: string, cause?: unknown): Error => new this.#Error(`Variable 'NODE_ENV' ${msg} 💩`, cause);
+	readonly #Error = class EnvironmentError extends Error {
 		constructor(message: string, cause: unknown) {
 			super(message, { cause });
 		}

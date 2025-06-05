@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyPluginCallback } from "fastify";
-import type { Core, ILogger, SystemDemon } from "#Domain";
+import type { Core, ILogger, SystemDaemon } from "#Domain";
 
 interface Dependencies extends Core {
 	app: FastifyInstance;
@@ -8,7 +8,7 @@ interface Dependencies extends Core {
 	port: number;
 }
 
-export class FastifyServer implements SystemDemon {
+export class FastifyServer implements SystemDaemon {
 	readonly #app: FastifyInstance;
 	readonly #port: number;
 	readonly #logger: ILogger;

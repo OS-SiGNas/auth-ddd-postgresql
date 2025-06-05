@@ -1,4 +1,4 @@
-export type * from "./SystemDemon.js";
+export type * from "./SystemDaemon.js";
 export type * from "./Business.js";
 export * from "./Request.js";
 
