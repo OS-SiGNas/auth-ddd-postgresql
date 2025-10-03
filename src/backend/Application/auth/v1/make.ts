@@ -75,7 +75,6 @@ export const getAuthApp = async <T extends AuthRouterExpress | AuthRouterFastify
 	});
 
 	const dto = new AuthRequestDTO();
-
 	const dependencies = { dto, controller };
 
 	if (secrets.HTTP_SERVICE === "express") {

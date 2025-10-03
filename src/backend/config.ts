@@ -56,9 +56,10 @@ export interface Secrets extends JsonWebTokenSecrets, PostgreSQLSecrets, RabbitM
 			this.#secrets = secretsParser(env);
 		} catch (error) {
 			const output = (msg: string): void => console.log("\n", styleText(["red", "bold", "bgBlack"], msg), "\n");
-			output("██████ CRITICAL ERROR ██████");
+			output("██████ FATAL ERROR ██████");
 			output("The application cannot start due to a critical configuration error, please fix it and try again.");
 			console.error(error instanceof Error ? error : new Error(String(error)));
+			output("██████ SHUTING DOWN ██████");
 			process.exit(1);
 		}
 	}

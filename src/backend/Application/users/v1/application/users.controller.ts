@@ -55,16 +55,15 @@ export class UsersController implements IUsersController {
 	};
 
 	public readonly getAllUsers: IUsersController["getAllUsers"] = async ({ headers, query, correlationId: ticket }) => {
-		const { try: attempt, catch: catcher } = this.#errorHandler;
+		const { try: $, catch: catcher } = this.#errorHandler;
 		const { validateSession } = this.#sessionHandler;
 		const { getAllUsers } = this.#business;
 
-		const [sessionError] = await attempt(validateSession, RoleName.ADMIN, headers.authorization);
+		const [sessionError] = await $(validateSession(RoleName.ADMIN, headers.authorization));
 		if (sessionError !== null) return this.#response({ error: catcher({ name: this.#name, ticket, error: sessionError }) });
-
-		const [error, value] = await attempt(getAllUsers, query);
+		const [error, data] = await $(getAllUsers(query));
 		if (error !== null) return this.#response({ error: catcher({ name: this.#name, ticket, error }) });
-		return this.#response({ data: value });
+		return this.#response({ data });
 	};
 
 	public readonly patchUser: IUsersController["patchUser"] = async (p) => {

@@ -18,14 +18,10 @@ export class _ErrorHandler implements IErrorHandler {
 		this.#logger = d.logger;
 	}
 
-	public readonly try: IErrorHandler["try"] = async (fn, ...args) => {
-		try {
-			return [null, await fn(...args)];
-		} catch (error) {
-			const normalizeError = !(error instanceof Error) ? new Error(String(error)) : error;
-			return [normalizeError, (await Promise.resolve()) as Awaited<ReturnType<typeof fn>>];
-		}
-	};
+	public readonly try: IErrorHandler["try"] = (promise) =>
+		new Promise((resolve) => {
+			promise.then((r) => resolve([null, r])).catch((e) => resolve([e]));
+		});
 
 	public readonly catch: IErrorHandler["catch"] = ({ name, error, ticket }): DomainException => {
 		this.#logger.debug(`💩 ${name}Error - ${ticket}`);
