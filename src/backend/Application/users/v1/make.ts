@@ -17,6 +17,8 @@ import type { UsersRouterExpress } from "./infrastructure/users-express.router.j
 import type { UsersRouterFastify } from "./infrastructure/users-fastify.router.js";
 
 export const getUsersApp = async <T extends UsersRouterExpress | UsersRouterFastify>(): Promise<T> => {
+	let app: T | undefined;
+
 	const business = new UsersBusiness({
 		logger: new Logger("UsersBusiness"),
 		modelRepository,
@@ -41,13 +43,15 @@ export const getUsersApp = async <T extends UsersRouterExpress | UsersRouterFast
 
 	if (secrets.HTTP_SERVICE === "express") {
 		const { UsersRouterExpress } = await import("./infrastructure/users-express.router.js");
-		return new UsersRouterExpress({ controller, dto }) as T;
+		app = new UsersRouterExpress({ controller, dto }) as T;
 	}
 
 	if (secrets.HTTP_SERVICE === "fastify") {
 		const { UsersRouterFastify } = await import("./infrastructure/users-fastify.router.js");
-		return new UsersRouterFastify({ controller, dto }) as T;
+		app = new UsersRouterFastify({ controller, dto }) as T;
 	}
 
-	throw new ModuleException("Users module");
+	if (app === undefined) throw new ModuleException("Users module is undefined");
+
+	return await Promise.resolve(app);
 };

@@ -1,13 +1,18 @@
-import type { SecretsParser } from "#Config";
+import type { SecretsParser } from "#Domain";
 
 import { z, ZodError } from "zod";
-import { UnprocessableException422 } from "#Domain";
 
 export const secretsParser: SecretsParser = (origin) => {
 	const zString = z.string().nonempty();
 	const zPort = z.string().transform(Number).pipe(z.number().positive().min(80).max(65535));
 	const zNumber = z.string().transform(Number).pipe(z.number().positive());
 	const zPassword = z.string().min(8).max(64);
+
+	const loggerSchema = {
+		LOGGER_SERVICE: z.enum(["winston", "console", "logan"]),
+		LOGGER_WORKER_FILE: zString,
+		LOGGER_INTERVAL: zNumber,
+	};
 
 	const pgSchema = {
 		PG_HOST: zString,
@@ -39,10 +44,10 @@ export const secretsParser: SecretsParser = (origin) => {
 
 	const schema = {
 		SERVICE_NAME: zString,
-		LOGGER_SERVICE: z.enum(["winston", "console"]),
 		HTTP_SERVICE: z.enum(["express", "fastify"]),
 		THIS_URL: zString,
 		PORT: zPort,
+		...loggerSchema,
 		...pgSchema,
 		...jwtSchema,
 		...rabbitSchema,
@@ -53,6 +58,6 @@ export const secretsParser: SecretsParser = (origin) => {
 	} catch (error) {
 		if (!(error instanceof ZodError)) throw error;
 		const cause: string[] = error.issues.map(({ path, message }) => `${path}: ${message}`);
-		throw new UnprocessableException422("Dotenv file incompatible 💩", { cause });
+		throw new (class ConfigError extends Error {})("Dotenv file incompatible 💩", { cause });
 	}
 };

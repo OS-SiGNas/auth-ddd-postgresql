@@ -29,6 +29,7 @@ export class ExpressServer implements SystemDaemon {
 
 		// 2: then, api applications ENDPOINTS
 		d.apis.forEach((api, i) => this.#app.use(`/v${i + 1}`, api));
+		this.#app.get("/teapot", (_, res) => res.sendStatus(418));
 
 		// 3: finally last position middlewares
 		this.#app.use(d.lastMiddlewares);

@@ -30,7 +30,10 @@ export const getExpressServer = async (): Promise<ExpressServer> => {
 			getUsersApp<UsersRouterExpress>(), // 1
 		]);
 
-		return [auth.getRouter(eRouter), users.getRouter(eRouter)];
+		return await Promise.resolve([
+			auth.getRouter(eRouter), // 0
+			users.getRouter(eRouter), // 1
+		]);
 	};
 
 	const globalMiddlewares = [

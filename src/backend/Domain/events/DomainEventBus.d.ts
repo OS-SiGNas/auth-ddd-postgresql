@@ -1,14 +1,18 @@
 import type { EventEmitter } from "node:events";
+
+import type { LogObject } from "#Domain";
 import type { ACTIONS } from "./actions.enum";
 import type { IEvent } from "./IEvent";
-
 import type { UserNonSensitiveData } from "#users/v1/domain/IUser";
 import type { UserSessionDTO } from "#users/v1/domain/users.dto";
 
 interface EventMap {
 	// system
-	[ACTIONS.SYSTEM_REBOOT]: [IEvent<never>];
+
+	[ACTIONS.SYSTEM_BOOT]: [];
+	[ACTIONS.SYSTEM_REBOOT]: [];
 	[ACTIONS.SYSTEM_SHUTDOWN]: [];
+	[ACTIONS.SYSTEM_LOG]: [LogObject, ...meta: unknown[]];
 
 	// Queue
 	[ACTIONS.QUEUE_CONSUME]: [IEvent<object>];
