@@ -1,3 +1,7 @@
+export type Level = "INFO" | "WARN" | "ERROR" | "DEBUG" | "FATAL";
+export type LoggerConstructor = new (name: string) => ILogger;
+export type Log = Console["log"];
+
 export interface ILogger {
 	readonly info: (text: string) => void;
 	readonly warn: (text: string) => void;
@@ -5,9 +9,6 @@ export interface ILogger {
 	readonly fatal: (text: string, ...meta: unknown[]) => void;
 	readonly debug: (text: string, ...meta: unknown[]) => void;
 }
-
-export type Level = "INFO" | "WARN" | "ERROR" | "DEBUG" | "FATAL";
-export type LoggerConstructor = new (name: string) => ILogger;
 
 export interface Transport {
 	exec: (l: LogObject, ...meta: unknown[]) => void;

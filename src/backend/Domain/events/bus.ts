@@ -9,9 +9,15 @@ import { ACTIONS, type DomainEventBus } from "#Domain";
 export const bus: DomainEventBus = new EventEmitter();
 
 bus.on(ACTIONS.SYSTEM_BOOT, async () => {
-	await import("#Config");
-	const { default: Main } = await import("../../main.js");
-	const { default: subscribers } = await import("../../subscribers.js");
-	const { systemDaemons } = await import("#Infrastructure/system-daemons/index.js");
+	const awaitConfig = import("#Config");
+	const awaitMain = import("../../main.js");
+	const awaitSubscribers = import("../../subscribers.js");
+	const awaitSystemDaemons = import("#Infrastructure/system-daemons/index.js");
+
+	await awaitConfig;
+	const { default: Main } = await awaitMain;
+	const { default: subscribers } = await awaitSubscribers;
+	const { systemDaemons } = await awaitSystemDaemons;
+
 	new Main(subscribers, systemDaemons);
 });

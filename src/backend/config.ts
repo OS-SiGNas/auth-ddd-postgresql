@@ -1,5 +1,5 @@
-import { styleText } from "node:util";
 import { secretsParser } from "./Application/config/secrets.parser.js";
+import { bgRed, white, cyan } from "#common/logger-handler/colors.utils.js";
 
 import type { Secrets, Environment, SecretsParser } from "#Domain";
 
@@ -21,12 +21,13 @@ import type { Secrets, Environment, SecretsParser } from "#Domain";
 		try {
 			this.#NODE_ENV = this.#getEnvironment(process.env.NODE_ENV);
 			this.#secrets = secretsParser(process.env);
+			console.info(`${white("**")}${cyan(" CONFIG SUCCESS ")}${white("**")}`);
 		} catch (error) {
-			const output = (msg: string): void => console.log("\n", styleText(["red", "bold", "bgBlack"], msg), "\n");
-			output("██████ FATAL ERROR ██████");
-			output("The application cannot start due to a critical configuration error, please fix it and try again.");
+			const fatal = (msg: string): void => console.log("\n", "██████", bgRed(msg), "██████", "\n");
+			fatal("FATAL ERROR");
+			fatal("The application cannot start due to a critical configuration error, please fix it and try again.");
 			console.error(error instanceof Error ? error : new Error(String(error)));
-			output("██████ SHUTING DOWN ██████");
+			fatal(" SHUTING DOWN");
 			process.exit(1);
 		}
 	}

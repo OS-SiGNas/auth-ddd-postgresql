@@ -39,5 +39,6 @@ export const ConsoleLogger = ((): LoggerConstructor => {
 		public readonly warn: Log = (text, ...meta): void => _warn(this.#name + text, ...meta);
 		public readonly debug: Log = (text, ...meta): void => _debug(this.#name + text, ...meta);
 		public readonly error: Log = (text, ...meta): void => _error(this.#name + text, ...meta);
+		public readonly fatal: Log = (text, ...meta): void => _error(this.#name + text, ...meta);
 	};
 })();

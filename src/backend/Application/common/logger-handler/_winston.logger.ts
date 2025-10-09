@@ -40,5 +40,10 @@ export const WinstonLogger = ((): LoggerConstructor => {
 			_winston.debug(`🔵 [${this.#name}] ${message}`);
 			if (meta.length >= 1) console.error(...meta);
 		};
+
+		public readonly fatal: Log = (message, ...meta): void => {
+			_winston.error(`💀 [${this.#name}] ${message}`);
+			if (meta.length >= 1) console.error(...meta);
+		};
 	};
 })();

@@ -30,4 +30,6 @@ interface EventMap {
 	[ACTIONS.USERS_ACCOUNT_DELETED]: [IEvent<UserNonSensitiveData, { modifiedBy: string }>];
 }
 
+export type Subscribers = (bus: DomainEventBus) => Promise<void>;
+
 export type DomainEventBus = EventEmitter<EventMap>;
