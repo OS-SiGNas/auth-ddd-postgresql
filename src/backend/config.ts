@@ -3,16 +3,13 @@ import { bgRed, white, cyan } from "#common/logger-handler/colors.utils.js";
 
 import type { Secrets, Environment, SecretsParser } from "#Domain";
 
-/** Private */ class _Config {
+/**
+ * @description The joke is that this class should not be exported
+ * Private */ class _Config {
 	static #instance?: _Config; // crazy singleton 🤡
 
 	readonly #NODE_ENV: Environment;
 	readonly #secrets: Secrets;
-	readonly #Error = class EnvironmentError extends Error {
-		constructor(message: string, cause: unknown) {
-			super(message, { cause });
-		}
-	};
 
 	constructor(secretsParser: SecretsParser) {
 		if (_Config.#instance !== undefined) return _Config.#instance;
@@ -21,7 +18,7 @@ import type { Secrets, Environment, SecretsParser } from "#Domain";
 		try {
 			this.#NODE_ENV = this.#getEnvironment(process.env.NODE_ENV);
 			this.#secrets = secretsParser(process.env);
-			console.info(`${white("**")}${cyan(" CONFIG SUCCESS ")}${white("**")}`);
+			console.info(`\n${white("**")}${cyan(" CONFIG SUCCESS ")}${white("**")}\n`);
 		} catch (error) {
 			const fatal = (msg: string): void => console.log("\n", "██████", bgRed(msg), "██████", "\n");
 			fatal("FATAL ERROR");
@@ -32,7 +29,7 @@ import type { Secrets, Environment, SecretsParser } from "#Domain";
 		}
 	}
 
-	readonly #envError = (msg: string, cause?: unknown): Error => new this.#Error(`Variable 'NODE_ENV' ${msg} 💩`, cause);
+	readonly #envError = (msg: string, cause?: unknown): Error => new (class EnvironmentError extends Error {})(`Variable 'NODE_ENV' ${msg} 💩`, { cause });
 	readonly #getEnvironment = (NODE_ENV?: string): Environment => {
 		if (NODE_ENV === undefined) throw this.#envError("is not defined");
 		const environments: Environment[] = ["production", "testing", "development"];
@@ -56,4 +53,7 @@ import type { Secrets, Environment, SecretsParser } from "#Domain";
 	}
 }
 
-export const { NODE_ENV, secrets, DEBUG } = new _Config(secretsParser);
+/**
+ * @description System Config
+ * @description with many singleton strategies  */
+export const { NODE_ENV, DEBUG, secrets } = new _Config(secretsParser);

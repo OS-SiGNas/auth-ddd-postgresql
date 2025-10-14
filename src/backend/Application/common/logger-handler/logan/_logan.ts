@@ -1,7 +1,7 @@
-import type { LoggerConstructor, ILogger, Level, LogObject } from "./ILogger.js";
+import type { LoggerConstructor, ILogger, Level, LogObject } from "#Domain";
 import type { Transport } from "./Transport.js";
 
-export const _getLogan = (...transports: Transport[]): LoggerConstructor => {
+export const _GetLogan = (...transports: Transport[]): LoggerConstructor => {
 	const _execTransport = async (l: LogObject, ...meta: unknown[]): Promise<void> => {
 		await Promise.all(transports.map((t) => t.exec(l, ...meta)));
 	};

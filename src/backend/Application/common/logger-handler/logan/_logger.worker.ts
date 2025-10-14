@@ -3,12 +3,6 @@ import { createWriteStream } from "node:fs";
 import { Console } from "node:console";
 import { styleText } from "node:util";
 
-const red = (text: string): string => styleText("red", text);
-const green = (text: string): string => styleText("green", text);
-const yellow = (text: string): string => styleText("yellow", text);
-const cyan = (text: string): string => styleText("cyan", text);
-const bgRed = (text: string): string => styleText(["bgRed", "bold", "white"], text);
-
 import type { LogObject } from "#Domain";
 
 interface EventWorker {
@@ -16,7 +10,15 @@ interface EventWorker {
 	meta?: unknown[];
 }
 
-void new (class LoggerWorker {
+const red = (text: string): string => styleText("red", text);
+const green = (text: string): string => styleText("green", text);
+const yellow = (text: string): string => styleText("yellow", text);
+const cyan = (text: string): string => styleText("cyan", text);
+const bgRed = (text: string): string => styleText(["bgRed", "bold", "white"], text);
+const bgGrey = (text: string): string => styleText(["bgBlack", "white"], text);
+
+new (class LoggerWorker {
+	#hasError: boolean = false;
 	readonly #chunks: Set<LogObject> = new Set();
 	readonly #interval: NodeJS.Timeout;
 	readonly #file = new Console(
@@ -26,14 +28,31 @@ void new (class LoggerWorker {
 	);
 
 	constructor() {
-		if (parentPort === null) throw new (class ThreadWorkerError extends Error {})("parent port is null");
-		parentPort.on("message", this.#message);
-		parentPort.on("close", this.#exit);
+		try {
+			if (parentPort === null) throw new (class ThreadWorkerError extends Error {})("parent port is null");
+			parentPort
+				.on("messageerror", (e: Error) => console.error(e))
+				.on("close", this.#shutdownWorker)
+				.on("message", this.#message);
 
-		process.on("exit", this.#exit);
-		process.on("SIGINT", () => this.#exit);
-		process.on("SIGTERM", this.#exit);
-		this.#interval = global.setInterval(this.#log, 30000);
+			process
+				.on("SIGINT", () => this.#shutdownWorker)
+				.on("SIGTERM", this.#shutdownWorker)
+				.on("exit", this.#shutdownWorker);
+
+			const firstLogTimeout = setTimeout(() => {
+				this.#log();
+				clearTimeout(firstLogTimeout);
+			}, 1000);
+
+			this.#interval = global.setInterval(this.#log, 30000);
+		} catch (error) {
+			this.#hasError = true;
+			this.#log();
+			console.error(error);
+			this.#file.error(error);
+			this.#shutdownWorker();
+		}
 	}
 
 	readonly #message = async ({ l, meta }: EventWorker): Promise<void> => {
@@ -47,27 +66,27 @@ void new (class LoggerWorker {
 			const output = `${c.level}\t${c.date}\t${c.name}\t${c.message}`;
 
 			if (c.level === "INFO") {
-				console.info(`🟢 ${green(c.level)} ${c.name} ${green(c.message)}\n`);
+				console.info(`${bgGrey(c.date)} 🟢 [${green(c.level)}] [${c.name}] ${green(c.message)}\n`);
 				this.#file.info(output);
 			}
 
 			if (c.level === "WARN") {
-				console.warn(`🟠 ${yellow(c.level)} ${c.name} ${yellow(c.message)}\n`);
+				console.warn(`${bgGrey(c.date)} 🟠 [${yellow(c.level)}] [${c.name}] ${yellow(c.message)}\n`);
 				this.#file.warn(yellow(output));
 			}
 
 			if (c.level === "DEBUG") {
-				console.debug(`🔵 ${cyan(c.level)} ${c.name} ${cyan(c.message)}\n`);
+				console.debug(`${bgGrey(c.date)} 🔵 [${cyan(c.level)}] [${c.name}] ${cyan(c.message)}\n`);
 				this.#file.debug(output);
 			}
 
 			if (c.level === "ERROR") {
-				console.error(`🛑 ${red(c.level)} ${c.name} ${red(c.message)}\n`);
+				console.error(`${bgGrey(c.date)} 🛑 [${red(c.level)}] [${c.name}] ${red(c.message)}\n`);
 				this.#file.error(output);
 			}
 
 			if (c.level === "FATAL") {
-				console.error(`🛑 ${bgRed(c.level)} ${c.name} ${red(c.message)}\n`);
+				console.error(`${bgGrey(c.date)} 🛑 [${bgRed(c.level)}] [${c.name}] ${red(c.message)}\n`);
 				this.#file.error(output);
 			}
 		}
@@ -75,9 +94,9 @@ void new (class LoggerWorker {
 		this.#chunks.clear();
 	};
 
-	readonly #exit = (): void => {
+	readonly #shutdownWorker = (): void => {
 		global.clearInterval(this.#interval);
 		this.#log();
-		process.exit();
+		process.exit(this.#hasError ? 1 : 0);
 	};
 })();

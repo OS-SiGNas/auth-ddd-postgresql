@@ -7,7 +7,7 @@
     - security.update_last_activity_on_user_updated
 */
 
-import { ACTIONS } from "#Domain";
+import { Actions } from "#Domain";
 import type { connect, Channel, Options, ConsumeMessage, ChannelModel } from "amqplib";
 import type { DomainEventBus, IErrorHandler, IEvent, ILogger, SystemDaemon } from "#Domain";
 
@@ -36,7 +36,7 @@ export class RabbitMQConnection implements SystemDaemon {
 		this.#connect = d.connect;
 		this.#queue = d.queue;
 		this.#options = d.options;
-		this.#bus = d.bus.on(ACTIONS.QUEUE_PUBLISH, this.#publish);
+		this.#bus = d.bus.on(Actions.QUEUE_PUBLISH, this.#publish);
 		this.#errorHandler = d.errorHandler;
 		this.#logger = d.logger;
 	}
@@ -83,7 +83,7 @@ export class RabbitMQConnection implements SystemDaemon {
 
 		try {
 			const event: IEvent<object> = JSON.parse(message.content.toString());
-			this.#bus.emit(ACTIONS.QUEUE_CONSUME, event);
+			this.#bus.emit(Actions.QUEUE_CONSUME, event);
 			return await Promise.resolve(this.#channel.ack(message));
 		} catch (error) {
 			if (error instanceof SyntaxError) this.#logger.warn("Problem consuming message: " + error.message);

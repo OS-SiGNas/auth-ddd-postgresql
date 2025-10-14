@@ -1,29 +1,34 @@
 import { secrets } from "#Config";
-import { ModuleException } from "#Domain";
 import type { LoggerConstructor } from "#Domain";
 
-const __make = async (): Promise<LoggerConstructor> => {
-	const service = secrets.LOGGER_SERVICE;
+/**
+ * @description Logger
+ * @description make file return  Logger class constructor */
+export const Logger: LoggerConstructor = await (async (): Promise<LoggerConstructor> => {
+	const _service = secrets.LOGGER_SERVICE;
 
-	if (service === "console") {
-		const { ConsoleLogger } = await import(`./_console.logger.js`);
-		return ConsoleLogger;
+	if (_service === "logan") {
+		const [{ _GetLogan }, { _ThreadTransport }] = await Promise.all([
+			import("./logan/_logan.js"), // 0 Logan
+			import("./logan/transports/_thread.transport.js"), // 1 Transport
+			// import("./logan/transports/_stdout.transport.ts") // 2 Transport
+		]);
+
+		const worker = secrets.LOGGER_WORKER_FILE;
+		return _GetLogan(new _ThreadTransport(worker));
 	}
 
-	if (service === "winston") {
+	if (_service === "winston") {
 		const { WinstonLogger } = await import("./_winston.logger.js");
 		return WinstonLogger;
 	}
 
-	if (service === "logan") {
-		const { _getLogan } = await import("./logan/_logan.js");
-		const { threadTransport } = await import("./logan/transports/thread.transport.js");
-		// const { _StdOutTransport } = await import("./logan/transports/stdout.transport.js");
-		return _getLogan(threadTransport);
+	if (_service === "console") {
+		const { ConsoleLogger } = await import(`./_console.logger.js`);
+		return ConsoleLogger;
 	}
 
-	const error = new ModuleException(`Logger service "${service}" not implemented`);
-	return Promise.reject(error);
-};
-
-export const Logger = await __make();
+	const { ModuleException } = await import("#Domain");
+	const message = `Logger service "${_service}" not implemented`;
+	return await Promise.reject(new ModuleException(message));
+})();

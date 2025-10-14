@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { ACTIONS, BadRequestException400, DuplicateAccountException409, ForbiddenException403, NotFoundException404 } from "#Domain";
+import { Actions, BadRequestException400, DuplicateAccountException409, ForbiddenException403, NotFoundException404 } from "#Domain";
 
 import type { BusinessDependencies, EventHandler, ICacheHandler, ILogger, IPasswordHandler, ITokenHandler } from "#Domain";
 import type { UserDTO } from "#users/v1/domain/users.dto.js";
@@ -65,7 +65,7 @@ export class AuthBusiness implements IAuthBusiness {
 		await this.#storage.delete(email);
 		const token = await this.#activateAccountTokenHandler.generateJWT({ email });
 		this.#storage.set(email, token);
-		const action = ACTIONS.AUTH_EMAIL_ACTIVATE_ACCOUNT;
+		const action = Actions.AUTH_EMAIL_ACTIVATE_ACCOUNT.description ?? "a/a";
 		const event = this.#eventHandler.eventFactory<{ emailReceiver: string; token: string }>({
 			metadata: { action, moduleEmitter: this.constructor.name, correlationId },
 			message: { emailReceiver: email, token },

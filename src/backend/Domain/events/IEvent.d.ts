@@ -1,9 +1,7 @@
-import type { ACTIONS } from "./actions.enum";
-
 export type EventContext = object | null;
 
 interface EventMetadata {
-	action: ACTIONS;
+	action: `${string}/${string}`;
 	id: string;
 	correlationId: string;
 	createdAt: string;
@@ -12,9 +10,9 @@ interface EventMetadata {
 }
 
 export interface IEvent<M extends object, C extends EventContext = null> {
-	metadata: EventMetadata;
-	context: C;
-	message: M;
+	readonly metadata: EventMetadata;
+	readonly context: C;
+	readonly message: M;
 }
 
 export interface EventPayload<M extends object, C extends EventContext> {
