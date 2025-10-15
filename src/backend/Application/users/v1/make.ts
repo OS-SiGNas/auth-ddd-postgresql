@@ -1,6 +1,5 @@
 import { DEBUG, secrets } from "#Config";
-import { eventFactory, ModuleException } from "#Domain";
-import { bus } from "#Infrastructure/event-bus.js";
+import { bus, eventFactory, ModuleException } from "#Domain";
 import { modelRepository } from "#Infrastructure/model.respository.js";
 
 import { passwordHandler } from "#common/password-handler/make.js";

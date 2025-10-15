@@ -34,7 +34,7 @@ export interface PostgreSQLSecrets {
 }
 
 export interface Secrets extends LoggerSecrets, JsonWebTokenSecrets, PostgreSQLSecrets, RabbitMQSecrets {
-	SERVICE_NAME: string;
+	APP_NAME: string;
 	THIS_URL: string;
 	PORT: number;
 	HTTP_SERVICE: "express" | "fastify";

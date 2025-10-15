@@ -3,19 +3,18 @@ import cors from "cors";
 import helmet from "helmet";
 
 import { DEBUG, secrets } from "#Config";
-import { eventFactory } from "#Domain";
-import { bus } from "#Infrastructure/event-bus.js";
+import { bus, eventFactory } from "#Domain";
 import { Logger } from "#common/logger-handler/make.js";
+
+// v1
+import { getAuthApp } from "#auth/v1/make.js";
+import { getUsersApp } from "#users/v1/make.js";
 
 import { setCorrelationId } from "./middlewares/setCorrelationId.middleware.js";
 import { requestLogger } from "./middlewares/requestLogger.middleware.js";
 import { notFound } from "./middlewares/notFound.middleware.js";
 import { errorsCatcher } from "./middlewares/errorCatcher.middleware.js";
 import { ExpressServer } from "./express.server.js";
-
-// v1
-import { getAuthApp } from "#auth/v1/make.js";
-import { getUsersApp } from "#users/v1/make.js";
 
 import type { RequestHandler } from "express";
 import type { AuthRouterExpress } from "#auth/v1/infrastructure/auth-express.router";

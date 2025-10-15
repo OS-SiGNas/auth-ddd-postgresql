@@ -1,44 +1,50 @@
-import { secrets, DEBUG, NODE_ENV } from "#Config";
+import { DEBUG, NODE_ENV } from "#Config";
 import { Actions } from "#Domain";
-import { Logger } from "#common/logger-handler/make.js";
+import type { DomainEventBus, ILogger, SystemDaemon } from "#Domain";
 
-import type { DomainEventBus, SystemDaemon } from "#Domain";
+interface Dependencies {
+	daemons: SystemDaemon[];
+	bus: DomainEventBus;
+	logger: ILogger;
+}
 
 /**
  * @description
  * @description default application boot loader */
-export default class Main {
-	static #instance?: Main;
+export class _Main {
+	static #instance?: _Main;
 
-	#isRunning: boolean = false;
-	#hasError: boolean = false;
-	readonly #logger = new Logger(secrets.SERVICE_NAME);
 	readonly #daemons: SystemDaemon[];
 	readonly #bus: DomainEventBus;
+	readonly #logger: ILogger;
+	#hasError: boolean = false;
+	constructor(d: Readonly<Dependencies>) {
+		if (_Main.#instance !== undefined) return _Main.#instance;
+		else _Main.#instance = this;
+		if (d.daemons.length === 0) {
+			this.#logger.warn("system daemons empty");
+			this.#shutdown();
+		} else {
+			this.#daemons = d.daemons;
+			this.#logger = d.logger;
+			process.on("SIGTERM", this.#shutdown);
+			process.on("SIGINT", this.#shutdown);
+			this.#bus = d.bus // 🧨
+				.on(Actions.SYSTEM_SHUTDOWN, this.#shutdown)
+				.on(Actions.SYSTEM_REBOOT, this.#reboot);
+		}
+	}
 
-	constructor(bus: DomainEventBus, daemons: SystemDaemon[]) {
-		if (Main.#instance !== undefined) return Main.#instance;
-		else Main.#instance = this;
-
+	public readonly boot = async (): Promise<void> => {
 		this.#logger.info("██████ STARTING APPLICATION ██████");
 		if (NODE_ENV === "development") this.#logger.info("👽 DEV MODE 👽");
 		if (NODE_ENV === "testing") this.#logger.info("🪲 TEST MODE 🪲");
 		if (NODE_ENV === "production") this.#logger.info("🔥 ON 🔥");
-		this.#daemons = daemons;
-		process.on("SIGTERM", this.#shutdown);
-		process.on("SIGINT", this.#shutdown);
-		this.#bus = bus
-			// System
-			.on(Actions.SYSTEM_SHUTDOWN, this.#shutdown)
-			.on(Actions.SYSTEM_REBOOT, this.#reboot);
-	}
-
-	public readonly boot = async (): Promise<void> => {
-		if (this.#isRunning) return;
 		try {
 			await Promise.all(this.#daemons.map((d) => d.start()));
 			this.#logger.info(this.#daemons.length + ` system daemons started successfully`);
-			this.#isRunning = true;
+			const { subscribers } = await import("./subscribers.js");
+			return await Promise.resolve(subscribers(this.#bus));
 		} catch (e) {
 			this.#logger.error("██████ Error starting daemons ██████\n");
 			this.#hasError = true;
@@ -57,11 +63,12 @@ export default class Main {
 
 	readonly #shutdown = async (): Promise<never> => {
 		this.#logger.info("██████ SHUTING DOWN ██████");
-		this.#isRunning = false;
-		const daemonsStoped = await Promise.allSettled(this.#daemons.map((d) => d.stop()));
-		for (const d of daemonsStoped) {
-			if (d.status === "rejected") this.#logger.error("daemon stop protocol failed", d.reason);
-			else this.#logger.info("daemon stoped");
+		if (this.#daemons.length !== 0) {
+			const daemonsSettled = Promise.allSettled(this.#daemons.map((d) => d.stop()));
+			for (const d of await daemonsSettled) {
+				if (d.status === "rejected") this.#logger.error("daemon stop protocol failed", d.reason);
+				else this.#logger.info("daemon stoped");
+			}
 		}
 		this.#bus.removeAllListeners();
 		process.removeAllListeners();

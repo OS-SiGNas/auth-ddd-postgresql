@@ -4,11 +4,12 @@ import type { UserNonSensitiveData } from "#users/v1/domain/IUser";
 import type { UserSessionDTO } from "#users/v1/domain/users.dto";
 import type { IEvent } from "./IEvent";
 import type { Actions } from "./actions.enum";
+import type { _Main } from "../../main";
 
 export type Subscribers = (bus: DomainEventBus) => void;
 export type DomainEventBus = EventEmitter<{
 	// system
-	[Actions.SYSTEM_BOOT]: [{ boot: () => Promise<void> }];
+	[Actions.SYSTEM_BOOT]: [_Main];
 	[Actions.SYSTEM_REBOOT]: [];
 	[Actions.SYSTEM_SHUTDOWN]: [];
 	[Actions.SYSTEM_LOG]: [LogObject, ...meta: unknown[]];

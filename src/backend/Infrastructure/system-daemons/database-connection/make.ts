@@ -8,9 +8,11 @@ import { _PostgreConnection } from "./postgresql.connection.js";
 import { User } from "#users/v1/domain/entities/users.entity.js";
 import { Role } from "#users/v1/domain/entities/roles.entity.js";
 
+import type { SystemDaemon } from "#Domain";
+
 const entities = [User, Role];
 
-export const postgresConnection = _PostgreConnection.getInstance({
+export const postgresConnection: SystemDaemon = _PostgreConnection.getInstance({
 	logger: new Logger("PostgreServer"),
 	retryTime: s.PG_RETRY_TIME,
 	dataSource: new DataSource({

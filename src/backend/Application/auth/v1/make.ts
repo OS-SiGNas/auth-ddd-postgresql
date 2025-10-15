@@ -1,8 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import { secrets, DEBUG } from "#Config";
-import { eventFactory, ModuleException } from "#Domain";
-import { bus } from "#Infrastructure/event-bus.js";
+import { bus, eventFactory, ModuleException } from "#Domain";
 import { emailSender } from "#Infrastructure/proxy/email-proxy/make.js";
 
 import { UserDTO } from "#users/v1/domain/users.dto.js";

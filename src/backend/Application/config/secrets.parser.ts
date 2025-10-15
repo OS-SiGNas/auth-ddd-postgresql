@@ -43,7 +43,7 @@ export const secretsParser: SecretsParser = (origin) => {
 	};
 
 	const schema = {
-		SERVICE_NAME: zString,
+		APP_NAME: zString,
 		HTTP_SERVICE: z.enum(["express", "fastify"]),
 		THIS_URL: zString,
 		PORT: zPort,
